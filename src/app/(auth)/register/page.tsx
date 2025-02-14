@@ -16,7 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { AuthNavbar } from "@/components/navbar/auth-navbar";
+import { AuthBarWithSignInButton } from "@/components/navbar/auth-navbar-sign-in";
 
 const formSchema = z
   .object({
@@ -54,7 +54,7 @@ export default function RegisterPage() {
     setIsLoading(true);
     try {
       // AWS Cognito integration would go here
-      router.push("/verify-email");
+      //  router.push("/verify-email");
     } catch (error) {
       console.error("Registration error:", error);
     } finally {
@@ -64,7 +64,7 @@ export default function RegisterPage() {
 
   return (
     <>
-      <AuthNavbar />
+      <AuthBarWithSignInButton />
       <div className="relative min-h-screen flex items-center justify-center px-4 py-16 sm:px-6 lg:px-8">
         {/* Background image overlay with better mobile handling */}
         <div

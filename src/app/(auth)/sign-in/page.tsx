@@ -1,9 +1,9 @@
-// "use client";
+"use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -14,9 +14,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { AuthNavBarWithRegisterButton } from "@/components/navbar/auth-navbar-register";
 
 const formSchema = z
   .object({
@@ -53,16 +53,7 @@ export default function RegisterPage() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      // Here you would integrate with AWS Cognito
-      // Example implementation:
-      // await Auth.signUp({
-      //   username: values.email,
-      //   password: values.password,
-      //   attributes: {
-      //     name: values.fullName,
-      //     email: values.email,
-      //   }
-      // })
+      // AWS Cognito integration would go here
       router.push("/verify-email");
     } catch (error) {
       console.error("Registration error:", error);
@@ -72,96 +63,82 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-black p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-center text-3xl font-bold text-orange-500">
-            STREAMFLIX
-          </CardTitle>
-          <h2 className="text-2xl font-semibold text-center text-white">
-            Create your account
-          </h2>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="fullName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Full Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter your full name" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter your email" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="Create a password"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="confirmPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Confirm Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="Confirm your password"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button
-                type="submit"
-                className="w-full bg-orange-500 hover:bg-orange-600"
-                disabled={isLoading}
+    <>
+      <AuthNavBarWithRegisterButton />
+      <div className="relative min-h-screen flex items-center justify-center px-4 py-16 sm:px-6 lg:px-8">
+        {/* Background image overlay with better mobile handling */}
+        <div
+          className="absolute inset-0 bg-[url('/images/netflix-background-home.jpg')] bg-cover bg-center bg-no-repeat brightness-30"
+          style={{ willChange: "transform" }} // Performance optimization for mobile
+        />
+
+        {/* Gradient overlay with adjusted opacity for better readability on mobile */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/80 to-black/95" />
+
+        {/* Content */}
+        <Card className="w-full max-w-md relative z-10 bg-black border border-gray-800 rounded-lg shadow-md bg-opacity-75">
+          <CardHeader className="space-y-1 px-4 sm:px-6 pt-6 sm:pt-8">
+            <h2 className="text-2xl font-bold text-center text-white">
+              Sign In
+            </h2>
+          </CardHeader>
+          <CardContent className="px-4 sm:px-6 pb-6 sm:pb-8">
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4"
               >
-                {isLoading ? "Creating account..." : "Create Account"}
-              </Button>
-            </form>
-          </Form>
-          <div className="mt-4 text-center text-sm text-gray-400">
-            Already have an account?{" "}
-            <Link href="/sign-in" className="text-orange-500 hover:underline">
-              Sign in
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-200 text-sm sm:text-base">
+                        Email
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Enter your email"
+                          {...field}
+                          className="bg-gray-900 border-gray-700 text-white placeholder:text-gray-400 h-10 sm:h-11"
+                        />
+                      </FormControl>
+                      <FormMessage className="text-xs sm:text-sm" />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-200 text-sm sm:text-base">
+                        Password
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="password"
+                          placeholder="Enter your password"
+                          {...field}
+                          className="bg-gray-900 border-gray-700 text-white placeholder:text-gray-400 h-10 sm:h-11"
+                        />
+                      </FormControl>
+                      <FormMessage className="text-xs sm:text-sm" />
+                    </FormItem>
+                  )}
+                />
+                <Button
+                  type="submit"
+                  className="w-full bg-orange-500 hover:bg-orange-600 text-white text-sm sm:text-base h-10 sm:h-11 mt-2"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Signing in..." : "Sign In"}
+                </Button>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+      </div>
+    </>
   );
 }
