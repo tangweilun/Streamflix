@@ -68,15 +68,15 @@ export default function RegisterPage() {
       <div className="relative min-h-screen flex items-center justify-center px-4 py-16 sm:px-6 lg:px-8">
         {/* Background image overlay with better mobile handling */}
         <div
-          className="absolute inset-0 bg-[url('/images/netflix-background-home.jpg')] bg-cover bg-center bg-no-repeat brightness-30"
+          className="absolute inset-0 bg-[url('/images/netflix-background-home.jpg')] bg-cover bg-center bg-no-repeat brightness-200"
           style={{ willChange: "transform" }} // Performance optimization for mobile
         />
 
         {/* Gradient overlay with adjusted opacity for better readability on mobile */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/80 to-black/95" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-black/75" />
 
         {/* Content */}
-        <Card className="w-full max-w-md relative z-10 bg-black border border-gray-800 rounded-lg shadow-md bg-opacity-75">
+        <Card className="w-full max-w-md relative z-10 bg-black border border-gray-800 rounded-lg shadow-md">
           <CardHeader className="space-y-1 px-4 sm:px-6 pt-6 sm:pt-8">
             <h2 className="text-2xl font-bold text-center text-white">
               Sign In
