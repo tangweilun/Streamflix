@@ -1,7 +1,11 @@
-export default function DashboardPage() {
+"use client";
+
+import { logout } from "../login/action";
+
+export default function Dashboard() {
   return (
-    <>
-      <div></div>
-    </>
+    <div>
+      <button onClick={() => logout()}>Logout</button>
+    </div>
   );
 }

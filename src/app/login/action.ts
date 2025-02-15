@@ -1,6 +1,6 @@
 "use server";
 
-import { createSession } from "@/lib/session";
+import { createSession, deleteSession } from "@/lib/session";
 import { loginSchema } from "@/lib/utils";
 import { redirect } from "next/navigation";
 
@@ -28,8 +28,11 @@ export async function login(prevState: unknown, formData: FormData) {
     };
   }
 
-  await createSession(testUser.id);
+  await createSession(testUser.email);
 
   redirect("/dashboard");
 }
-export async function logout() {}
+export async function logout() {
+  await deleteSession();
+  redirect("/sign-in");
+}
