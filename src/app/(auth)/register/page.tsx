@@ -14,7 +14,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useRouter } from "next/navigation";
+//import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AuthBarWithSignInButton } from "@/components/navbar/auth-navbar-sign-in";
 
@@ -37,7 +37,7 @@ const formSchema = z
   });
 
 export default function RegisterPage() {
-  const router = useRouter();
+  //const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -50,7 +50,7 @@ export default function RegisterPage() {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit() {
     setIsLoading(true);
     try {
       // AWS Cognito integration would go here
@@ -76,7 +76,7 @@ export default function RegisterPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-black/75" />
 
         {/* Content */}
-        <Card className="w-full max-w-md relative z-10 bg-black border border-gray-800 rounded-lg shadow-md">
+        <Card className="w-full max-w-md relative z-10 bg-black border border-gray-800 rounded-lg shadow-md opacity-85">
           <CardHeader className="space-y-1 px-4 sm:px-6 pt-6 sm:pt-8">
             <h2 className="text-2xl font-bold text-center text-white">
               Create your account
@@ -100,7 +100,7 @@ export default function RegisterPage() {
                         <Input
                           placeholder="Enter your full name"
                           {...field}
-                          className="bg-gray-900 border-gray-700 text-white placeholder:text-gray-400 h-10 sm:h-11"
+                          className="bg-gray-100 border-gray-700 text-black placeholder:text-gray-400 h-10 sm:h-11"
                         />
                       </FormControl>
                       <FormMessage className="text-xs sm:text-sm" />
@@ -119,7 +119,7 @@ export default function RegisterPage() {
                         <Input
                           placeholder="Enter your email"
                           {...field}
-                          className="bg-gray-900 border-gray-700 text-white placeholder:text-gray-400 h-10 sm:h-11"
+                          className="bg-gray-100 border-gray-700 text-black placeholder:text-gray-400 h-10 sm:h-11"
                         />
                       </FormControl>
                       <FormMessage className="text-xs sm:text-sm" />
@@ -139,7 +139,7 @@ export default function RegisterPage() {
                           type="password"
                           placeholder="Create a password"
                           {...field}
-                          className="bg-gray-900 border-gray-700 text-white placeholder:text-gray-400 h-10 sm:h-11"
+                          className="bg-gray-100 border-gray-700 text-black placeholder:text-gray-400 h-10 sm:h-11"
                         />
                       </FormControl>
                       <FormMessage className="text-xs sm:text-sm" />
@@ -159,7 +159,7 @@ export default function RegisterPage() {
                           type="password"
                           placeholder="Confirm your password"
                           {...field}
-                          className="bg-gray-900 border-gray-700 text-white placeholder:text-gray-400 h-10 sm:h-11"
+                          className="bg-gray-100 border-gray-700 text-black placeholder:text-gray-400 h-10 sm:h-11"
                         />
                       </FormControl>
                       <FormMessage className="text-xs sm:text-sm" />

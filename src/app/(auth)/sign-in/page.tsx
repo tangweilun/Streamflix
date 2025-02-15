@@ -14,53 +14,37 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+// import { useRouter } from "next/navigation";
+import { useActionState, useState } from "react";
 import { AuthNavBarWithRegisterButton } from "@/components/navbar/auth-navbar-register";
+import { login } from "@/app/login/action";
+import { loginSchema } from "@/lib/utils";
 
-const formSchema = z
-  .object({
-    fullName: z.string().min(2, {
-      message: "Full name must be at least 2 characters.",
-    }),
-    email: z.string().email({
-      message: "Please enter a valid email address.",
-    }),
-    password: z.string().min(8, {
-      message: "Password must be at least 8 characters.",
-    }),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-  });
-
-export default function RegisterPage() {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+export default function SignInPage() {
+  //const router = useRouter();
+  // const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
+  const [state, loginAction] = useActionState(login, undefined);
+  const form = useForm<z.infer<typeof loginSchema>>({
+    resolver: zodResolver(loginSchema),
     defaultValues: {
-      fullName: "",
       email: "",
       password: "",
-      confirmPassword: "",
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true);
-    try {
-      // AWS Cognito integration would go here
-      router.push("/verify-email");
-    } catch (error) {
-      console.error("Registration error:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }
+  //   async function onSubmit(values: z.infer<typeof loginSchema>) {
+  //     loginAction(values);
+  //     setIsLoading(true);
+  //     try {
+  //       // AWS Cognito integration would go here
+  //       router.push("/verify-email");
+  //     } catch (error) {
+  //       console.error("Registration error:", error);
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   }
 
   return (
     <>
@@ -76,7 +60,7 @@ export default function RegisterPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-black/75" />
 
         {/* Content */}
-        <Card className="w-full max-w-md relative z-10 bg-black border border-gray-800 rounded-lg shadow-md">
+        <Card className="w-full max-w-md relative z-10 bg-black border border-gray-800 rounded-lg shadow-md opacity-85">
           <CardHeader className="space-y-1 px-4 sm:px-6 pt-6 sm:pt-8">
             <h2 className="text-2xl font-bold text-center text-white">
               Sign In
@@ -85,7 +69,8 @@ export default function RegisterPage() {
           <CardContent className="px-4 sm:px-6 pb-6 sm:pb-8">
             <Form {...form}>
               <form
-                onSubmit={form.handleSubmit(onSubmit)}
+                // onSubmit={form.handleSubmit(onSubmit)}
+                action={loginAction}
                 className="space-y-4"
               >
                 <FormField
@@ -100,9 +85,14 @@ export default function RegisterPage() {
                         <Input
                           placeholder="Enter your email"
                           {...field}
-                          className="bg-gray-900 border-gray-700 text-white placeholder:text-gray-400 h-10 sm:h-11"
+                          className="bg-gray-100 border-gray-700 text-black placeholder:text-gray-400 h-10 sm:h-11"
                         />
                       </FormControl>
+                      {state?.errors.email && (
+                        <p className="text-red-500 text-xs sm:text-sm mt-1">
+                          {state?.errors.email}
+                        </p>
+                      )}
                       <FormMessage className="text-xs sm:text-sm" />
                     </FormItem>
                   )}
@@ -120,9 +110,14 @@ export default function RegisterPage() {
                           type="password"
                           placeholder="Enter your password"
                           {...field}
-                          className="bg-gray-900 border-gray-700 text-white placeholder:text-gray-400 h-10 sm:h-11"
+                          className="bg-gray-100 border-gray-700 text-black placeholder:text-gray-400 h-10 sm:h-11"
                         />
                       </FormControl>
+                      {state?.errors.password && (
+                        <p className="text-red-500 text-xs sm:text-sm mt-1">
+                          {state?.errors.password}
+                        </p>
+                      )}
                       <FormMessage className="text-xs sm:text-sm" />
                     </FormItem>
                   )}
