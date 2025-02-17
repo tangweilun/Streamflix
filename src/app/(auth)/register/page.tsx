@@ -79,7 +79,7 @@ export default function RegisterPage() {
         <Card className="w-full max-w-md relative z-10 bg-black border border-gray-800 rounded-lg shadow-md opacity-85">
           <CardHeader className="space-y-1 px-4 sm:px-6 pt-6 sm:pt-8">
             <h2 className="text-2xl font-bold text-center text-white">
-              Create your account
+              Create your accounttest
             </h2>
           </CardHeader>
           <CardContent className="px-4 sm:px-6 pb-6 sm:pb-8">
