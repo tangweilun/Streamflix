@@ -1,6 +1,6 @@
 "use client";
 
-import { logout } from "../login/action";
+import { logout } from "../../lib/action";
 
 export default function Dashboard() {
   return (

@@ -14,69 +14,106 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-//import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { AuthBarWithSignInButton } from "@/components/navbar/auth-navbar-sign-in";
-
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { storeToken } from "@/lib/action";
+import { useRouter } from "next/navigation";
 const formSchema = z
   .object({
-    fullName: z.string().min(2, {
-      message: "Full name must be at least 2 characters.",
-    }),
-    email: z.string().email({
-      message: "Please enter a valid email address.",
-    }),
-    password: z.string().min(8, {
-      message: "Password must be at least 8 characters.",
-    }),
+    userName: z
+      .string()
+      .min(2, { message: "User name must be at least 2 characters." }),
+    email: z.string().email({ message: "Please enter a valid email address." }),
+    password: z
+      .string()
+      .min(8, { message: "Password must be at least 8 characters." }),
     confirmPassword: z.string(),
+    phoneNumber: z
+      .string()
+      .min(10)
+      .max(15, { message: "Invalid phone number length." }),
+    dateOfBirth: z.string().refine((date) => !isNaN(new Date(date).getTime()), {
+      message: "Please enter a valid date.",
+    }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
     path: ["confirmPassword"],
   });
 
+async function registerUser(
+  data: Omit<z.infer<typeof formSchema>, "confirmPassword">
+) {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/Auth/register`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    }
+  );
+
+  if (!response.ok) {
+    const text = await response.text();
+    try {
+      // Try parsing as JSON
+      const errorData = JSON.parse(text);
+      throw new Error(errorData.message || "Registration failed.");
+    } catch {
+      // If parsing fails, assume plain text error message
+      throw new Error(text || "Registration failed.");
+    }
+  }
+
+  return await response.json();
+}
+
 export default function RegisterPage() {
-  //const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      fullName: "",
+      userName: "",
       email: "",
       password: "",
       confirmPassword: "",
+      phoneNumber: "",
+      dateOfBirth: "",
     },
   });
 
-  async function onSubmit() {
-    setIsLoading(true);
-    try {
-      // AWS Cognito integration would go here
-      //  router.push("/verify-email");
-    } catch (error) {
-      console.error("Registration error:", error);
-    } finally {
-      setIsLoading(false);
-    }
+  const mutation = useMutation({
+    mutationFn: registerUser,
+    onSuccess: (data) => {
+      storeToken(data.token);
+      toast.success("Registration successful!");
+      router.push("/dashboard");
+    },
+    onError: (error: any) => {
+      toast.error(error.message);
+    },
+  });
+
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    const { confirmPassword, ...filteredValues } = values;
+    const formattedDate = new Date(values.dateOfBirth).toISOString();
+    mutation.mutate({
+      ...filteredValues,
+      dateOfBirth: formattedDate,
+    });
   }
 
   return (
     <>
       <AuthBarWithSignInButton />
       <div className="relative min-h-screen flex items-center justify-center px-4 py-16 sm:px-6 lg:px-8">
-        {/* Background image overlay with better mobile handling */}
-        <div
-          className="absolute inset-0 bg-[url('/images/netflix-background-home.jpg')] bg-cover bg-center bg-no-repeat brightness-200"
-          style={{ willChange: "transform" }} // Performance optimization for mobile
-        />
-
-        {/* Gradient overlay with adjusted opacity for better readability on mobile */}
+        <div className="absolute inset-0 bg-[url('/images/netflix-background-home.jpg')] bg-cover bg-center bg-no-repeat brightness-200" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-black/75" />
 
-        {/* Content */}
-        <Card className="w-full max-w-md relative z-10 bg-black border border-gray-800 rounded-lg shadow-md opacity-85">
+        <Card className="w-full max-w-4xl relative z-10 bg-black border border-gray-800 rounded-lg shadow-md opacity-85">
           <CardHeader className="space-y-1 px-4 sm:px-6 pt-6 sm:pt-8">
             <h2 className="text-2xl font-bold text-center text-white">
               Create your account
@@ -86,93 +123,58 @@ export default function RegisterPage() {
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-4"
+                className="grid grid-cols-1 md:grid-cols-2 gap-4"
               >
-                <FormField
-                  control={form.control}
-                  name="fullName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-gray-200 text-sm sm:text-base">
-                        Full Name
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Enter your full name"
-                          {...field}
-                          className="bg-gray-100 border-gray-700 text-black placeholder:text-gray-400 h-10 sm:h-11"
-                        />
-                      </FormControl>
-                      <FormMessage className="text-xs sm:text-sm" />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-gray-200 text-sm sm:text-base">
-                        Email
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Enter your email"
-                          {...field}
-                          className="bg-gray-100 border-gray-700 text-black placeholder:text-gray-400 h-10 sm:h-11"
-                        />
-                      </FormControl>
-                      <FormMessage className="text-xs sm:text-sm" />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-gray-200 text-sm sm:text-base">
-                        Password
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          type="password"
-                          placeholder="Create a password"
-                          {...field}
-                          className="bg-gray-100 border-gray-700 text-black placeholder:text-gray-400 h-10 sm:h-11"
-                        />
-                      </FormControl>
-                      <FormMessage className="text-xs sm:text-sm" />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="confirmPassword"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-gray-200 text-sm sm:text-base">
-                        Confirm Password
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          type="password"
-                          placeholder="Confirm your password"
-                          {...field}
-                          className="bg-gray-100 border-gray-700 text-black placeholder:text-gray-400 h-10 sm:h-11"
-                        />
-                      </FormControl>
-                      <FormMessage className="text-xs sm:text-sm" />
-                    </FormItem>
-                  )}
-                />
-                <Button
-                  type="submit"
-                  className="w-full bg-orange-500 hover:bg-orange-600 text-white text-sm sm:text-base h-10 sm:h-11 mt-2"
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Creating account..." : "Create Account"}
-                </Button>
+                {[
+                  "userName",
+                  "email",
+                  "password",
+                  "confirmPassword",
+                  "phoneNumber",
+                  "dateOfBirth",
+                ].map((fieldName) => (
+                  <FormField
+                    key={fieldName}
+                    control={form.control}
+                    name={fieldName as keyof z.infer<typeof formSchema>}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-200 text-sm sm:text-base">
+                          {fieldName.charAt(0).toUpperCase() +
+                            fieldName.slice(1).replace(/([A-Z])/g, " $1")}
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type={
+                              fieldName.includes("password")
+                                ? "password"
+                                : fieldName === "dateOfBirth"
+                                ? "date"
+                                : "text"
+                            }
+                            placeholder={`Enter your ${fieldName
+                              .replace(/([A-Z])/g, " $1")
+                              .toLowerCase()}`}
+                            {...field}
+                            className="bg-gray-100 border-gray-700 text-black placeholder:text-gray-400 h-10 sm:h-11"
+                          />
+                        </FormControl>
+                        <FormMessage className="text-xs sm:text-sm" />
+                      </FormItem>
+                    )}
+                  />
+                ))}
+                <div className="col-span-1 md:col-span-2 mt-4">
+                  <Button
+                    type="submit"
+                    className="w-full bg-orange-500 hover:bg-orange-600 text-white text-sm sm:text-base h-10 sm:h-11"
+                    disabled={mutation.isPending}
+                  >
+                    {mutation.isPending
+                      ? "Creating account..."
+                      : "Create Account"}
+                  </Button>
+                </div>
               </form>
             </Form>
           </CardContent>

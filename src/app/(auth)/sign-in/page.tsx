@@ -14,17 +14,47 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-// import { useRouter } from "next/navigation";
-import { useActionState, useState } from "react";
+import { useRouter } from "next/navigation";
 import { AuthNavBarWithRegisterButton } from "@/components/navbar/auth-navbar-register";
-import { login } from "@/app/login/action";
-import { loginSchema } from "@/lib/utils";
+import { toast } from "react-toastify";
+import { useMutation } from "@tanstack/react-query";
+import { storeToken } from "@/lib/action";
+
+const loginSchema = z.object({
+  email: z.string().email({ message: "Invalid email address" }).trim(),
+  password: z
+    .string()
+    .min(8, { message: "Password must be at least 8 characters" })
+    .trim(),
+});
+
+async function loginUser(data: z.infer<typeof loginSchema>) {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/Auth/login`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    }
+  );
+
+  if (!response.ok) {
+    const text = await response.text();
+    try {
+      // Try parsing as JSON
+      const errorData = JSON.parse(text);
+      throw new Error(errorData.message || "Login failed.");
+    } catch {
+      // If parsing fails, assume plain text error message
+      throw new Error(text || "Login failed.");
+    }
+  }
+
+  return await response.json();
+}
 
 export default function SignInPage() {
-  //const router = useRouter();
-  // const [isLoading, setIsLoading] = useState(false);
-  const [isLoading] = useState(false);
-  const [state, loginAction] = useActionState(login, undefined);
+  const router = useRouter();
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -33,18 +63,21 @@ export default function SignInPage() {
     },
   });
 
-  //   async function onSubmit(values: z.infer<typeof loginSchema>) {
-  //     loginAction(values);
-  //     setIsLoading(true);
-  //     try {
-  //       // AWS Cognito integration would go here
-  //       router.push("/verify-email");
-  //     } catch (error) {
-  //       console.error("Registration error:", error);
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   }
+  const mutation = useMutation({
+    mutationFn: loginUser,
+    onSuccess: (data) => {
+      storeToken(data.token);
+      toast.success("Welcome!");
+      router.push("/dashboard");
+    },
+    onError: (error: any) => {
+      toast.error(error.message);
+    },
+  });
+
+  function onSubmit(values: z.infer<typeof loginSchema>) {
+    mutation.mutate(values);
+  }
 
   return (
     <>
@@ -69,8 +102,7 @@ export default function SignInPage() {
           <CardContent className="px-4 sm:px-6 pb-6 sm:pb-8">
             <Form {...form}>
               <form
-                // onSubmit={form.handleSubmit(onSubmit)}
-                action={loginAction}
+                onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-4"
               >
                 <FormField
@@ -88,11 +120,6 @@ export default function SignInPage() {
                           className="bg-gray-100 border-gray-700 text-black placeholder:text-gray-400 h-10 sm:h-11"
                         />
                       </FormControl>
-                      {state?.errors.email && (
-                        <p className="text-red-500 text-xs sm:text-sm mt-1">
-                          {state?.errors.email}
-                        </p>
-                      )}
                       <FormMessage className="text-xs sm:text-sm" />
                     </FormItem>
                   )}
@@ -113,11 +140,6 @@ export default function SignInPage() {
                           className="bg-gray-100 border-gray-700 text-black placeholder:text-gray-400 h-10 sm:h-11"
                         />
                       </FormControl>
-                      {state?.errors.password && (
-                        <p className="text-red-500 text-xs sm:text-sm mt-1">
-                          {state?.errors.password}
-                        </p>
-                      )}
                       <FormMessage className="text-xs sm:text-sm" />
                     </FormItem>
                   )}
@@ -125,9 +147,9 @@ export default function SignInPage() {
                 <Button
                   type="submit"
                   className="w-full bg-orange-500 hover:bg-orange-600 text-white text-sm sm:text-base h-10 sm:h-11 mt-2"
-                  disabled={isLoading}
+                  disabled={mutation.isPending}
                 >
-                  {isLoading ? "Signing in..." : "Sign In"}
+                  {mutation.isPending ? "Signing in..." : "Sign In"}
                 </Button>
               </form>
             </Form>
