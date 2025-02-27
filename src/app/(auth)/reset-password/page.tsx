@@ -20,7 +20,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { AuthBarWithSignInButton } from "@/components/navbar/auth-navbar-sign-in";
 
-// ✅ Define schema for password validation
+//  Define schema for password validation
 const passwordSchema = z.object({
   password: z
     .string()
@@ -28,7 +28,7 @@ const passwordSchema = z.object({
     .trim(),
 });
 
-// ✅ Reset Password API Function
+// Reset Password API Function
 async function resetPassword(data: { token: string; password: string }) {
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/Auth/reset-password`,
@@ -57,7 +57,7 @@ export default function ResetPasswordPage() {
   const searchParams = useSearchParams();
   const [token, setToken] = useState<string | null>(null);
 
-  // ✅ Extract token from URL safely
+  // Extract token from URL safely
   useEffect(() => {
     const urlToken = searchParams.get("token");
     if (urlToken) setToken(urlToken);
