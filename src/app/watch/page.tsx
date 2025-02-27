@@ -7,10 +7,10 @@ import VideoCarousel from "@/components/VideoCarousel"
 // This would typically come from an API or database
 const featuredVideo = {
   id: 1,
-  title: "勇士王朝",
+  title: "UNDERRATED",
   description:
-    "A large and lovable rabbit deals with three tiny bullies, led by a flying squirrel, who are determined to squelch his happiness.",
-  thumbnail: "/placeholder.svg?height=1080&width=1920",
+    "The remarkable coming-of-age story of Stephen Curry-one of the most influential, dynamic, and unexpected players in basketball history-and his rise from an undersized collage player to a four-time NBA CHAMPION.",
+  thumbnail: "/samplevideo/underrated.jpg",
 }
 
 const categories = [
