@@ -92,13 +92,17 @@ export default function RegisterPage() {
       toast.success("Registration successful!");
       router.push("/dashboard");
     },
-    onError: (error: any) => {
-      toast.error(error.message);
+    onError: (error: unknown) => {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("An unknown error occurred.");
+      }
     },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    const { confirmPassword, ...filteredValues } = values;
+    const { ...filteredValues } = values;
     const formattedDate = new Date(values.dateOfBirth).toISOString();
     mutation.mutate({
       ...filteredValues,

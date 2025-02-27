@@ -9,12 +9,13 @@ export async function logout() {
 }
 
 export async function storeToken(token: string): Promise<void> {
+  //  Server-side httpOnly cookie (secure, can't be accessed by JavaScript)
   (await cookies()).set("authToken", token, {
-    httpOnly: true, // Prevent JavaScript access
-    secure: process.env.NODE_ENV === "production", // Secure in production
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
     path: "/",
-    maxAge: 7 * 24 * 60 * 60, // Expires in 7 days
+    maxAge: 7 * 24 * 60 * 60, // 7 days
   });
 }
 

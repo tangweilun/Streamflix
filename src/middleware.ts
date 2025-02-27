@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
-const protectedRoutes = ["/dashboard"];
+const protectedRoutes = ["/dashboard", "/admin"];
 const publicRoutes = ["/sign-in", "/register"];
 
 function isTokenExpired(token: string): boolean {
   try {
     const payload = JSON.parse(atob(token.split(".")[1])); // Decode JWT payload
     const exp = payload.exp; // Expiration timestamp
-    console.log("token exp time" + exp);
     if (!exp) return true; // If no exp, assume expired
 
     const now = Math.floor(Date.now() / 1000); // Current time in seconds
