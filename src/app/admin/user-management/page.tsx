@@ -65,9 +65,6 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-// Custom theme styles
-import "./theme.css";
-
 // Sample user data
 const users = [
   {
