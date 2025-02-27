@@ -1,14 +1,12 @@
-import type React from "react";
-import "./globals.css";
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import Navbar from "@/components/navbar";
-
-const inter = Inter({ subsets: ["latin"] });
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import "./globals.css";
+import Providers from "@/lib/provider";
 
 export const metadata: Metadata = {
-  title: "StreamFlix",
-  description: "Your favorite streaming platform.",
+  title: "Streamflix",
+  description: "Video streaming Platform",
 };
 
 export default function RootLayout({
@@ -18,9 +16,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-black text-white min-h-screen`}>
-        <Navbar />
-        <main className="pt-16"> {children}</main>
+      <body>
+        <Providers> {children}</Providers>
+        <ToastContainer position="bottom-right" theme="light" />
       </body>
     </html>
   );
