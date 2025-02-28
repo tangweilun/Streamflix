@@ -1,12 +1,12 @@
 import { AuthBarWithSignInButton } from "@/components/navbar/auth-navbar-sign-in";
-import Image from "next/image";
+//import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-black">
+    <div className="relative min-h-screen flex items-center justify-center px-4 py-16 sm:px-6 lg:px-8">
       <div className="absolute inset-0 bg-[url('/images/netflix-background-home.jpg')] bg-cover bg-center bg-no-repeat brightness-200" />
       <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-black/75" />
 
@@ -23,7 +23,7 @@ export default function LandingPage() {
 
       <AuthBarWithSignInButton />
 
-      <main className="relative z-10 px-4">
+      <div className="relative z-10 px-4">
         <div className="container mx-auto min-h-[80vh] flex flex-col items-center justify-center text-center">
           <h1 className="max-w-4xl text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-6">
             Unlimited movies,
@@ -43,18 +43,7 @@ export default function LandingPage() {
             </Button>
           </Link>
         </div>
-      </main>
-
-      <footer className="relative z-10 py-10 px-4 text-gray-300">
-        <div className="container mx-auto text-center">
-          <p className="text-md">
-            Questions? Email us at{" "}
-            <a href="mailto:help@streamflix.com" className="hover:underline">
-              help@streamflix.com
-            </a>
-          </p>
-        </div>
-      </footer>
+      </div>
     </div>
   );
 }
