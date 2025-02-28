@@ -3,6 +3,8 @@
 import Link from "next/link"
 import { useState, useEffect } from "react"
 import { Search, Bell, ChevronDown } from "lucide-react"
+import Image from "next/image";
+
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -48,7 +50,13 @@ export default function Navbar() {
           </button>
           <div className="relative group">
             <button className="flex items-center text-white hover:text-orange-500 transition-colors">
-              <img src="/placeholder.svg?height=32&width=32" alt="User" className="w-8 h-8 rounded-full mr-2" />
+              <Image
+                src="/placeholder.svg"
+                alt="User"
+                width={32}
+                height={32}
+                className="w-8 h-8 rounded-full mr-2"
+              />              
               <ChevronDown className="w-4 h-4" />
             </button>
             <div className="absolute right-0 mt-2 w-48 bg-black bg-opacity-90 rounded-md shadow-lg py-1 hidden group-hover:block">
