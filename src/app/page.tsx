@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { PlayCircle } from "lucide-react";
+import Image from "next/image";
 //import { VideoCarousel } from "@/components/video-carousel";
 
 // Mock data for featured content and categories
@@ -70,7 +71,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-black">
       <div className="relative mb-8">
-        <img
+        <Image
           src={featuredContent.image || "/placeholder.svg"}
           alt={featuredContent.title}
           className="w-full h-[600px] object-cover"

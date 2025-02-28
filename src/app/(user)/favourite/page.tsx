@@ -225,7 +225,7 @@ export default function LikedMedia() {
             <div className="flex items-center gap-2 w-full sm:w-auto">
               <Select
                 defaultValue="rating"
-                onValueChange={(value) =>
+                onValueChange={(value: string) =>
                   setSortBy(value as "rating" | "year" | "title")
                 }
               >
