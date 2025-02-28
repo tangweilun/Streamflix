@@ -3,6 +3,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./globals.css";
 import Providers from "@/lib/provider";
+import { usePathname } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Streamflix",
