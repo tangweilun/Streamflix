@@ -1,5 +1,4 @@
 import { AuthBarWithSignInButton } from "@/components/navbar/auth-navbar-sign-in";
-//import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
@@ -9,17 +8,6 @@ export default function LandingPage() {
     <div className="relative min-h-screen flex items-center justify-center px-4 py-16 sm:px-6 lg:px-8">
       <div className="absolute inset-0 bg-[url('/images/netflix-background-home.jpg')] bg-cover bg-center bg-no-repeat brightness-200" />
       <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-black/75" />
-
-      {/* <div className="fixed inset-0 -z-10">
-        <Image
-          src=""
-          alt="StreamFlix Background"
-          fill={true}
-          style={{ objectFit: "cover" }}
-          priority
-        />
-        <div className="absolute inset-0 bg-black/60 bg-gradient-to-t from-black/90 via-black/40 to-black/90" />
-      </div> */}
 
       <AuthBarWithSignInButton />
 
