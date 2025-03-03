@@ -1,14 +1,14 @@
-import { Button } from "@/components/ui/button";
-import { PlayCircle } from "lucide-react";
-import Image from "next/image";
+import { Button } from '@/components/ui/button';
+import { PlayCircle } from 'lucide-react';
+import Image from 'next/image';
 //import { VideoCarousel } from "@/components/video-carousel";
 
 // Mock data for featured content and categories
 const featuredContent = {
-  title: "Stranger Things",
+  title: 'Stranger Things',
   description:
-    "When a young boy vanishes, a small town uncovers a mystery involving secret experiments, terrifying supernatural forces, and one strange little girl.",
-  image: "/placeholder.svg?height=600&width=1200",
+    'When a young boy vanishes, a small town uncovers a mystery involving secret experiments, terrifying supernatural forces, and one strange little girl.',
+  image: '/placeholder.svg?height=600&width=1200',
 };
 
 // const trendingVideos = [
@@ -72,8 +72,9 @@ export default function HomePage() {
     <div className="min-h-screen bg-black">
       <div className="relative mb-8">
         <Image
-          src={featuredContent.image || "/placeholder.svg"}
+          src={featuredContent.image || '/placeholder.svg'}
           alt={featuredContent.title}
+          fill={true}
           className="w-full h-[600px] object-cover"
         />
         <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black to-transparent">
