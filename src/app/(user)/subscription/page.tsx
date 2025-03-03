@@ -55,7 +55,7 @@ export default function SubscriptionPage() {
 
   return (
     <div className="min-h-screen bg-black py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto pt-2">
+      <div className="max-w-7xl mx-auto">
         <div className="text-center">
           <h1 className="text-3xl font-extrabold text-orange-500 sm:text-4xl">
             Choose Your Plan
