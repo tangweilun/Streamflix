@@ -18,7 +18,7 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`fixed top-0 w-full z-50 transition-colors duration-300 ${
+      className={`fixed top-0 mb-5 w-full z-50 transition-colors duration-300 ${
         isScrolled ? "bg-black" : "bg-transparent"
       }`}
     >
@@ -67,8 +67,8 @@ export default function Navbar() {
                 <Image
                   src="/placeholder.svg"
                   alt="User"
-                  layout="fill"
-                  objectFit="cover"
+                  fill={true}
+                  style={{ objectFit: "cover" }}
                   className="rounded-full"
                 />
               </div>

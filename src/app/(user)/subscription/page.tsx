@@ -55,7 +55,7 @@ export default function SubscriptionPage() {
 
   return (
     <div className="min-h-screen bg-black py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto pt-2">
         <div className="text-center">
           <h1 className="text-3xl font-extrabold text-orange-500 sm:text-4xl">
             Choose Your Plan
@@ -71,7 +71,7 @@ export default function SubscriptionPage() {
               key={plan.name}
               className={`flex flex-col justify-between bg-gray-900 border-2 ${
                 selectedPlan === plan.name
-                  ? "border-orange-500"
+                  ? "border-orange-700"
                   : "border-gray-700"
               }`}
             >
@@ -106,8 +106,8 @@ export default function SubscriptionPage() {
                 <Button
                   className={`w-full ${
                     selectedPlan === plan.name
-                      ? "bg-orange-600 hover:bg-orange-700"
-                      : "bg-green-500 hover:bg-orange-600"
+                      ? "bg-orange-700 hover:bg-orange-700"
+                      : "bg-orange-600 hover:bg-orange-700"
                   }`}
                   onClick={() => setSelectedPlan(plan.name)}
                 >
