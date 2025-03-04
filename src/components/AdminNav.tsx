@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Home, Film, Users, Settings } from "lucide-react";
+import { Home, Film, Users } from "lucide-react";
 import { logout } from "@/lib/action";
 
 export default function AdminNav() {
