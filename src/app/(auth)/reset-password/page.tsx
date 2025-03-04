@@ -32,7 +32,7 @@ const passwordSchema = z.object({
 // Reset Password API Function
 async function resetPassword(data: { token: string; password: string }) {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/Auth/reset-password`,
+    `${process.env.NEXT_PUBLIC_API_URL}/auth/reset-password`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },

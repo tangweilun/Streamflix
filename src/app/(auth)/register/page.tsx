@@ -47,7 +47,7 @@ async function registerUser(
   data: Omit<z.infer<typeof formSchema>, "confirmPassword">
 ) {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/Auth/register`,
+    `${process.env.NEXT_PUBLIC_API_URL}/auth/register`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },

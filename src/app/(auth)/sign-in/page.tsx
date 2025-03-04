@@ -43,7 +43,7 @@ const forgotPasswordSchema = z.object({
 
 async function loginUser(data: z.infer<typeof loginSchema>) {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/Auth/login`,
+    `${process.env.NEXT_PUBLIC_API_URL}/auth/login`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -68,7 +68,7 @@ async function loginUser(data: z.infer<typeof loginSchema>) {
 
 async function requestPasswordReset(email: string) {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/Auth/forgot-password`,
+    `${process.env.NEXT_PUBLIC_API_URL}/auth/forgot-password`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
