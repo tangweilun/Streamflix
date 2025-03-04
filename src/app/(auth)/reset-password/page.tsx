@@ -20,6 +20,7 @@ import { toast } from "react-toastify";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { AuthBarWithSignInButton } from "@/components/navbar/auth-navbar-sign-in";
+import { logout } from "@/lib/action";
 
 //  Define schema for password validation
 const passwordSchema = z.object({
@@ -39,7 +40,7 @@ async function resetPassword(data: { token: string; password: string }) {
       body: JSON.stringify(data),
     }
   );
-
+  logout();
   if (!response.ok) {
     const text = await response.text();
     try {
