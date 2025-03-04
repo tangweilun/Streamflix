@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { Search, Bell, ChevronDown } from "lucide-react";
+import { logout } from "@/lib/action";
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -93,12 +94,12 @@ export default function Navbar() {
               >
                 Subscription
               </Link>
-              <Link
-                href="/logout"
+              <button
+                onClick={() => logout()}
                 className="block px-4 py-2 text-sm text-white hover:bg-orange-600 hover:text-black"
               >
-                Sign out
-              </Link>
+                Log out
+              </button>
             </div>
           </div>
         </div>

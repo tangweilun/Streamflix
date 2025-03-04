@@ -1,9 +1,10 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useState, useEffect } from 'react';
-import { Search, Bell, ChevronDown } from 'lucide-react';
-import Image from 'next/image';
+import Link from "next/link";
+import { useState, useEffect } from "react";
+import { Search, Bell, ChevronDown } from "lucide-react";
+import Image from "next/image";
+import { logout } from "@/lib/action";
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -12,14 +13,14 @@ export default function Navbar() {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 0);
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
     <nav
       className={`fixed top-0 w-full z-50 transition-colors duration-300 ${
-        isScrolled ? 'bg-black' : 'bg-transparent'
+        isScrolled ? "bg-black" : "bg-transparent"
       }`}
     >
       <div className="container mx-auto px-6 py-4 flex items-center justify-between">
@@ -85,12 +86,12 @@ export default function Navbar() {
               >
                 Account
               </Link>
-              <Link
-                href="/logout"
+              <button
+                onClick={() => logout()}
                 className="block px-4 py-2 text-sm text-white hover:bg-orange-600 hover:text-black"
               >
-                Sign out
-              </Link>
+                Log out
+              </button>
             </div>
           </div>
         </div>

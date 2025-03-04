@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { Home, Film, Users, Settings } from "lucide-react";
+import { logout } from "@/lib/action";
 
 export default function AdminNav() {
   return (
@@ -31,13 +34,12 @@ export default function AdminNav() {
               <Users className="w-5 h-5 mr-2" />
               Users
             </Link>
-            <Link
-              href="/admin/settings"
+            <button
+              onClick={() => logout()}
               className="flex items-center px-3 py-2 text-gray-300 hover:text-orange-500 transition-colors"
             >
-              <Settings className="w-5 h-5 mr-2" />
-              Settings
-            </Link>
+              Log out
+            </button>
           </div>
         </div>
       </div>
