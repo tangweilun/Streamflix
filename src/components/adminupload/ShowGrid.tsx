@@ -1,15 +1,15 @@
-import Image from "next/image"
-import Link from "next/link"
-import { Plus, Edit, Trash } from "lucide-react"
+import Image from "next/image";
+import Link from "next/link";
+import { Plus, Edit, Trash } from "lucide-react";
 
 type Show = {
-  id: number
-  title: string
-  thumbnail: string
-  episodeCount: number
-  seasons: number
-  lastUpdated: string
-}
+  id: number;
+  title: string;
+  thumbnail: string;
+  episodeCount: number;
+  seasons: number;
+  lastUpdated: string;
+};
 
 export default function ShowGrid({ shows }: { shows: Show[] }) {
   return (
@@ -17,7 +17,12 @@ export default function ShowGrid({ shows }: { shows: Show[] }) {
       {shows.map((show) => (
         <div key={show.id} className="bg-gray-900 rounded-lg overflow-hidden">
           <div className="relative aspect-video">
-            <Image src={show.thumbnail || "/placeholder.svg"} alt={show.title} fill className="object-cover" />
+            <Image
+              src={show.thumbnail || "/placeholder.svg"}
+              alt={show.title}
+              fill
+              className="object-cover"
+            />
           </div>
           <div className="p-4">
             <h3 className="text-xl font-semibold mb-2">{show.title}</h3>
@@ -28,7 +33,7 @@ export default function ShowGrid({ shows }: { shows: Show[] }) {
             </div>
             <div className="mt-4 flex gap-2">
               <Link
-                href={`/adminupload/shows/${show.id}/upload`}
+                href={`/admin/shows/${show.id}/upload`}
                 className="flex-1 inline-flex items-center justify-center px-4 py-2 bg-orange-600 text-black rounded-md hover:bg-orange-500 transition-colors"
               >
                 <Plus className="w-4 h-4 mr-2" />
@@ -45,6 +50,5 @@ export default function ShowGrid({ shows }: { shows: Show[] }) {
         </div>
       ))}
     </div>
-  )
+  );
 }
-

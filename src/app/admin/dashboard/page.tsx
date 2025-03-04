@@ -1,7 +1,7 @@
-import Link from "next/link"
-import { Plus } from "lucide-react"
-import AdminNav from "@/components/AdminNav"
-import ShowGrid from "@/components/adminupload/ShowGrid"
+import Link from "next/link";
+import { Plus } from "lucide-react";
+import AdminNav from "@/components/AdminNav";
+import ShowGrid from "@/components/adminupload/ShowGrid";
 
 // This would typically come from your database
 const shows = [
@@ -22,7 +22,7 @@ const shows = [
     lastUpdated: "2024-02-26",
   },
   // Add more shows as needed
-]
+];
 
 export default function AdminDashboard() {
   return (
@@ -30,9 +30,11 @@ export default function AdminDashboard() {
       <AdminNav />
       <main className="container mx-auto px-6 py-8 pt-24">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-orange-500">TV Show Management</h1>
+          <h1 className="text-3xl font-bold text-orange-500">
+            TV Show Management
+          </h1>
           <Link
-            href="/adminupload/shows/new"
+            href="/admin/shows/new"
             className="inline-flex items-center px-4 py-2 bg-orange-600 text-black rounded-md hover:bg-orange-500 transition-colors"
           >
             <Plus className="w-5 h-5 mr-2" />
@@ -42,6 +44,5 @@ export default function AdminDashboard() {
         <ShowGrid shows={shows} />
       </main>
     </div>
-  )
+  );
 }
-

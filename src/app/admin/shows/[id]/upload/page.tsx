@@ -61,7 +61,7 @@ export default function UploadEpisode() {
     await new Promise((resolve) => setTimeout(resolve, 5000));
     clearInterval(interval);
 
-    router.push(`/adminupload/shows/${id}`);
+    router.push(`/admin/shows/${id}`);
   };
 
   return (
@@ -124,7 +124,9 @@ export default function UploadEpisode() {
                 <label className="relative flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-orange-500">
                   {selectedFile ? (
                     <div className="flex items-center justify-between w-full px-4">
-                      <span className="text-sm truncate">{selectedFile.name}</span>
+                      <span className="text-sm truncate">
+                        {selectedFile.name}
+                      </span>
                       <button
                         type="button"
                         onClick={() => setSelectedFile(null)}
@@ -137,9 +139,12 @@ export default function UploadEpisode() {
                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                       <Upload className="w-8 h-8 mb-4 text-gray-500" />
                       <p className="text-sm text-gray-500">
-                        <span className="font-semibold">Click to upload</span> or drag and drop
+                        <span className="font-semibold">Click to upload</span>{" "}
+                        or drag and drop
                       </p>
-                      <p className="text-xs text-gray-500">MP4, WebM, or MKV (MAX. 4GB)</p>
+                      <p className="text-xs text-gray-500">
+                        MP4, WebM, or MKV (MAX. 4GB)
+                      </p>
                     </div>
                   )}
                   <input

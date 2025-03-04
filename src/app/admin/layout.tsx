@@ -1,14 +1,9 @@
-import Navbar from "@/components/navbar";
-
+import type React from "react"
 export default function AdminLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
-  return (
-    <>
-      <Navbar />
-      <div className={`bg-black text-white min-h-screen`}>{children}</div>
-    </>
-  );
+  return <div className="min-h-screen bg-black">{children}</div>
 }
+
