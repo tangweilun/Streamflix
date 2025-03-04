@@ -26,7 +26,7 @@ export default function Navbar() {
       <div className="container mx-auto px-6 py-4 flex items-center justify-between">
         <div className="flex items-center">
           <Link href="/" className="text-2xl font-bold text-orange-500 mr-8">
-            MyFlix
+            Streamflix
           </Link>
           <div className="hidden md:flex space-x-4">
             <Link

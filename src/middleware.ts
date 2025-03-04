@@ -46,16 +46,16 @@ export default async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/sign-in", req.nextUrl));
   }
 
-  // if (isPublicRoute && token) {
-  //   const isAdmin = getIsAdmin(token);
-  //   if (isAdmin && path !== "/admin") {
-  //     console.log("Admin user detected, redirecting to /admin");
-  //     return NextResponse.redirect(new URL("/admin/dashboard", req.nextUrl));
-  //   } else {
-  //     console.log("User already signed in, redirecting to /dashboard");
-  //     return NextResponse.redirect(new URL("/dashboard", req.nextUrl));
-  //   }
-  // }
+  if (isPublicRoute && token) {
+    const isAdmin = getIsAdmin(token);
+    if (isAdmin && path !== "/admin") {
+      console.log("Admin user detected, redirecting to /admin");
+      return NextResponse.redirect(new URL("/admin/dashboard", req.nextUrl));
+    } else {
+      console.log("User already signed in, redirecting to /dashboard");
+      return NextResponse.redirect(new URL("/dashboard", req.nextUrl));
+    }
+  }
 
   return NextResponse.next();
 }

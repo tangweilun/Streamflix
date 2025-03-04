@@ -10,7 +10,7 @@ export default function AdminNav() {
       <div className="container mx-auto px-6">
         <div className="flex items-center justify-between h-16">
           <Link href="/admin" className="text-2xl font-bold text-orange-500">
-            MyFlix Admin
+            Streamflix Admin
           </Link>
           <div className="flex items-center space-x-4">
             <Link
