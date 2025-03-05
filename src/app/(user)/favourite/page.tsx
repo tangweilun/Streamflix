@@ -1,39 +1,20 @@
 "use client";
 
-import { CardFooter } from "@/components/ui/card";
+import { useState, useMemo } from "react";
 import Image from "next/image";
-
-import { useState } from "react";
-import {
-  Search,
-  Star,
-  Trash2,
-  Filter,
-  Grid,
-  List,
-  Film,
-  Tv,
-} from "lucide-react";
-
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+  DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -41,352 +22,292 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-// Sample media data
-const mediaItems = [
+import {
+  MoreVertical,
+  ThumbsDown,
+  Search,
+  LayoutGrid,
+  List,
+  Filter,
+} from "lucide-react";
+
+const likedVideos = [
   {
-    id: "1",
-    title: "Inception",
-    type: "movie",
-    poster: "/placeholder.svg?height=400&width=300",
-    year: 2010,
-    rating: 8.8,
-    genres: ["Sci-Fi", "Action", "Thriller"],
-    director: "Christopher Nolan",
+    id: 1,
+    title: "Stranger Things Season 4 - Official Trailer",
+    thumbnail: "/placeholder.svg?height=180&width=320",
+    views: "2.3M",
+    uploadedAt: "2 weeks ago",
+    duration: "2:47",
+    year: 2022,
+    genre: "Sci-Fi",
+    contentType: "Movie",
   },
   {
-    id: "2",
-    title: "Breaking Bad",
-    type: "series",
-    poster: "/placeholder.svg?height=400&width=300",
-    year: 2008,
-    rating: 9.5,
-    genres: ["Crime", "Drama", "Thriller"],
-    creator: "Vince Gilligan",
+    id: 2,
+    title: "The Witcher: Blood Origin - Behind the Scenes",
+    thumbnail: "/placeholder.svg?height=180&width=320",
+    views: "892K",
+    uploadedAt: "1 month ago",
+    duration: "5:16",
+    year: 2022,
+    genre: "Fantasy",
+    contentType: "Series",
   },
   {
-    id: "3",
-    title: "The Shawshank Redemption",
-    type: "movie",
-    poster: "/placeholder.svg?height=400&width=300",
-    year: 1994,
-    rating: 9.3,
-    genres: ["Drama"],
-    director: "Frank Darabont",
+    id: 3,
+    title: "Wednesday - Thing's Best Moments",
+    thumbnail: "/placeholder.svg?height=180&width=320",
+    views: "1.1M",
+    uploadedAt: "3 weeks ago",
+    duration: "3:42",
+    year: 2023,
+    genre: "Comedy",
+    contentType: "Series",
   },
   {
-    id: "4",
-    title: "Game of Thrones",
-    type: "series",
-    poster: "/placeholder.svg?height=400&width=300",
-    year: 2011,
-    rating: 9.2,
-    genres: ["Action", "Adventure", "Drama"],
-    creator: "David Benioff, D.B. Weiss",
+    id: 4,
+    title: "The Crown Season 5 Recap",
+    thumbnail: "/placeholder.svg?height=180&width=320",
+    views: "567K",
+    uploadedAt: "1 month ago",
+    duration: "8:15",
+    year: 2022,
+    genre: "Drama",
+    contentType: "Series",
   },
   {
-    id: "5",
-    title: "The Dark Knight",
-    type: "movie",
-    poster: "/placeholder.svg?height=400&width=300",
-    year: 2008,
-    rating: 9.0,
-    genres: ["Action", "Crime", "Drama"],
-    director: "Christopher Nolan",
+    id: 5,
+    title: "Squid Game - Final Game Explained",
+    thumbnail: "/placeholder.svg?height=180&width=320",
+    views: "3.4M",
+    uploadedAt: "6 months ago",
+    duration: "10:22",
+    year: 2021,
+    genre: "Thriller",
+    contentType: "Series",
   },
   {
-    id: "6",
-    title: "Stranger Things",
-    type: "series",
-    poster: "/placeholder.svg?height=400&width=300",
-    year: 2016,
-    rating: 8.7,
-    genres: ["Drama", "Fantasy", "Horror"],
-    creator: "The Duffer Brothers",
-  },
-  {
-    id: "7",
-    title: "Interstellar",
-    type: "movie",
-    poster: "/placeholder.svg?height=400&width=300",
-    year: 2014,
-    rating: 8.6,
-    genres: ["Adventure", "Drama", "Sci-Fi"],
-    director: "Christopher Nolan",
-  },
-  {
-    id: "8",
-    title: "The Mandalorian",
-    type: "series",
-    poster: "/placeholder.svg?height=400&width=300",
-    year: 2019,
-    rating: 8.8,
-    genres: ["Action", "Adventure", "Fantasy"],
-    creator: "Jon Favreau",
+    id: 6,
+    title: "Money Heist - The Professor's Plan",
+    thumbnail: "/placeholder.svg?height=180&width=320",
+    views: "1.8M",
+    uploadedAt: "8 months ago",
+    duration: "7:33",
+    year: 2021,
+    genre: "Crime",
+    contentType: "Movie",
   },
 ];
 
-export default function LikedMedia() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [mediaType, setMediaType] = useState<"all" | "movie" | "series">("all");
-  const [sortBy, setSortBy] = useState<"rating" | "year" | "title">("rating");
+const genres = [
+  "All",
+  "Sci-Fi",
+  "Fantasy",
+  "Comedy",
+  "Drama",
+  "Thriller",
+  "Crime",
+];
 
-  // Filter and sort media items
-  const filteredMedia = mediaItems
-    .filter(
-      (item) =>
-        item.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
-        (mediaType === "all" || item.type === mediaType)
-    )
-    .sort((a, b) => {
-      if (sortBy === "rating") return b.rating - a.rating;
-      if (sortBy === "year") return b.year - a.year;
-      return a.title.localeCompare(b.title);
-    });
+export default function LikedVideosPage() {
+  const [filter, setFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState("title");
+  const [selectedGenre, setSelectedGenre] = useState("All");
+  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
+
+  const filteredVideos = useMemo(() => {
+    return likedVideos
+      .filter((video) => {
+        //video search function
+        if (
+          searchQuery &&
+          !video.title.toLowerCase().includes(searchQuery.toLowerCase())
+        ) {
+          return false;
+        }
+
+        //genre filter function
+        if (selectedGenre !== "All" && video.genre !== selectedGenre) {
+          return false;
+        }
+
+        //content type filter(movies, series)
+        if (filter === "movies") {
+          return video.contentType === "Movie";
+        } else if (filter === "series") {
+          return video.contentType === "Series";
+        }
+
+        return true;
+      })
+      .sort((a, b) => {
+        if (sortBy === "dateAdded") {
+          return (
+            new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
+          );
+        } else if (sortBy === "title") {
+          return a.title.localeCompare(b.title);
+        } else if (sortBy === "year") {
+          return b.year - a.year;
+        }
+
+        return 0;
+      });
+  }, [searchQuery, selectedGenre, filter, sortBy]);
 
   return (
-    <div className="theme-custom">
-      <Card className="border-none shadow-none">
-        <CardHeader className="pb-4">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <CardTitle className="text-2xl font-bold">
-                My Favourite Media
-              </CardTitle>
-              <CardDescription>
-                Your collection of favorite movies and TV series
-              </CardDescription>
-            </div>
-            <div className="flex items-center gap-2">
-              <Tabs
-                defaultValue="all"
-                className="w-[200px]"
-                onValueChange={(value: string) =>
-                  setMediaType(value as "all" | "movie" | "series")
-                }
-              >
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="all">All</TabsTrigger>
-                  <TabsTrigger
-                    value="movie"
-                    className="flex items-center gap-1"
-                  >
-                    <Film className="h-3 w-3" />
-                    Movies
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="series"
-                    className="flex items-center gap-1"
-                  >
-                    <Tv className="h-3 w-3" />
-                    Series
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-              <div className="flex items-center border rounded-md">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className={
-                    viewMode === "grid"
-                      ? "bg-accent text-accent-foreground"
-                      : ""
-                  }
-                  onClick={() => setViewMode("grid")}
+    <div className="container mx-auto p-6">
+      <div className="flex items-start gap-6 mb-8">
+        <div className="relative w-[280px] h-[157px] rounded-lg overflow-hidden bg-gray-800">
+          <Image
+            src={likedVideos[0]?.thumbnail || "/placeholder.svg"}
+            alt="Playlist thumbnail"
+            fill={true}
+            style={{ objectFit: "cover" }}
+          />
+        </div>
+
+        <div className="flex-1">
+          <h1 className="text-3xl font-bold mb-2">Liked Videos</h1>
+          <div className="text-gray-400 text-sm space-y-1">
+            <p>{likedVideos.length} videos</p>
+            <p>Last updated on {new Date().toLocaleDateString()}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap gap-4 mb-6 items-center">
+        <div className="relative flex-grow max-w-md">
+          <Search className="absolute left-3 top-1/2 transform-translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Input
+            placeholder="Search in liked videos"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 bg-gray-800 border-gray-700"
+          />
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Select value={sortBy} onValueChange={setSortBy}>
+            <SelectTrigger className="w-[180px] bg-gray-800 border-gray-700">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent className="bg-gray-800 border-gray-700">
+              <SelectItem value="dateAdded">Sort by: Date Added</SelectItem>
+              <SelectItem value="title">Sort by: Title</SelectItem>
+              <SelectItem value="year">Sort by: Year</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="border-gray-700">
+                <Filter className="w-4 h-4 mr-2" />
+                Genre
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56 bg-gray-800 border-gray-700">
+              <DropdownMenuLabel>Select Genre</DropdownMenuLabel>
+              <DropdownMenuSeparator className="bg-gray-700" />
+              {genres.map((genre) => (
+                <DropdownMenuCheckboxItem
+                  key={genre}
+                  checked={selectedGenre === genre}
+                  onCheckedChange={() => setSelectedGenre(genre)}
                 >
-                  <Grid className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className={
-                    viewMode === "list"
-                      ? "bg-accent text-accent-foreground"
-                      : ""
-                  }
-                  onClick={() => setViewMode("list")}
-                >
-                  <List className="h-4 w-4" />
-                </Button>
+                  {genre}
+                </DropdownMenuCheckboxItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <div className="flex border border-gray-700 rounded-md overflow-hidden">
+            <Button
+              variant={viewMode === "list" ? "default" : "ghost"}
+              className={
+                viewMode === "list"
+                  ? "bg-orange-500 hover:bg-orange-600 rounded-none"
+                  : "bg-gray-800 hover:bg-gray-700 rounded-none"
+              }
+              onClick={() => setViewMode("list")}
+              size="sm"
+            >
+              <List className="w-4 h-4" />
+            </Button>
+
+            <Button
+              variant={viewMode === "grid" ? "default" : "ghost"}
+              className={
+                viewMode === "grid"
+                  ? "bg-orange-500 hover:bg-orange-600 rounded-none"
+                  : "bg-gray-800 hover:bg-gray-700 rounded-none"
+              }
+              onClick={() => setViewMode("grid")}
+              size="sm"
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <Tabs defaultValue="all" className="mb-6">
+        <TabsList className="bg-gray-800">
+          <TabsTrigger value="all" onClick={() => setFilter("all")}>
+            All
+          </TabsTrigger>
+          <TabsTrigger value="movies" onClick={() => setFilter("movies")}>
+            Movies
+          </TabsTrigger>
+          <TabsTrigger value="series" onClick={() => setFilter("series")}>
+            Series
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+      {viewMode === "list" && (
+        <div className="space-y-4">
+          {filteredVideos.map((video, index) => (
+            <div key={video.id} className="flex gap-4 group">
+              <div className="w-8 text-center text-gray-400 pt-2">
+                {index + 1}
+              </div>
+
+              <div className="relative w-[160px] h-[90px]">
+                <Image
+                  src={video.thumbnail || "/placeholder.svg"}
+                  alt={video.title}
+                  fill={true}
+                  style={{ objectFit: "cover" }}
+                  className="rounded"
+                />
+              </div>
+
+              <div className="flex-1">
+                <span className="text-sx bg-gray-700 px-1.5 py-0.5 rounded">
+                  {video.genre}
+                </span>
+
+                <div className="text-sm text-gray-400">
+                  {video.views} views • {video.uploadedAt}
+                </div>
+              </div>
+
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <MoreVertical className="w-5 h-5"></MoreVertical>
+                    </Button>
+                  </DropdownMenuTrigger>
+                </DropdownMenu>
               </div>
             </div>
-          </div>
-          <div className="flex flex-col sm:flex-row items-center gap-2 mt-4">
-            <div className="relative flex-1 w-full">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search your liked media..."
-                className="pl-8 w-full"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <Select
-                defaultValue="rating"
-                onValueChange={(value: string) =>
-                  setSortBy(value as "rating" | "year" | "title")
-                }
-              >
-                <SelectTrigger className="w-full sm:w-[180px]">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="rating">Sort by Rating</SelectItem>
-                  <SelectItem value="year">Sort by Year</SelectItem>
-                  <SelectItem value="title">Sort by Title</SelectItem>
-                </SelectContent>
-              </Select>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="icon">
-                    <Filter className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>Filter by Genre</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>Action</DropdownMenuItem>
-                  <DropdownMenuItem>Drama</DropdownMenuItem>
-                  <DropdownMenuItem>Sci-Fi</DropdownMenuItem>
-                  <DropdownMenuItem>Comedy</DropdownMenuItem>
-                  <DropdownMenuItem>Horror</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {filteredMedia.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">
-                No media found matching your search criteria
-              </p>
-            </div>
-          ) : viewMode === "grid" ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {filteredMedia.map((item) => (
-                <Card key={item.id} className="overflow-hidden">
-                  <div className="relative aspect-[2/3] overflow-hidden">
-                    <Image
-                      src={item.poster || "/placeholder.svg"}
-                      alt={item.title}
-                      className="object-cover w-full h-full transition-transform hover:scale-105"
-                      layout="fill"
-                    />
-                    <div className="absolute top-2 right-2 flex gap-1">
-                      <Badge className="bg-accent hover:bg-accent/90">
-                        <Star className="h-3 w-3 mr-1 fill-current" />
-                        {item.rating}
-                      </Badge>
-                      <Badge
-                        variant="outline"
-                        className="bg-black/70 backdrop-blur-sm"
-                      >
-                        {item.type === "movie" ? (
-                          <Film className="h-3 w-3" />
-                        ) : (
-                          <Tv className="h-3 w-3" />
-                        )}
-                      </Badge>
-                    </div>
-                  </div>
-                  <CardHeader className="p-3">
-                    <CardTitle className="text-base">{item.title}</CardTitle>
-                    <CardDescription className="text-xs">
-                      {item.year} •{" "}
-                      {item.type === "movie" ? item.director : item.creator}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardFooter className="p-3 pt-0 flex-col items-start gap-2">
-                    <div className="flex flex-wrap gap-1">
-                      {item.genres.map((genre) => (
-                        <Badge
-                          key={genre}
-                          variant="secondary"
-                          className="text-xs"
-                        >
-                          {genre}
-                        </Badge>
-                      ))}
-                    </div>
-                    <div className="flex justify-end w-full mt-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-red-500 hover:text-red-600"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </CardFooter>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {filteredMedia.map((item) => (
-                <Card key={item.id} className="overflow-hidden">
-                  <div className="flex">
-                    <div className="w-[100px] h-[150px] flex-shrink-0">
-                      <Image
-                        src={item.poster || "/placeholder.svg"}
-                        alt={item.title}
-                        className="object-cover w-full h-full"
-                        layout="fill"
-                      />
-                    </div>
-                    <div className="flex flex-col flex-1 p-4">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="font-bold">{item.title}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            {item.year} •{" "}
-                            {item.type === "movie"
-                              ? item.director
-                              : item.creator}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Badge className="bg-accent hover:bg-accent/90">
-                            <Star className="h-3 w-3 mr-1 fill-current" />
-                            {item.rating}
-                          </Badge>
-                          <Badge variant="outline">
-                            {item.type === "movie" ? "Movie" : "TV Series"}
-                          </Badge>
-                        </div>
-                      </div>
-                      <div className="flex flex-wrap gap-1 my-2">
-                        {item.genres.map((genre) => (
-                          <Badge
-                            key={genre}
-                            variant="secondary"
-                            className="text-xs"
-                          >
-                            {genre}
-                          </Badge>
-                        ))}
-                      </div>
-                      <div className="flex justify-end mt-auto">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 text-red-500 hover:text-red-600"
-                        >
-                          <Trash2 className="h-4 w-4 mr-1" />
-                          Remove
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
