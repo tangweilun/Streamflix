@@ -29,6 +29,7 @@ import {
   LayoutGrid,
   List,
   Filter,
+  Trash2,
 } from "lucide-react";
 
 const likedVideos = [
@@ -178,9 +179,9 @@ export default function LikedVideosPage() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-4 mb-6 items-center">
+      <div className="flex flex-wrap gap-4 mb-6 items-center justify-between">
         <div className="relative flex-grow max-w-md">
-          <Search className="absolute left-3 top-1/2 transform-translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
             placeholder="Search in liked videos"
             value={searchQuery}
@@ -194,7 +195,7 @@ export default function LikedVideosPage() {
             <SelectTrigger className="w-[180px] bg-gray-800 border-gray-700">
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
-            <SelectContent className="bg-gray-800 border-gray-700">
+            <SelectContent className="bg-gray-800 border-gray-700 text-white">
               <SelectItem value="dateAdded">Sort by: Date Added</SelectItem>
               <SelectItem value="title">Sort by: Title</SelectItem>
               <SelectItem value="year">Sort by: Year</SelectItem>
@@ -203,12 +204,12 @@ export default function LikedVideosPage() {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="border-gray-700">
+              <Button variant="outline" className="border-gray-700 text-black">
                 <Filter className="w-4 h-4 mr-2" />
                 Genre
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56 bg-gray-800 border-gray-700">
+            <DropdownMenuContent className="w-56 bg-gray-800 border-gray-700 text-white">
               <DropdownMenuLabel>Select Genre</DropdownMenuLabel>
               <DropdownMenuSeparator className="bg-gray-700" />
               {genres.map((genre) => (
@@ -270,7 +271,10 @@ export default function LikedVideosPage() {
       {viewMode === "list" && (
         <div className="space-y-4">
           {filteredVideos.map((video, index) => (
-            <div key={video.id} className="flex gap-4 group">
+            <div
+              key={video.id}
+              className="flex gap-4 group p-2 rounded-lg hover:bg-gray-800 hover:shadow-lg transition duration-300"
+            >
               <div className="w-8 text-center text-gray-400 pt-2">
                 {index + 1}
               </div>
@@ -295,17 +299,68 @@ export default function LikedVideosPage() {
                 </div>
               </div>
 
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <MoreVertical className="w-5 h-5"></MoreVertical>
-                    </Button>
-                  </DropdownMenuTrigger>
-                </DropdownMenu>
+              <div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-red-500 hover:text-red-600"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {viewMode === "grid" && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {filteredVideos.map((video) => (
+            <div key={video.id} className="group">
+              <div className="relative">
+                <Image
+                  src={video.thumbnail || "/placeholder.svg"}
+                  alt={video.title}
+                  width={320}
+                  height={180}
+                  layout="responsive"
+                  className="rounded"
+                />
+              </div>
+
+              <div className="mt-2">
+                <Link
+                  href={`/watch/${video.id}`}
+                  className="hover:text-orange-500"
+                >
+                  <h3 className="font-medium text-sm line-clamp-2">
+                    {video.title}
+                  </h3>
+                </Link>
+                <div className="text-xs text-gray-400">
+                  {video.views} views • {video.uploadedAt}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {filteredVideos.length === 0 && (
+        <div className="text-center py-12">
+          <p className="text-gray-400 mb-2">
+            No videos match your search result
+          </p>
+          <Button
+            variant="outline"
+            onClick={() => {
+              setSearchQuery("");
+              setSelectedGenre("All");
+              setFilter("all");
+            }}
+          >
+            Clear Filters
+          </Button>
         </div>
       )}
     </div>
