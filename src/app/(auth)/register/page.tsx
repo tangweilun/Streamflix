@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useMutation } from "@tanstack/react-query";
-import { AuthBarWithSignInButton } from "@/components/navbar/auth-navbar-sign-in";
+import { AuthBarWithSignInButton } from "@/components/auth-navbar/auth-navbar-sign-in";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { storeToken } from "@/lib/action";
