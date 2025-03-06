@@ -1,51 +1,62 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import Image from "next/image"
-import { X, Plus, ChevronRight, ImageIcon, Users, Info, Layout } from "lucide-react"
-import AdminNav from "@/components/AdminNav"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import {
+  X,
+  Plus,
+  ChevronRight,
+  ImageIcon,
+  Users,
+  Info,
+  Layout,
+} from "lucide-react";
+import AdminNav from "@/components/AdminNav";
 
-type FormStep = "basic" | "media" | "cast" | "seasons" | "preview"
+type FormStep = "basic" | "media" | "cast" | "seasons" | "preview";
 
 interface CastMember {
-  id: string
-  name: string
-  role: string
-  character?: string
+  id: string;
+  name: string;
+  role: string;
+  character?: string;
 }
 
 interface Season {
-  number: number
-  title: string
-  episodes: number
-  releaseYear: string
+  number: number;
+  title: string;
+  episodes: number;
+  releaseYear: string;
 }
 
 export default function NewShow() {
-  const router = useRouter()
-  const [currentStep, setCurrentStep] = useState<FormStep>("basic")
-  const [uploading, setUploading] = useState(false)
+  const router = useRouter();
+  const [currentStep, setCurrentStep] = useState<FormStep>("basic");
+  const [uploading, setUploading] = useState(false);
   const [images, setImages] = useState({
     thumbnail: null as string | null,
     poster: null as string | null,
     banner: null as string | null,
-  })
-  const [castMembers, setCastMembers] = useState<CastMember[]>([])
-  const [seasons, setSeasons] = useState<Season[]>([])
+  });
+  const [castMembers, setCastMembers] = useState<CastMember[]>([]);
+  const [seasons, setSeasons] = useState<Season[]>([]);
 
-  const handleImageChange = (type: keyof typeof images, e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+  const handleImageChange = (
+    type: keyof typeof images,
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onloadend = () => {
-        setImages((prev) => ({ ...prev, [type]: reader.result as string }))
-      }
-      reader.readAsDataURL(file)
+        setImages((prev) => ({ ...prev, [type]: reader.result as string }));
+      };
+      reader.readAsDataURL(file);
     }
-  }
+  };
 
   const addCastMember = () => {
     const newMember: CastMember = {
@@ -53,13 +64,13 @@ export default function NewShow() {
       name: "",
       role: "actor",
       character: "",
-    }
-    setCastMembers((prev) => [...prev, newMember])
-  }
+    };
+    setCastMembers((prev) => [...prev, newMember]);
+  };
 
   const removeCastMember = (id: string) => {
-    setCastMembers((prev) => prev.filter((member) => member.id !== id))
-  }
+    setCastMembers((prev) => prev.filter((member) => member.id !== id));
+  };
 
   const addSeason = () => {
     const newSeason: Season = {
@@ -67,21 +78,21 @@ export default function NewShow() {
       title: "",
       episodes: 0,
       releaseYear: new Date().getFullYear().toString(),
-    }
-    setSeasons((prev) => [...prev, newSeason])
-  }
+    };
+    setSeasons((prev) => [...prev, newSeason]);
+  };
 
   const removeSeason = (number: number) => {
-    setSeasons((prev) => prev.filter((season) => season.number !== number))
-  }
+    setSeasons((prev) => prev.filter((season) => season.number !== number));
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setUploading(true)
+    e.preventDefault();
+    setUploading(true);
     // Simulate upload delay
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-    router.push("/adminupload")
-  }
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    router.push("/admin");
+  };
 
   const renderStepContent = () => {
     switch (currentStep) {
@@ -162,13 +173,15 @@ export default function NewShow() {
               </div>
             </div>
           </div>
-        )
+        );
 
       case "media":
         return (
           <div className="space-y-6">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Show Thumbnail (16:9)</label>
+              <label className="text-sm font-medium">
+                Show Thumbnail (16:9)
+              </label>
               <div className="flex items-center justify-center w-full">
                 <label className="relative flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-orange-500">
                   {images.thumbnail ? (
@@ -181,7 +194,9 @@ export default function NewShow() {
                       />
                       <button
                         type="button"
-                        onClick={() => setImages((prev) => ({ ...prev, thumbnail: null }))}
+                        onClick={() =>
+                          setImages((prev) => ({ ...prev, thumbnail: null }))
+                        }
                         className="absolute top-2 right-2 p-1 bg-black bg-opacity-50 rounded-full hover:bg-opacity-75"
                       >
                         <X className="w-5 h-5" />
@@ -191,9 +206,12 @@ export default function NewShow() {
                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                       <ImageIcon className="w-8 h-8 mb-4 text-gray-500" />
                       <p className="mb-2 text-sm text-gray-500">
-                        <span className="font-semibold">Click to upload</span> or drag and drop
+                        <span className="font-semibold">Click to upload</span>{" "}
+                        or drag and drop
                       </p>
-                      <p className="text-xs text-gray-500">PNG, JPG or GIF (MAX. 800x400px)</p>
+                      <p className="text-xs text-gray-500">
+                        PNG, JPG or GIF (MAX. 800x400px)
+                      </p>
                     </div>
                   )}
                   <input
@@ -220,7 +238,9 @@ export default function NewShow() {
                       />
                       <button
                         type="button"
-                        onClick={() => setImages((prev) => ({ ...prev, poster: null }))}
+                        onClick={() =>
+                          setImages((prev) => ({ ...prev, poster: null }))
+                        }
                         className="absolute top-2 right-2 p-1 bg-black bg-opacity-50 rounded-full hover:bg-opacity-75"
                       >
                         <X className="w-5 h-5" />
@@ -230,9 +250,12 @@ export default function NewShow() {
                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                       <ImageIcon className="w-8 h-8 mb-4 text-gray-500" />
                       <p className="mb-2 text-sm text-gray-500">
-                        <span className="font-semibold">Click to upload</span> or drag and drop
+                        <span className="font-semibold">Click to upload</span>{" "}
+                        or drag and drop
                       </p>
-                      <p className="text-xs text-gray-500">PNG, JPG or GIF (MAX. 400x600px)</p>
+                      <p className="text-xs text-gray-500">
+                        PNG, JPG or GIF (MAX. 400x600px)
+                      </p>
                     </div>
                   )}
                   <input
@@ -259,7 +282,9 @@ export default function NewShow() {
                       />
                       <button
                         type="button"
-                        onClick={() => setImages((prev) => ({ ...prev, banner: null }))}
+                        onClick={() =>
+                          setImages((prev) => ({ ...prev, banner: null }))
+                        }
                         className="absolute top-2 right-2 p-1 bg-black bg-opacity-50 rounded-full hover:bg-opacity-75"
                       >
                         <X className="w-5 h-5" />
@@ -269,9 +294,12 @@ export default function NewShow() {
                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                       <ImageIcon className="w-8 h-8 mb-4 text-gray-500" />
                       <p className="mb-2 text-sm text-gray-500">
-                        <span className="font-semibold">Click to upload</span> or drag and drop
+                        <span className="font-semibold">Click to upload</span>{" "}
+                        or drag and drop
                       </p>
-                      <p className="text-xs text-gray-500">PNG, JPG or GIF (MAX. 1920x820px)</p>
+                      <p className="text-xs text-gray-500">
+                        PNG, JPG or GIF (MAX. 1920x820px)
+                      </p>
                     </div>
                   )}
                   <input
@@ -284,7 +312,7 @@ export default function NewShow() {
               </div>
             </div>
           </div>
-        )
+        );
 
       case "cast":
         return (
@@ -302,7 +330,10 @@ export default function NewShow() {
             </div>
 
             {castMembers.map((member, index) => (
-              <div key={member.id} className="p-4 bg-gray-800 rounded-lg space-y-4">
+              <div
+                key={member.id}
+                className="p-4 bg-gray-800 rounded-lg space-y-4"
+              >
                 <div className="flex justify-between items-center">
                   <h4 className="font-medium">Cast Member #{index + 1}</h4>
                   <button
@@ -323,9 +354,9 @@ export default function NewShow() {
                       placeholder="Enter name"
                       value={member.name}
                       onChange={(e) => {
-                        const updated = [...castMembers]
-                        updated[index].name = e.target.value
-                        setCastMembers(updated)
+                        const updated = [...castMembers];
+                        updated[index].name = e.target.value;
+                        setCastMembers(updated);
                       }}
                     />
                   </div>
@@ -336,9 +367,9 @@ export default function NewShow() {
                       className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
                       value={member.role}
                       onChange={(e) => {
-                        const updated = [...castMembers]
-                        updated[index].role = e.target.value
-                        setCastMembers(updated)
+                        const updated = [...castMembers];
+                        updated[index].role = e.target.value;
+                        setCastMembers(updated);
                       }}
                     >
                       <option value="actor">Actor</option>
@@ -350,16 +381,18 @@ export default function NewShow() {
 
                   {member.role === "actor" && (
                     <div className="space-y-2 col-span-2">
-                      <label className="text-sm font-medium">Character Name</label>
+                      <label className="text-sm font-medium">
+                        Character Name
+                      </label>
                       <input
                         type="text"
                         className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
                         placeholder="Enter character name"
                         value={member.character || ""}
                         onChange={(e) => {
-                          const updated = [...castMembers]
-                          updated[index].character = e.target.value
-                          setCastMembers(updated)
+                          const updated = [...castMembers];
+                          updated[index].character = e.target.value;
+                          setCastMembers(updated);
                         }}
                       />
                     </div>
@@ -370,11 +403,12 @@ export default function NewShow() {
 
             {castMembers.length === 0 && (
               <div className="text-center py-8 text-gray-500">
-                No cast members added yet. Click the button above to add cast & crew members.
+                No cast members added yet. Click the button above to add cast &
+                crew members.
               </div>
             )}
           </div>
-        )
+        );
 
       case "seasons":
         return (
@@ -392,7 +426,10 @@ export default function NewShow() {
             </div>
 
             {seasons.map((season, index) => (
-              <div key={season.number} className="p-4 bg-gray-800 rounded-lg space-y-4">
+              <div
+                key={season.number}
+                className="p-4 bg-gray-800 rounded-lg space-y-4"
+              >
                 <div className="flex justify-between items-center">
                   <h4 className="font-medium">Season {season.number}</h4>
                   <button
@@ -413,24 +450,28 @@ export default function NewShow() {
                       placeholder="Enter season title"
                       value={season.title}
                       onChange={(e) => {
-                        const updated = [...seasons]
-                        updated[index].title = e.target.value
-                        setSeasons(updated)
+                        const updated = [...seasons];
+                        updated[index].title = e.target.value;
+                        setSeasons(updated);
                       }}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Number of Episodes</label>
+                    <label className="text-sm font-medium">
+                      Number of Episodes
+                    </label>
                     <input
                       type="number"
                       min="1"
                       className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
                       value={season.episodes}
                       onChange={(e) => {
-                        const updated = [...seasons]
-                        updated[index].episodes = Number.parseInt(e.target.value)
-                        setSeasons(updated)
+                        const updated = [...seasons];
+                        updated[index].episodes = Number.parseInt(
+                          e.target.value
+                        );
+                        setSeasons(updated);
                       }}
                     />
                   </div>
@@ -444,9 +485,9 @@ export default function NewShow() {
                       className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
                       value={season.releaseYear}
                       onChange={(e) => {
-                        const updated = [...seasons]
-                        updated[index].releaseYear = e.target.value
-                        setSeasons(updated)
+                        const updated = [...seasons];
+                        updated[index].releaseYear = e.target.value;
+                        setSeasons(updated);
                       }}
                     />
                   </div>
@@ -460,14 +501,19 @@ export default function NewShow() {
               </div>
             )}
           </div>
-        )
+        );
 
       case "preview":
         return (
           <div className="space-y-6">
             <div className="relative aspect-[21/9] rounded-lg overflow-hidden">
               {images.banner ? (
-                <Image src={images.banner || "/placeholder.svg"} alt="Show banner" fill className="object-cover" />
+                <Image
+                  src={images.banner || "/placeholder.svg"}
+                  alt="Show banner"
+                  fill
+                  className="object-cover"
+                />
               ) : (
                 <div className="w-full h-full bg-gray-800 flex items-center justify-center">
                   <ImageIcon className="w-12 h-12 text-gray-600" />
@@ -479,7 +525,12 @@ export default function NewShow() {
               <div className="col-span-1">
                 {images.poster ? (
                   <div className="relative aspect-[2/3] rounded-lg overflow-hidden">
-                    <Image src={images.poster || "/placeholder.svg"} alt="Show poster" fill className="object-cover" />
+                    <Image
+                      src={images.poster || "/placeholder.svg"}
+                      alt="Show poster"
+                      fill
+                      className="object-cover"
+                    />
                   </div>
                 ) : (
                   <div className="aspect-[2/3] bg-gray-800 rounded-lg flex items-center justify-center">
@@ -497,7 +548,9 @@ export default function NewShow() {
                   <span>•</span>
                   <span>{seasons.length} Seasons</span>
                 </div>
-                <p className="text-gray-300">Show description will appear here...</p>
+                <p className="text-gray-300">
+                  Show description will appear here...
+                </p>
               </div>
             </div>
 
@@ -512,7 +565,9 @@ export default function NewShow() {
                       </div>
                       <div className="text-sm font-medium">{member.name}</div>
                       <div className="text-xs text-gray-400">
-                        {member.role === "actor" ? member.character : member.role}
+                        {member.role === "actor"
+                          ? member.character
+                          : member.role}
                       </div>
                     </div>
                   ))}
@@ -525,12 +580,19 @@ export default function NewShow() {
                 <h4 className="text-lg font-medium mb-4">Seasons</h4>
                 <div className="space-y-4">
                   {seasons.map((season) => (
-                    <div key={season.number} className="flex items-center space-x-4 p-4 bg-gray-800 rounded-lg">
+                    <div
+                      key={season.number}
+                      className="flex items-center space-x-4 p-4 bg-gray-800 rounded-lg"
+                    >
                       <div className="w-16 h-16 bg-gray-700 rounded-lg flex items-center justify-center">
-                        <span className="text-2xl font-bold">{season.number}</span>
+                        <span className="text-2xl font-bold">
+                          {season.number}
+                        </span>
                       </div>
                       <div>
-                        <h5 className="font-medium">{season.title || `Season ${season.number}`}</h5>
+                        <h5 className="font-medium">
+                          {season.title || `Season ${season.number}`}
+                        </h5>
                         <p className="text-sm text-gray-400">
                           {season.episodes} Episodes • {season.releaseYear}
                         </p>
@@ -541,17 +603,21 @@ export default function NewShow() {
               </div>
             )}
           </div>
-        )
+        );
     }
-  }
+  };
 
   const steps: { id: FormStep; label: string; icon: React.ReactNode }[] = [
     { id: "basic", label: "Basic Info", icon: <Info className="w-5 h-5" /> },
     { id: "media", label: "Media", icon: <ImageIcon className="w-5 h-5" /> },
     { id: "cast", label: "Cast & Crew", icon: <Users className="w-5 h-5" /> },
     { id: "seasons", label: "Seasons", icon: <Layout className="w-5 h-5" /> },
-    { id: "preview", label: "Preview", icon: <ChevronRight className="w-5 h-5" /> },
-  ]
+    {
+      id: "preview",
+      label: "Preview",
+      icon: <ChevronRight className="w-5 h-5" />,
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -565,8 +631,10 @@ export default function NewShow() {
                 <button
                   type="button"
                   onClick={() => {
-                    const currentIndex = steps.findIndex((step) => step.id === currentStep)
-                    setCurrentStep(steps[currentIndex - 1].id)
+                    const currentIndex = steps.findIndex(
+                      (step) => step.id === currentStep
+                    );
+                    setCurrentStep(steps[currentIndex - 1].id);
                   }}
                   className="px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-700 transition-colors"
                 >
@@ -577,8 +645,10 @@ export default function NewShow() {
                 <button
                   type="button"
                   onClick={() => {
-                    const currentIndex = steps.findIndex((step) => step.id === currentStep)
-                    setCurrentStep(steps[currentIndex + 1].id)
+                    const currentIndex = steps.findIndex(
+                      (step) => step.id === currentStep
+                    );
+                    setCurrentStep(steps[currentIndex + 1].id);
                   }}
                   className="px-4 py-2 bg-orange-600 text-black rounded-md hover:bg-orange-500 transition-colors"
                 >
@@ -603,7 +673,9 @@ export default function NewShow() {
                 <div
                   key={step.id}
                   className={`flex items-center justify-center w-10 h-10 rounded-full ${
-                    currentStep === step.id ? "bg-orange-600 text-black" : "bg-gray-800 text-white"
+                    currentStep === step.id
+                      ? "bg-orange-600 text-black"
+                      : "bg-gray-800 text-white"
                   }`}
                 >
                   {step.icon}
@@ -623,6 +695,5 @@ export default function NewShow() {
         </div>
       </main>
     </div>
-  )
+  );
 }
-
