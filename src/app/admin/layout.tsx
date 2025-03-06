@@ -1,4 +1,4 @@
-import Navbar from "@/components/navbar";
+import AdminNavbar from "@/components/admin-navbar";
 
 export default function AdminLayout({
   children,
@@ -7,8 +7,8 @@ export default function AdminLayout({
 }) {
   return (
     <>
-      <Navbar />
-      <div className={`bg-black text-white min-h-screen`}>{children}</div>
+      <AdminNavbar />
+      <div className={`bg-black text-white min-h-screen pt-16`}>{children}</div>
     </>
   );
 }

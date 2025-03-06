@@ -25,7 +25,7 @@ export default function Navbar() {
       <div className="container mx-auto px-6 py-4 flex items-center justify-between">
         <div className="flex items-center">
           <Link href="/" className="text-2xl font-bold text-orange-500 mr-8">
-            StreamFlix
+            StreamFlix Admin
           </Link>
           <div className="hidden md:flex space-x-4">
             <Link
@@ -35,32 +35,20 @@ export default function Navbar() {
               Dashboard
             </Link>
             <Link
-              href="/series"
+              href="/"
               className="text-white hover:text-orange-500 transition-colors"
             >
               Shows
             </Link>
             <Link
-              href="/movies"
+              href="/"
               className="text-white hover:text-orange-500 transition-colors"
             >
-              Movies
-            </Link>
-            <Link
-              href="/new"
-              className="text-white hover:text-orange-500 transition-colors"
-            >
-              New & Popular
+              Users
             </Link>
           </div>
         </div>
         <div className="flex items-center space-x-4">
-          <button className="text-white hover:text-orange-500 transition-colors">
-            <Search />
-          </button>
-          <button className="text-white hover:text-orange-500 transition-colors">
-            <Bell />
-          </button>
           <div className="relative group">
             <button className="flex items-center text-white hover:text-orange-500 transition-colors">
               <div className="w-8 h-8 relative mr-2">

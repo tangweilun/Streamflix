@@ -8,11 +8,7 @@ export default function DashboardLayout({
   return (
     <>
       <Navbar />
-      <div
-        className={`bg-black text-white min-h-screen overflow-x-hidden pt-16`}
-      >
-        {children}
-      </div>
+      <div className={`bg-black text-white min-h-screen pt-16`}>{children}</div>
     </>
   );
 }
