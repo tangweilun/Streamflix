@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-// import {UserTable} from "@/component/user-table"
 
 import {
   Table,
@@ -20,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Search } from "lucide-react";
 
 interface User {
   id: number;
@@ -59,13 +59,16 @@ export default function UserManagementPage() {
     <div className="container mx-auto p-6  min-h-screen">
       <h1 className="text-3xl font-bold text-white mb-6">User Management</h1>
       <div className="mb-4">
-        <Input
-          type="text"
-          placeholder="Search users"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="bg-gray-800 text-white"
-        />
+        <div className="relative flex-grow">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Input
+            type="text"
+            placeholder="Search users"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10 bg-gray-800 text-white"
+          />
+        </div>
       </div>
 
       <Table>
