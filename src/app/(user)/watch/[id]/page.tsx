@@ -38,9 +38,14 @@ const relatedVideos = [
 
 export default function VideoPage() {
   useEffect(() => {
+    // Save the original overflow style
     const originalStyle = document.body.style.overflow;
 
+    // Prevent scrolling while watching
+    document.body.style.overflow = "hidden";
+
     return () => {
+      // Restore original scrolling when leaving the page
       document.body.style.overflow = originalStyle;
     };
   }, []);

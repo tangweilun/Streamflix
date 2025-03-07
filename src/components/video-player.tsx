@@ -23,10 +23,18 @@ export function VideoPlayer({ src }: VideoPlayerProps) {
     if (!video) return;
 
     const updateTime = () => setCurrentTime(video.currentTime);
-    const updateDuration = () => setDuration(video.duration);
+    const updateDuration = () => {
+      if (video.duration && !isNaN(video.duration)) {
+        setDuration(video.duration);
+      }
+    };
 
     video.addEventListener("timeupdate", updateTime);
     video.addEventListener("loadedmetadata", updateDuration);
+
+    if (video.readyState >= 1) {
+      updateDuration();
+    }
 
     return () => {
       video.removeEventListener("timeupdate", updateTime);
@@ -35,16 +43,14 @@ export function VideoPlayer({ src }: VideoPlayerProps) {
   }, []);
 
   const togglePlay = () => {
-    console.log("0");
     if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause();
-        console.log("1");
-      } else {
+      if (videoRef.current.paused) {
         videoRef.current.play();
-        console.log("2");
+        setIsPlaying(true);
+      } else {
+        videoRef.current.pause();
+        setIsPlaying(false);
       }
-      setIsPlaying(!isPlaying);
     }
   };
 
