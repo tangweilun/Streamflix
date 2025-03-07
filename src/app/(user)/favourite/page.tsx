@@ -9,7 +9,6 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
   DropdownMenuLabel,
@@ -22,15 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  MoreVertical,
-  ThumbsDown,
-  Search,
-  LayoutGrid,
-  List,
-  Filter,
-  Trash2,
-} from "lucide-react";
+import { Search, LayoutGrid, List, Filter, Trash2 } from "lucide-react";
 
 const likedVideos = [
   {

@@ -21,12 +21,12 @@ import {
 } from "@/components/ui/select";
 import { Search } from "lucide-react";
 
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  role: string;
-}
+// interface User {
+//   id: number;
+//   name: string;
+//   email: string;
+//   role: string;
+// }
 
 const users = [
   { id: 1, name: "John Doe", email: "john@example.com", role: "user" },
