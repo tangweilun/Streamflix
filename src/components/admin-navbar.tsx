@@ -4,6 +4,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -49,20 +54,25 @@ export default function Navbar() {
           </div>
         </div>
         <div className="flex items-center space-x-4">
-          <div className="relative group">
-            <button className="flex items-center text-white hover:text-orange-500 transition-colors">
-              <div className="w-8 h-8 relative mr-2">
-                <Image
-                  src="/placeholder.svg"
-                  alt="User"
-                  fill={true}
-                  style={{ objectFit: "cover" }}
-                  className="rounded-full"
-                />
-              </div>
-              <ChevronDown className="w-4 h-4" />
-            </button>
-            <div className="absolute right-0 mt-2 w-48 bg-black bg-opacity-90 rounded-md shadow-lg py-1 hidden group-hover:block">
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              className="focus:outline-none focus:ring-0"
+              asChild
+            >
+              <button className="flex items-center text-white hover:text-orange-500 transition-colors">
+                <div className="w-8 h-8 relative mr-2">
+                  <Image
+                    src="/placeholder.svg"
+                    alt="User"
+                    fill={true}
+                    style={{ objectFit: "cover" }}
+                    className="rounded-full"
+                  />
+                </div>
+                <ChevronDown className="w-4 h-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="absolute w-48 mt-3 -right-6 bg-black border-black rounded-none shadow-lg py-1">
               <Link
                 href="/profile"
                 className="block px-4 py-2 text-sm text-white hover:bg-orange-600 hover:text-black"
@@ -87,8 +97,8 @@ export default function Navbar() {
               >
                 Sign out
               </Link>
-            </div>
-          </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </nav>

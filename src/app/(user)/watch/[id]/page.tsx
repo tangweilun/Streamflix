@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ThumbsUp, Plus, Flag } from "lucide-react";
+import { ThumbsUp, Plus } from "lucide-react";
 import Image from "next/image";
 
 const video = {
