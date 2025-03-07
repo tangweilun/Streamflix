@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
-import AdminNav from "@/components/AdminNav";
 import ShowGrid from "@/components/adminupload/ShowGrid";
 
 const shows = [
