@@ -35,7 +35,7 @@ export default function AdminLayout({
             Shows
           </Link>
           <Link
-            href="/admin/upload"
+            href="/admin/shows/new"
             className="flex items-center px-4 py-3 text-white hover:bg-gray-800 rounded-md"
           >
             <Upload className="mr-3 h-5 w-5 text-orange-500" />
