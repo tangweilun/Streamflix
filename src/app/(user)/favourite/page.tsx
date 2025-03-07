@@ -141,8 +141,6 @@ export default function LikedVideosPage() {
           );
         } else if (sortBy === "title") {
           return a.title.localeCompare(b.title);
-        } else if (sortBy === "year") {
-          return b.year - a.year;
         }
 
         return 0;
@@ -189,7 +187,6 @@ export default function LikedVideosPage() {
             <SelectContent className="bg-gray-800 border-gray-700 text-white">
               <SelectItem value="dateAdded">Sort by: Date Added</SelectItem>
               <SelectItem value="title">Sort by: Title</SelectItem>
-              <SelectItem value="year">Sort by: Year</SelectItem>
             </SelectContent>
           </Select>
 
@@ -281,7 +278,9 @@ export default function LikedVideosPage() {
               </div>
 
               <div className="flex-1">
-                <span className="text-sx bg-gray-700 px-1.5 py-0.5 rounded">
+                <h5 className="text-white">{video.title}</h5>
+
+                <span className="text-xs bg-gray-700 px-1.5 py-0.5 rounded">
                   {video.genre}
                 </span>
 
@@ -328,6 +327,9 @@ export default function LikedVideosPage() {
                     {video.title}
                   </h3>
                 </Link>
+                <span className="text-xs bg-gray-700 px-1.5 py-0.5 rounded">
+                  {video.genre}
+                </span>
                 <div className="text-xs text-gray-400">
                   {video.views} views • {video.uploadedAt}
                 </div>

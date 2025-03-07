@@ -2,13 +2,12 @@
 
 import type React from "react";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Check, ImageIcon, Loader2, Plus, Save, X } from "lucide-react";
 
@@ -36,7 +35,7 @@ const availableGenres = [
 ];
 
 export default function EditShowPage() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -47,14 +46,10 @@ export default function EditShowPage() {
   const [newCastMember, setNewCastMember] = useState("");
   const [creators, setCreators] = useState<string[]>([]);
   const [newCreator, setNewCreator] = useState("");
-  const [directors, setDirectors] = useState<string[]>([]);
-  const [newDirector, setNewDirector] = useState("");
 
   const [posterImage, setPosterImage] = useState<string | null>(null);
   const posterInputRef = useRef<HTMLInputElement>(null);
 
-  // UI state
-  const [activeTab, setActiveTab] = useState("basic");
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
@@ -90,17 +85,6 @@ export default function EditShowPage() {
 
   const removeCreator = (creator: string) => {
     setCreators(creators.filter((c) => c !== creator));
-  };
-
-  const addDirector = () => {
-    if (newDirector.trim() && !directors.includes(newDirector.trim())) {
-      setDirectors([...directors, newDirector.trim()]);
-      setNewDirector("");
-    }
-  };
-
-  const removeDirector = (director: string) => {
-    setDirectors(directors.filter((d) => d !== director));
   };
 
   const toggleGenre = (genre: string) => {
