@@ -74,6 +74,7 @@ export default function HomePage() {
         <Image
           src={featuredContent.image || "/placeholder.svg"}
           alt={featuredContent.title}
+          fill={true}
           className="w-full h-[600px] object-cover"
         />
         <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black to-transparent">
