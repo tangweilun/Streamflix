@@ -1,18 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { VideoPlayer } from "@/components/video-player";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ThumbsUp, Plus, Flag } from "lucide-react";
 import Image from "next/image";
 
-const videoData = {
+const video = {
   id: "1",
   title: "UNDERRATED",
   description:
     "The remarkable coming-of-age story of Stephen Curry-one of the most influential, dynamic, and unexpected players in basketball history-and his rise from an undersized collage player to a four-time NBA CHAMPION.",
   src: "/samplevideo/samplevideo.mp4",
+  thumbnail: "/samplevideo/underrated.jpg",
 };
 
 const relatedVideos = [
@@ -41,11 +41,18 @@ export default function VideoPage() {
   const [inMyList, setInMyList] = useState(false);
 
   return (
-    <div className="container mx-auto p-4 bg-gray-900 min-h-screen">
+    <div className="container mx-auto p-8 min-h-screen">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-4">
-          <VideoPlayer src={videoData.src} />
-          <h1 className="text-2xl font-bold text-white">{videoData.title}</h1>
+          <video
+            src={video.src}
+            poster={video.thumbnail}
+            controls
+            className="w-full"
+          >
+            Your browser does not support the video tag.
+          </video>
+          <h1 className="text-2xl font-bold text-white">{video.title}</h1>
           <div className="flex items-center space-x-4">
             <Button
               variant="outline"
@@ -75,7 +82,7 @@ export default function VideoPage() {
             </Button>
           </div>
           <div className="bg-gray-800 p-4 rounded-lg">
-            <p className="text-white">{videoData.description}</p>
+            <p className="text-white">{video.description}</p>
           </div>
         </div>
 
