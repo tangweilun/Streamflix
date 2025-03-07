@@ -3,7 +3,14 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { Play, Pause, Volume2, VolumeX } from "lucide-react";
+import {
+  Play,
+  Pause,
+  Volume2,
+  VolumeX,
+  Maximize,
+  Minimize,
+} from "lucide-react";
 
 interface VideoPlayerProps {
   src: string;
@@ -15,11 +22,11 @@ export function VideoPlayer({ src }: VideoPlayerProps) {
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const video = videoRef.current;
-
     if (!video) return;
 
     const updateTime = () => setCurrentTime(video.currentTime);
@@ -42,11 +49,15 @@ export function VideoPlayer({ src }: VideoPlayerProps) {
     };
   }, []);
 
-  const togglePlay = () => {
+  const togglePlay = async () => {
     if (videoRef.current) {
       if (videoRef.current.paused) {
-        videoRef.current.play();
-        setIsPlaying(true);
+        try {
+          await videoRef.current.play();
+          setIsPlaying(true);
+        } catch (error) {
+          console.error("Error playing video:", error);
+        }
       } else {
         videoRef.current.pause();
         setIsPlaying(false);
@@ -77,6 +88,7 @@ export function VideoPlayer({ src }: VideoPlayerProps) {
       if (isMuted) {
         videoRef.current.volume = volume;
       } else {
+        // Optionally, store current volume before muting
         setVolume(videoRef.current.volume);
         videoRef.current.volume = 0;
       }

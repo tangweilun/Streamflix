@@ -1,27 +1,15 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Search, Bell, ChevronDown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuPortal,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
 export default function Navbar() {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
   return (
     <nav className="fixed top-0 w-full bg-black border-b border-gray-800 z-50">
       <div className="container mx-auto px-6 py-4 flex items-center justify-between">

@@ -37,19 +37,6 @@ const relatedVideos = [
 ];
 
 export default function VideoPage() {
-  useEffect(() => {
-    // Save the original overflow style
-    const originalStyle = document.body.style.overflow;
-
-    // Prevent scrolling while watching
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      // Restore original scrolling when leaving the page
-      document.body.style.overflow = originalStyle;
-    };
-  }, []);
-
   const [isLiked, setIsLiked] = useState(false);
   const [inMyList, setInMyList] = useState(false);
 
@@ -64,7 +51,7 @@ export default function VideoPage() {
               variant="outline"
               size="sm"
               onClick={() => setIsLiked(!isLiked)}
-              className={isLiked ? "bg-orange-500 text-white" : ""}
+              className="bg-orange-500 hover:bg-orange-600"
             >
               <ThumbsUp className="w-4 h-4 mr-2" />
               {isLiked ? "Liked" : "Like"}
@@ -73,12 +60,16 @@ export default function VideoPage() {
               variant="outline"
               size="sm"
               onClick={() => setInMyList(!inMyList)}
-              className={inMyList ? "bg-orange-500 text-white" : ""}
+              className="bg-orange-500 hover:bg-orange-600"
             >
               <Plus className="w-4 h-4 mr-2" />
               {inMyList ? "In My List" : "Add to My List"}
             </Button>
-            <Button variant="outline" size="sm">
+            <Button
+              variant="outline"
+              size="sm"
+              className="bg-orange-500 hover:bg-orange-600"
+            >
               <Flag className="w-4 h-4 mr-2" />
               Report
             </Button>
@@ -87,6 +78,7 @@ export default function VideoPage() {
             <p className="text-white">{videoData.description}</p>
           </div>
         </div>
+
         <div className="space-y-4">
           <h2 className="text-xl font-bold text-white">Next Episodes</h2>
           {relatedVideos.map((video) => (
@@ -95,7 +87,8 @@ export default function VideoPage() {
                 <Image
                   src={video.thumbnail || "/placeholder.svg"}
                   alt={video.title}
-                  fill={true}
+                  height={100}
+                  width={100}
                   className="w-40 h-24 object-cover rounded"
                 />
                 <div>

@@ -55,7 +55,7 @@ export function VideoCarousel({ title, videos = [] }: VideoCarouselProps) {
           <ChevronLeft />
         </button>
         <div className="flex overflow-x-hidden px-8">
-          {videos.map((video, index) => (
+          {videos.map((video) => (
             <div
               key={video.id}
               className="flex-shrink-0 w-1/4 px-2 transition-transform duration-300 ease-in-out transform hover:scale-105"
