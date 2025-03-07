@@ -14,18 +14,86 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-// import { useRouter } from "next/navigation";
-import { useActionState, useState } from "react";
+import { useRouter } from "next/navigation";
 import { AuthNavBarWithRegisterButton } from "@/components/navbar/auth-navbar-register";
-import { login } from "@/app/login/action";
-import { loginSchema } from "@/lib/utils";
+import { toast } from "react-toastify";
+import { useMutation } from "@tanstack/react-query";
+import { storeToken } from "@/lib/action";
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+
+const loginSchema = z.object({
+  email: z.string().email({ message: "Invalid email address" }).trim(),
+  password: z
+    .string()
+    .min(8, { message: "Password must be at least 8 characters" })
+    .trim(),
+});
+
+const forgotPasswordSchema = z.object({
+  email: z.string().email({ message: "Invalid email address" }).trim(),
+});
+
+async function loginUser(data: z.infer<typeof loginSchema>) {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/Auth/login`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    }
+  );
+
+  if (!response.ok) {
+    const text = await response.text();
+    try {
+      // Try parsing as JSON
+      const errorData = JSON.parse(text);
+      throw new Error(errorData.message || "Login failed.");
+    } catch {
+      // If parsing fails, assume plain text error message
+      throw new Error(text || "Login failed.");
+    }
+  }
+
+  return await response.json();
+}
+
+async function requestPasswordReset(email: string) {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/Auth/forgot-password`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    }
+  );
+
+  if (!response.ok) {
+    const text = await response.text();
+    try {
+      const errorData = JSON.parse(text);
+      throw new Error(errorData.message || "Password reset request failed.");
+    } catch {
+      throw new Error(text || "Password reset request failed.");
+    }
+  }
+
+  return await response.json();
+}
 
 export default function SignInPage() {
-  //const router = useRouter();
-  // const [isLoading, setIsLoading] = useState(false);
-  const [isLoading] = useState(false);
-  const [state, loginAction] = useActionState(login, undefined);
-  const form = useForm<z.infer<typeof loginSchema>>({
+  const router = useRouter();
+  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
+
+  const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
@@ -33,18 +101,52 @@ export default function SignInPage() {
     },
   });
 
-  //   async function onSubmit(values: z.infer<typeof loginSchema>) {
-  //     loginAction(values);
-  //     setIsLoading(true);
-  //     try {
-  //       // AWS Cognito integration would go here
-  //       router.push("/verify-email");
-  //     } catch (error) {
-  //       console.error("Registration error:", error);
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   }
+  const forgotPasswordForm = useForm<z.infer<typeof forgotPasswordSchema>>({
+    resolver: zodResolver(forgotPasswordSchema),
+    defaultValues: {
+      email: "",
+    },
+  });
+
+  const loginMutation = useMutation({
+    mutationFn: loginUser,
+    onSuccess: (data) => {
+      storeToken(data.token);
+      toast.success("Welcome!");
+      router.push("/dashboard");
+    },
+    onError: (error: unknown) => {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("An unknown error occurred.");
+      }
+    },
+  });
+
+  const resetPasswordMutation = useMutation({
+    mutationFn: requestPasswordReset,
+    onSuccess: () => {
+      toast.success("Password reset instructions sent to your email!");
+      setForgotPasswordOpen(false);
+      forgotPasswordForm.reset();
+    },
+    onError: (error: unknown) => {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("An unknown error occurred.");
+      }
+    },
+  });
+
+  function onSubmit(values: z.infer<typeof loginSchema>) {
+    loginMutation.mutate(values);
+  }
+
+  function onForgotPassword(values: z.infer<typeof forgotPasswordSchema>) {
+    resetPasswordMutation.mutate(values.email);
+  }
 
   return (
     <>
@@ -67,14 +169,13 @@ export default function SignInPage() {
             </h2>
           </CardHeader>
           <CardContent className="px-4 sm:px-6 pb-6 sm:pb-8">
-            <Form {...form}>
+            <Form {...loginForm}>
               <form
-                // onSubmit={form.handleSubmit(onSubmit)}
-                action={loginAction}
+                onSubmit={loginForm.handleSubmit(onSubmit)}
                 className="space-y-4"
               >
                 <FormField
-                  control={form.control}
+                  control={loginForm.control}
                   name="email"
                   render={({ field }) => (
                     <FormItem>
@@ -88,17 +189,12 @@ export default function SignInPage() {
                           className="bg-gray-100 border-gray-700 text-black placeholder:text-gray-400 h-10 sm:h-11"
                         />
                       </FormControl>
-                      {state?.errors.email && (
-                        <p className="text-red-500 text-xs sm:text-sm mt-1">
-                          {state?.errors.email}
-                        </p>
-                      )}
                       <FormMessage className="text-xs sm:text-sm" />
                     </FormItem>
                   )}
                 />
                 <FormField
-                  control={form.control}
+                  control={loginForm.control}
                   name="password"
                   render={({ field }) => (
                     <FormItem>
@@ -113,27 +209,82 @@ export default function SignInPage() {
                           className="bg-gray-100 border-gray-700 text-black placeholder:text-gray-400 h-10 sm:h-11"
                         />
                       </FormControl>
-                      {state?.errors.password && (
-                        <p className="text-red-500 text-xs sm:text-sm mt-1">
-                          {state?.errors.password}
-                        </p>
-                      )}
                       <FormMessage className="text-xs sm:text-sm" />
                     </FormItem>
                   )}
                 />
+                <div className="flex justify-end">
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="p-0 text-orange-400 hover:text-orange-300 text-sm"
+                    onClick={() => setForgotPasswordOpen(true)}
+                  >
+                    Forgot password?
+                  </Button>
+                </div>
                 <Button
                   type="submit"
-                  className="w-full bg-orange-500 hover:bg-orange-600 text-white text-sm sm:text-base h-10 sm:h-11 mt-2"
-                  disabled={isLoading}
+                  className="w-full bg-orange-500 hover:bg-orange-600 text-white text-sm sm:text-base h-10 sm:h-11"
+                  disabled={loginMutation.isPending}
                 >
-                  {isLoading ? "Signing in..." : "Sign In"}
+                  {loginMutation.isPending ? "Signing in..." : "Sign In"}
                 </Button>
               </form>
             </Form>
           </CardContent>
         </Card>
       </div>
+
+      {/* Forgot Password Dialog */}
+      <Dialog open={forgotPasswordOpen} onOpenChange={setForgotPasswordOpen}>
+        <DialogContent className="bg-black border border-gray-800 text-white max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-white">
+              Reset Password
+            </DialogTitle>
+            <DialogDescription className="text-gray-300">
+              Enter your email address and we&apos;ll send you a link to reset
+              your password.
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...forgotPasswordForm}>
+            <form
+              onSubmit={forgotPasswordForm.handleSubmit(onForgotPassword)}
+              className="space-y-4"
+            >
+              <FormField
+                control={forgotPasswordForm.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-200">Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter your email"
+                        {...field}
+                        className="bg-gray-100 border-gray-700 text-black placeholder:text-gray-400"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <DialogFooter>
+                <Button
+                  type="submit"
+                  className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+                  disabled={resetPasswordMutation.isPending}
+                >
+                  {resetPasswordMutation.isPending
+                    ? "Sending..."
+                    : "Send Reset Link"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
