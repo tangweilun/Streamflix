@@ -1,78 +1,99 @@
-import Image from "next/image"
-import Link from "next/link"
-import { PlayCircle, Info } from "lucide-react"
-import Navbar from "@/components/navbar/video-navbar"
-import VideoCarousel from "@/components/VideoCarousel"
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { PlayCircle } from "lucide-react";
+import { VideoCarousel } from "@/components/video-carousel";
 
-// This would typically come from an API or database
 const featuredVideo = {
   id: 1,
   title: "UNDERRATED",
   description:
     "The remarkable coming-of-age story of Stephen Curry-one of the most influential, dynamic, and unexpected players in basketball history-and his rise from an undersized collage player to a four-time NBA CHAMPION.",
   thumbnail: "/samplevideo/underrated.jpg",
-}
+};
 
-const categories = [
+const trendingVideos = [
   {
-    name: "Trending Now",
-    videos: [
-      { id: 1, title: "Big Buck Bunny", thumbnail: "/placeholder.svg?height=200&width=350" },
-      { id: 2, title: "Elephant Dream", thumbnail: "/placeholder.svg?height=200&width=350" },
-      { id: 3, title: "Sintel", thumbnail: "/placeholder.svg?height=200&width=350" },
-      // Add more videos as needed
-    ],
+    id: "1",
+    title: "Big Buck Bunny",
+    image: "/placeholder.svg?height=200&width=350",
   },
   {
-    name: "New Releases",
-    videos: [
-      { id: 4, title: "Tears of Steel", thumbnail: "/placeholder.svg?height=200&width=350" },
-      { id: 5, title: "Cosmos Laundromat", thumbnail: "/placeholder.svg?height=200&width=350" },
-      { id: 6, title: "Caminandes", thumbnail: "/placeholder.svg?height=200&width=350" },
-      // Add more videos as needed
-    ],
+    id: "2",
+    title: "Elephant Dream",
+    image: "/placeholder.svg?height=200&width=350",
   },
-]
+  {
+    id: "3",
+    title: "Sintel",
+    image: "/placeholder.svg?height=200&width=350",
+  },
+  {
+    id: "4",
+    title: "Tears of Steel",
+    image: "/placeholder.svg?height=200&width=350",
+  },
+  {
+    id: "5",
+    title: "The Daily Life",
+    image: "/placeholder.svg?height=200&width=350",
+  },
+];
 
-export default function Home() {
+const popularVideos = [
+  {
+    id: "6",
+    title: "The Crown",
+    image: "/placeholder.svg?height=200&width=350",
+  },
+  {
+    id: "7",
+    title: "Bridgerton",
+    image: "/placeholder.svg?height=200&width=350",
+  },
+  {
+    id: "8",
+    title: "Money Heist",
+    image: "/placeholder.svg?height=200&width=350",
+  },
+  {
+    id: "9",
+    title: "The Witcher",
+    image: "/placeholder.svg?height=200&width=350",
+  },
+  {
+    id: "10",
+    title: "Wednesday",
+    image: "/placeholder.svg?height=200&width=350",
+  },
+];
+
+export default function HomePage() {
   return (
-    <div className="min-h-screen bg-black text-white">
-      <Navbar />
-      <main>
-      <section className="relative h-[80vh]">
-        <div className="relative w-full h-full bg-gray-700 flex items-center justify-center">
-            <Image
-            src={featuredVideo.thumbnail || ""}
+    <div className="min-h-screen bg-black">
+      <div className="relative mb-8">
+        <div className="w-full h-[600px] relative">
+          <Image
+            src={featuredVideo.thumbnail || "/placeholder.svg"}
             alt={featuredVideo.title}
-            fill
-            className="object-cover"
-            />
-            {!featuredVideo.thumbnail && <span className="absolute text-gray-400">No Image</span>}
+            fill={true}
+            style={{ objectFit: "cover" }}
+            priority
+          />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent" />
-        <div className="absolute bottom-0 left-0 p-8 space-y-4">
-            <h1 className="text-5xl font-bold">{featuredVideo.title}</h1>
-            <p className="text-lg max-w-2xl">{featuredVideo.description}</p>
-            <div className="space-x-4">
-            <Link
-                href={`/watch/${featuredVideo.id}`}
-                className="inline-flex items-center px-6 py-3 bg-orange-600 text-black rounded-md hover:bg-orange-500 transition-colors"
-            >
-                <PlayCircle className="mr-2" />
-                Play
-            </Link>
-            <button className="inline-flex items-center px-6 py-3 bg-gray-800 text-white rounded-md hover:bg-gray-700 transition-colors">
-                <Info className="mr-2" />
-                More Info
-            </button>
-            </div>
+        <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black to-transparent">
+          <h1 className="text-4xl font-bold mb-2">{featuredVideo.title}</h1>
+          <p className="text-lg mb-4 max-w-2xl">{featuredVideo.description}</p>
+          <Button className="bg-orange-500 hover:bg-orange-600 text-white">
+            <PlayCircle className="mr-2 h-5 w-5" />
+            Play Now
+          </Button>
         </div>
-        </section>
-        {categories.map((category) => (
-          <VideoCarousel key={category.name} title={category.name} videos={category.videos} />
-        ))}
-      </main>
-    </div>
-  )
-}
+      </div>
 
+      <div className="container mx-auto px-4 space-y-8">
+        <VideoCarousel title="Trending Now" videos={trendingVideos} />
+        <VideoCarousel title="Popular on StreamFlix" videos={popularVideos} />
+      </div>
+    </div>
+  );
+}

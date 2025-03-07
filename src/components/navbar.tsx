@@ -82,7 +82,7 @@ export default function Navbar() {
                 <ChevronDown className="w-4 h-4" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="absolute w-48 mt-4 -right-6 bg-black border-black rounded-sm shadow-lg py-1">
+            <DropdownMenuContent className="absolute w-48 mt-3 -right-6 bg-black border-black rounded-none shadow-lg py-1">
               <Link
                 href="/profile"
                 className="block px-4 py-2 text-sm text-white hover:bg-orange-600 hover:text-black"
