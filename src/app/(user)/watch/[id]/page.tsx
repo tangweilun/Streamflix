@@ -55,8 +55,7 @@ export default function VideoPage() {
           <h1 className="text-2xl font-bold text-white">{video.title}</h1>
           <div className="flex items-center space-x-4">
             <Button
-              variant="outline"
-              size="sm"
+              size="default"
               onClick={() => setIsLiked(!isLiked)}
               className="bg-orange-500 hover:bg-orange-600"
             >
@@ -64,21 +63,12 @@ export default function VideoPage() {
               {isLiked ? "Liked" : "Like"}
             </Button>
             <Button
-              variant="outline"
-              size="sm"
+              size="default"
               onClick={() => setInMyList(!inMyList)}
               className="bg-orange-500 hover:bg-orange-600"
             >
               <Plus className="w-4 h-4 mr-2" />
               {inMyList ? "In My List" : "Add to My List"}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="bg-orange-500 hover:bg-orange-600"
-            >
-              <Flag className="w-4 h-4 mr-2" />
-              Report
             </Button>
           </div>
           <div className="bg-gray-800 p-4 rounded-lg">
