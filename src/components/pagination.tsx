@@ -10,101 +10,134 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 
-interface PaginationProps {
+interface PaginationControlProps {
   currentPage: number;
   totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
   onPageChange: (page: number) => void;
-  maxPageButtons?: number;
+  maxVisiblePages?: number;
 }
 
-export function PaginationComponent({
+export function PaginationControl({
   currentPage,
   totalPages,
+  hasNextPage,
+  hasPrevPage,
   onPageChange,
-  maxPageButtons = 5,
-}: PaginationProps) {
-  if (totalPages <= 1) return null; //pagination is not rendered if there's only one page
+  maxVisiblePages = 5,
+}: PaginationControlProps) {
+  if (totalPages <= 1) return null;
 
-  const getPageNumbers = () => {
-    const pageNumbers = [];
+  const renderPaginationItems = () => {
+    const items = [];
 
-    pageNumbers.push(1); //always show first page
+    items.push(
+      <PaginationItem key="prev">
+        <PaginationPrevious
+          onClick={() => hasPrevPage && onPageChange(currentPage - 1)}
+          className={
+            !hasPrevPage
+              ? "pointer-events-none opacity-50"
+              : "hover:bg-orange-500"
+          }
+        />
+      </PaginationItem>
+    );
 
-    const startPage = Math.max(2, currentPage - Math.floor(maxPageButtons / 2));
-    const endPage = Math.min(totalPages - 1, startPage + maxPageButtons - 3);
+    items.push(
+      <PaginationItem key="1">
+        <PaginationLink
+          isActive={currentPage === 1}
+          onClick={() => onPageChange(1)}
+          className={
+            currentPage === 1
+              ? "bg-orange-500 border-orange-500 hover:bg-orange-600 text-white"
+              : "hover:bg-orange-500 text-white"
+          }
+        >
+          1
+        </PaginationLink>
+      </PaginationItem>
+    );
+
+    const startPage = Math.max(
+      2,
+      currentPage - Math.floor(maxVisiblePages / 2)
+    );
+    const endPage = Math.min(totalPages - 1, startPage + maxVisiblePages - 3);
 
     if (startPage > 2) {
-      pageNumbers.push("ellipsis-start");
+      items.push(
+        <PaginationItem key="ellipsis-start">
+          <PaginationEllipsis />
+        </PaginationItem>
+      );
     }
 
     for (let i = startPage; i <= endPage; i++) {
-      pageNumbers.push(i);
+      items.push(
+        <PaginationItem key={i}>
+          <PaginationLink
+            isActive={currentPage === i}
+            onClick={() => onPageChange(i)}
+            className={
+              currentPage === i
+                ? "bg-orange-500 border-orange-500 hover:bg-orange-600 text-white"
+                : "hover:bg-orange-500 text-white"
+            }
+          >
+            {i}
+          </PaginationLink>
+        </PaginationItem>
+      );
     }
 
     if (endPage < totalPages - 1) {
-      pageNumbers.push("ellipsis-end");
+      items.push(
+        <PaginationItem key="ellipsis-end">
+          <PaginationEllipsis />
+        </PaginationItem>
+      );
     }
 
     if (totalPages > 1) {
-      pageNumbers.push(totalPages);
+      items.push(
+        <PaginationItem key={totalPages}>
+          <PaginationLink
+            isActive={currentPage === totalPages}
+            onClick={() => onPageChange(totalPages)}
+            className={
+              currentPage === totalPages
+                ? "bg-orange-500 border-orange-500 hover:bg-orange-600"
+                : ""
+            }
+          >
+            {totalPages}
+          </PaginationLink>
+        </PaginationItem>
+      );
     }
 
-    return pageNumbers;
-  };
+    items.push(
+      <PaginationItem key="next">
+        <PaginationNext
+          onClick={() => hasNextPage && onPageChange(currentPage + 1)}
+          className={
+            !hasNextPage
+              ? "pointer-events-none opacity-50"
+              : "hover:bg-orange-500"
+          }
+        />
+      </PaginationItem>
+    );
 
-  const pageNumbers = getPageNumbers();
+    return items;
+  };
 
   return (
     <Pagination>
-      <PaginationContent>
-        <PaginationItem>
-          <PaginationPrevious
-            onClick={() => onPageChange(currentPage - 1)}
-            className={
-              currentPage === 1
-                ? "pointer-events-none opacity-50"
-                : "hover:bg-orange-500"
-            }
-          />
-        </PaginationItem>
-
-        {pageNumbers.map((page, index) => {
-          if (page === "ellipsis-start" || page === "ellipsis-end") {
-            return (
-              <PaginationItem key={`ellipsis-${index}`}>
-                <PaginationEllipsis />
-              </PaginationItem>
-            );
-          }
-
-          return (
-            <PaginationItem key={`page-${page}`}>
-              <PaginationLink
-                isActive={currentPage === page}
-                onClick={() => onPageChange(page as number)}
-                className={
-                  currentPage === page
-                    ? "text-black bg-orange-500 border-orange-500 hover:bg-orange-600"
-                    : "text-white hover:bg-orange-500"
-                }
-              >
-                {page}
-              </PaginationLink>
-            </PaginationItem>
-          );
-        })}
-
-        <PaginationItem>
-          <PaginationNext
-            onClick={() => onPageChange(currentPage + 1)}
-            className={
-              currentPage === totalPages
-                ? "pointer-events-none opacity-50"
-                : "hover:bg-orange-500"
-            }
-          />
-        </PaginationItem>
-      </PaginationContent>
+      <PaginationContent>{renderPaginationItems()}</PaginationContent>
     </Pagination>
   );
 }

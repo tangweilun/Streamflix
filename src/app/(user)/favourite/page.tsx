@@ -93,6 +93,7 @@ const likedVideos = [
 ];
 
 const genres = [
+  "All",
   "Action",
   "Adventure",
   "Animation",
@@ -291,7 +292,14 @@ export default function LikedVideosPage() {
               </div>
 
               <div className="flex-1">
-                <h5 className="text-white">{video.title}</h5>
+                <Link
+                  href={`/watch/${video.id}`}
+                  className="hover:text-orange-500"
+                >
+                  <h3 className="font-medium text-sm line-clamp-2">
+                    {video.title}
+                  </h3>
+                </Link>
 
                 <span className="text-xs bg-gray-700 px-1.5 py-0.5 rounded">
                   {video.genre}
@@ -364,6 +372,7 @@ export default function LikedVideosPage() {
               setSelectedGenre("All");
               setFilter("all");
             }}
+            className="bg-orange-500 hover:bg-orange-600 border-orange-500"
           >
             Clear Filters
           </Button>

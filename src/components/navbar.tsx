@@ -15,6 +15,7 @@ import { Input } from "./ui/input";
 
 export default function Navbar() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   const router = useRouter();
@@ -33,7 +34,7 @@ export default function Navbar() {
         <div className="flex items-center">
           <Link
             href="/watch"
-            className="text-2xl font-bold text-orange-500 mr-8"
+            className="text-3xl font-bold text-orange-500 mr-8"
           >
             StreamFlix
           </Link>
@@ -86,7 +87,7 @@ export default function Navbar() {
             </button>
           )}
 
-          <DropdownMenu>
+          <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
             <DropdownMenuTrigger
               className="focus:outline-none focus:ring-0"
               asChild
@@ -107,24 +108,21 @@ export default function Navbar() {
             <DropdownMenuContent className="absolute w-48 mt-3 -right-6 bg-black border-black rounded-none shadow-lg py-1">
               <Link
                 href="/profile"
+                onClick={() => setDropdownOpen(false)}
                 className="block px-4 py-2 text-sm text-white hover:bg-orange-600 hover:text-black"
               >
                 Profile
               </Link>
               <Link
-                href="/account"
-                className="block px-4 py-2 text-sm text-white hover:bg-orange-600 hover:text-black"
-              >
-                Subscription
-              </Link>
-              <Link
                 href="/subscription"
+                onClick={() => setDropdownOpen(false)}
                 className="block px-4 py-2 text-sm text-white hover:bg-orange-600 hover:text-black"
               >
                 Subscription
               </Link>
               <Link
                 href="/logout"
+                onClick={() => setDropdownOpen(false)}
                 className="block px-4 py-2 text-sm text-white hover:bg-orange-600 hover:text-black"
               >
                 Sign out

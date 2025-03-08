@@ -1,6 +1,5 @@
 "use client";
 
-import type React from "react";
 import { useEffect, useState, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
@@ -8,7 +7,7 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Film, Tv, Loader2 } from "lucide-react";
-import { PaginationComponent } from "@/components/pagination";
+import { PaginationControl } from "@/components/pagination";
 
 interface SearchResult {
   id: string;
@@ -134,7 +133,6 @@ function SearchResultContent() {
         setPagination(pagination);
       } catch (error) {
         console.error("Search error:", error);
-        // Handle error state
       } finally {
         setIsLoading(false);
       }
@@ -180,7 +178,6 @@ function SearchResultContent() {
     setCurrentPage(page);
     performSearch(searchQuery, activeTab, page);
     updateUrl(searchQuery, activeTab, page);
-    // Scroll to top when changing pages
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -276,9 +273,11 @@ function SearchResultContent() {
 
             {pagination.totalPages > 1 && (
               <div className="mt-8">
-                <PaginationComponent
+                <PaginationControl
                   currentPage={pagination.currentPage}
                   totalPages={pagination.totalPages}
+                  hasNextPage={pagination.hasNextPage}
+                  hasPrevPage={pagination.hasPrevPage}
                   onPageChange={handlePageChange}
                 />
               </div>

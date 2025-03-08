@@ -31,7 +31,7 @@ interface Video {
   uploadedAt: string;
 }
 
-const fetchSeriesData = async (
+const fetchMoviesData = async (
   page = 1,
   pageSize = 12,
   genre = "All",
@@ -42,7 +42,7 @@ const fetchSeriesData = async (
 
   // Generate a large dataset for testing
   const allResults = [];
-  const totalItems = 20000; // Simulating 200 series
+  const totalItems = 20000; // Simulating 200 movies
 
   // Generate mock data
   for (let i = 1; i <= totalItems; i++) {
@@ -62,16 +62,16 @@ const fetchSeriesData = async (
     allResults.push(item);
   }
 
-  const allSeries = allResults.filter((item) => item.type === "series");
+  const allMovies = allResults.filter((item) => item.type === "movie");
 
   // Filter by genre if needed
-  let filteredSeries = allSeries;
+  let filteredMovies = allMovies;
   if (genre !== "All") {
-    filteredSeries = allSeries.filter((item) => item.genres.includes(genre));
+    filteredMovies = allMovies.filter((item) => item.genres.includes(genre));
   }
 
   // Sort the data
-  filteredSeries.sort((a, b) => {
+  filteredMovies.sort((a, b) => {
     if (sortBy === "dateAdded") {
       // Compare by the uploadedAt property as a Date
       return (
@@ -84,14 +84,14 @@ const fetchSeriesData = async (
   });
 
   // Calculate pagination
-  const totalResults = filteredSeries.length;
+  const totalResults = filteredMovies.length;
   const totalPages = Math.ceil(totalResults / pageSize);
   const startIndex = (page - 1) * pageSize;
   const endIndex = startIndex + pageSize;
-  const paginatedResults = filteredSeries.slice(startIndex, endIndex);
+  const paginatedResults = filteredMovies.slice(startIndex, endIndex);
 
   return {
-    series: paginatedResults,
+    movies: paginatedResults,
     pagination: {
       currentPage: page,
       totalPages,
@@ -126,14 +126,14 @@ const genres = [
   "Western",
 ];
 
-export default function SeriesVideosPage() {
+export default function MovieVideosPage() {
   const [sortBy, setSortBy] = useState("title");
   const [selectedGenre, setSelectedGenre] = useState("All");
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
 
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const [seriesData, setSeriesData] = useState<Video[]>([]);
+  const [moviesData, setMoviesData] = useState<Video[]>([]);
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
@@ -170,16 +170,16 @@ export default function SeriesVideosPage() {
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const { series, pagination } = await fetchSeriesData(
+      const { movies, pagination } = await fetchMoviesData(
         currentPage,
         12,
         selectedGenre,
         sortBy
       );
-      setSeriesData(series);
+      setMoviesData(movies);
       setPagination(pagination);
     } catch (error) {
-      console.error("Error fetching series data:", error);
+      console.error("Error fetching movies data:", error);
     } finally {
       setIsLoading(false);
     }
@@ -201,7 +201,7 @@ export default function SeriesVideosPage() {
     <div className="container mx-auto p-6 pt-10 min-h-screen bg-black">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-orange-500 mb-2">TV Series</h1>
+          <h1 className="text-3xl font-bold text-orange-500 mb-2">Movies</h1>
         </div>
       </div>
 
@@ -279,13 +279,13 @@ export default function SeriesVideosPage() {
       {isLoading ? (
         <div className="flex justify-center items-center py-20">
           <Loader2 className="h-8 w-8 text-orange-500 animate-spin mr-3" />
-          <span className="text-white text-lg">Loading series...</span>
+          <span className="text-white text-lg">Loading movies...</span>
         </div>
       ) : (
         <>
           {viewMode === "list" && (
             <div className="space-y-4">
-              {seriesData.map((video, index) => (
+              {moviesData.map((video, index) => (
                 <div
                   key={video.id}
                   className="flex gap-4 group p-2 rounded-lg hover:bg-gray-800 hover:shadow-lg transition duration-300"
@@ -336,7 +336,7 @@ export default function SeriesVideosPage() {
 
           {viewMode === "grid" && (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {seriesData.map((video) => (
+              {moviesData.map((video) => (
                 <div key={video.id} className="group">
                   <div className="relative">
                     <Link href={`/watch/${video.id}`}>
@@ -391,11 +391,11 @@ export default function SeriesVideosPage() {
             </div>
           )}
 
-          {seriesData.length === 0 && (
+          {moviesData.length === 0 && (
             <div className="text-center py-12">
               <div className="text-gray-500 text-6xl mb-4">📺</div>
               <h2 className="text-xl font-semibold text-white mb-2">
-                No TV series found
+                No movies found
               </h2>
               <p className="text-gray-400">
                 Try selecting a different genre or check back later for new
