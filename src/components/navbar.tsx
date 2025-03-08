@@ -1,5 +1,6 @@
 "use client";
 
+import type React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
@@ -10,6 +11,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "./ui/input";
 
 export default function Navbar() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -59,7 +61,7 @@ export default function Navbar() {
         <div className="flex items-center space-x-4">
           {isSearchOpen ? (
             <form onSubmit={handleSearchSubmit} className="relative animate-in">
-              <input
+              <Input
                 type="text"
                 placeholder="Search for movies, TV shows..."
                 value={searchQuery}
@@ -113,7 +115,7 @@ export default function Navbar() {
                 href="/account"
                 className="block px-4 py-2 text-sm text-white hover:bg-orange-600 hover:text-black"
               >
-                Account
+                Subscription
               </Link>
               <Link
                 href="/subscription"

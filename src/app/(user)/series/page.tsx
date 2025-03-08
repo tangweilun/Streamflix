@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/select";
 import { Search, LayoutGrid, List, Filter, Trash2 } from "lucide-react";
 
-const likedVideos = [
+const videos = [
   {
     id: 1,
     title: "Stranger Things Season 4 - Official Trailer",
@@ -115,7 +115,7 @@ const genres = [
   "Western",
 ];
 
-export default function LikedVideosPage() {
+export default function SeriesVideosPage() {
   const [filter, setFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("title");
@@ -123,26 +123,11 @@ export default function LikedVideosPage() {
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
 
   const filteredVideos = useMemo(() => {
-    return likedVideos
+    return videos
       .filter((video) => {
-        //video search function
-        if (
-          searchQuery &&
-          !video.title.toLowerCase().includes(searchQuery.toLowerCase())
-        ) {
-          return false;
-        }
-
         //genre filter function
         if (selectedGenre !== "All" && video.genre !== selectedGenre) {
           return false;
-        }
-
-        //content type filter(movies, series)
-        if (filter === "movies") {
-          return video.contentType === "Movie";
-        } else if (filter === "series") {
-          return video.contentType === "Series";
         }
 
         return true;
@@ -158,34 +143,15 @@ export default function LikedVideosPage() {
 
         return 0;
       });
-  }, [searchQuery, selectedGenre, filter, sortBy]);
+  }, [selectedGenre, sortBy]);
 
   return (
     <div className="container mx-auto p-6">
-      <div className="flex items-start gap-6 mb-8">
-        <div className="relative w-[280px] h-[157px] rounded-lg overflow-hidden bg-gray-800">
-          <Image
-            src={likedVideos[0]?.thumbnail || "/placeholder.svg"}
-            alt="Playlist thumbnail"
-            fill={true}
-            style={{ objectFit: "cover" }}
-          />
-        </div>
-
-        <div className="flex-1">
-          <h1 className="text-3xl font-bold mb-2">Liked Videos</h1>
-          <div className="text-gray-400 text-sm space-y-1">
-            <p>{likedVideos.length} videos</p>
-            <p>Last updated on {new Date().toLocaleDateString()}</p>
-          </div>
-        </div>
-      </div>
-
       <div className="flex flex-wrap gap-4 mb-6 items-center justify-between">
         <div className="relative flex-grow max-w-md">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
-            placeholder="Search in liked videos"
+            placeholder={`Search in liked videos ${filter}`}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 bg-gray-800 border-gray-700"
