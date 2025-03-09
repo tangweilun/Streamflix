@@ -21,7 +21,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import AdminNav from "@/components/AdminNav";
 import { Input } from "@/components/ui/input";
 
 interface User {
@@ -129,11 +128,12 @@ export default function UserManagement() {
   );
 
   return (
-    <div className="p-6 bg-black text-white min-h-screen">
-      <AdminNav />
-      <div className="max-w-6xl mx-auto pt-20">
+    <div className="bg-black text-white min-h-screen">
+      <div className="max-w-6xl mx-auto pt-10">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold">User Management</h1>
+          <h1 className="text-3xl font-bold text-orange-500">
+            User Management
+          </h1>
         </div>
 
         <div className="mb-4 relative">

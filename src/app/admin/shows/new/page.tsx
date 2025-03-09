@@ -14,7 +14,7 @@ import {
   Info,
   Layout,
 } from "lucide-react";
-import AdminNav from "@/components/AdminNav";
+import { Textarea } from "@/components/ui/textarea";
 
 type FormStep = "basic" | "media" | "cast" | "seasons" | "preview";
 
@@ -100,7 +100,7 @@ export default function NewShow() {
         return (
           <div className="space-y-6">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Show Title</label>
+              <label className="text-sm font-medium">Title</label>
               <input
                 type="text"
                 required
@@ -111,7 +111,7 @@ export default function NewShow() {
 
             <div className="space-y-2">
               <label className="text-sm font-medium">Description</label>
-              <textarea
+              <Textarea
                 required
                 rows={4}
                 className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
@@ -621,8 +621,7 @@ export default function NewShow() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <AdminNav />
-      <main className="container mx-auto px-6 py-8 pt-24">
+      <main className="container mx-auto px-6 py-8 pt-10">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <h1 className="text-3xl font-bold text-orange-500">Add New Show</h1>

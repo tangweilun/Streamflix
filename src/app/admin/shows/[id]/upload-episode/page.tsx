@@ -3,12 +3,11 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Upload, X } from "lucide-react";
-import AdminNav from "@/components/AdminNav";
 
 export default function UploadEpisode() {
   const router = useRouter();
-  const params = useParams(); // ✅ Correct way to get dynamic route params in client components
-  const { id } = params; // Extract show ID
+  const params = useParams();
+  const { id } = params;
 
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -66,17 +65,19 @@ export default function UploadEpisode() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <AdminNav />
-      <main className="container mx-auto px-6 py-8 pt-24">
+      <main className="container px-6 py-8 pt-10">
         <div className="max-w-2xl mx-auto">
           <h1 className="text-3xl font-bold text-orange-500 mb-8">
             Upload New Episode
           </h1>
+
           {!id && <p className="text-red-500 mb-4">Error: Invalid show ID.</p>}
           {error && <p className="text-red-500">{error}</p>}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Episode Title</label>
+              <label className="text-sm font-medium">
+                Episode Title<span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
                 required
@@ -85,31 +86,23 @@ export default function UploadEpisode() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Season Number</label>
-                <input
-                  type="number"
-                  min="1"
-                  required
-                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  placeholder="Season #"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Episode Number</label>
-                <input
-                  type="number"
-                  min="1"
-                  required
-                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  placeholder="Episode #"
-                />
-              </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">
+                Episode Number<span className="text-red-500">*</span>
+              </label>
+              <input
+                type="number"
+                min="1"
+                required
+                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                placeholder="Episode #"
+              />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Episode Description</label>
+              <label className="text-sm font-medium">
+                Episode Description<span className="text-red-500">*</span>
+              </label>
               <textarea
                 required
                 rows={4}
@@ -119,7 +112,9 @@ export default function UploadEpisode() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Video File</label>
+              <label className="text-sm font-medium">
+                Video File<span className="text-red-500">*</span>
+              </label>
               <div className="flex items-center justify-center w-full">
                 <label className="relative flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-orange-500">
                   {selectedFile ? (

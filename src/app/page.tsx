@@ -1,4 +1,4 @@
-import { AuthBarWithSignInButton } from "@/components/navbar/auth-navbar-sign-in";
+import { AuthBarWithSignInButton } from "@/components/auth-navbar/auth-navbar-sign-in";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";

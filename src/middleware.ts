@@ -18,16 +18,6 @@ function isTokenExpired(token: string): boolean {
   }
 }
 
-function getIsAdmin(token: string): boolean {
-  try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    return payload.role === "Admin";
-  } catch (error) {
-    console.error("Invalid token:", error);
-    return false;
-  }
-}
-
 export default async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
   const isProtectedRoute = protectedRoutes.includes(path);
@@ -47,14 +37,8 @@ export default async function middleware(req: NextRequest) {
   }
 
   if (isPublicRoute && token) {
-    const isAdmin = getIsAdmin(token);
-    if (isAdmin && path !== "/admin") {
-      console.log("Admin user detected, redirecting to /admin");
-      return NextResponse.redirect(new URL("/admin/dashboard", req.nextUrl));
-    } else {
-      console.log("User already signed in, redirecting to /dashboard");
-      return NextResponse.redirect(new URL("/dashboard", req.nextUrl));
-    }
+    console.log("User already signed in, redirecting to /dashboard");
+    return NextResponse.redirect(new URL("/dashboard", req.nextUrl));
   }
 
   return NextResponse.next();

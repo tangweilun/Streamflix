@@ -16,7 +16,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="flex flex-col min-h-screen">
+      <body className="flex flex-col min-h-screen overflow-y-hidden">
         <Providers>{children}</Providers>
         <ToastContainer position="bottom-right" theme="light" />
 

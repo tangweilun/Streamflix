@@ -19,8 +19,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { AuthBarWithSignInButton } from "@/components/navbar/auth-navbar-sign-in";
 import { logout } from "@/lib/action";
+import { AuthBarWithSignInButton } from "@/components/auth-navbar/auth-navbar-sign-in";
 
 //  Define schema for password validation
 const passwordSchema = z.object({

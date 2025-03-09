@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
-import { AuthNavBarWithRegisterButton } from "@/components/navbar/auth-navbar-register";
+import { AuthNavBarWithRegisterButton } from "@/components/auth-navbar/auth-navbar-register";
 import { toast } from "react-toastify";
 import { useMutation } from "@tanstack/react-query";
 import { storeToken } from "@/lib/action";
