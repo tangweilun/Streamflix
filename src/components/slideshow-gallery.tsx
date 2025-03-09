@@ -63,7 +63,7 @@ export function FeaturedSlideshow({
     return null;
   }
 
-  const currentItem = items[currentIndex];
+  //const currentItem = items[currentIndex];
 
   return (
     <div

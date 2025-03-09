@@ -3,7 +3,7 @@
 import type React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { logout } from "@/lib/action";
+//import { logout } from "@/lib/action";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search, ChevronDown, X } from "lucide-react";
