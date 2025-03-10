@@ -1,6 +1,9 @@
+"use client";
+
 import type React from "react";
 import Link from "next/link";
 import { LayoutDashboard, Film, Users, Upload, LogOut } from "lucide-react";
+import { logout } from "@/lib/action";
 
 export default function AdminLayout({
   children,
@@ -53,7 +56,8 @@ export default function AdminLayout({
         <div className="absolute bottom-0 left-0 w-64 p-4 border-t border-gray-800">
           <div className="space-y-1">
             <Link
-              href="/logout"
+              href="/sign-in"
+              onClick={() => logout()}
               className="flex items-center px-4 py-3 text-white hover:bg-gray-800 rounded-md"
             >
               <LogOut className="mr-3 h-5 w-5 text-orange-500" />

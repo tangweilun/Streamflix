@@ -5,7 +5,6 @@ import { redirect } from "next/navigation";
 
 export async function logout() {
   await deleteToken();
-  redirect("/sign-in");
 }
 
 export async function storeToken(token: string): Promise<void> {

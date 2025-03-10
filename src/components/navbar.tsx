@@ -122,7 +122,8 @@ export default function Navbar() {
               >
                 Subscription
               </Link>
-              <Button
+              <Link
+                href="/sign-in"
                 onClick={() => {
                   setDropdownOpen(false);
                   logout();
@@ -130,7 +131,7 @@ export default function Navbar() {
                 className="block px-4 py-2 text-sm text-white hover:bg-orange-600 hover:text-black"
               >
                 Sign out
-              </Button>
+              </Link>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
