@@ -90,7 +90,7 @@ export default function RegisterPage() {
     onSuccess: (data) => {
       storeToken(data.token);
       toast.success("Registration successful!");
-      router.push("/dashboard");
+      router.push("/subscription");
     },
     onError: (error: unknown) => {
       if (error instanceof Error) {
