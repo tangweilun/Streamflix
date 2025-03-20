@@ -13,7 +13,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "./ui/input";
-import { Button } from "./ui/button";
 
 export default function Navbar() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
