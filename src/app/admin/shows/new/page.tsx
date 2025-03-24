@@ -2,13 +2,6 @@
 
 import type React from "react"
 
-<<<<<<< HEAD
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import Image from "next/image"
-import { X, Plus, ChevronRight, ImageIcon, Users, Info, Layout, AlertCircle } from "lucide-react"
-import AdminNav from "@/components/AdminNav"
-=======
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -20,9 +13,9 @@ import {
   Users,
   Info,
   Layout,
+  AlertCircle,
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
->>>>>>> 374a3c103f96f147112fec0abe1463503edfbf84
 
 type FormStep = "basic" | "media" | "cast" | "seasons" | "preview"
 
@@ -198,14 +191,7 @@ export default function NewShow() {
 
             <div className="space-y-2">
               <label className="text-sm font-medium">Description</label>
-<<<<<<< HEAD
-              <textarea
-                name="description"
-                value={showData.description}
-                onChange={handleInputChange}
-=======
               <Textarea
->>>>>>> 374a3c103f96f147112fec0abe1463503edfbf84
                 required
                 rows={4}
                 className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"

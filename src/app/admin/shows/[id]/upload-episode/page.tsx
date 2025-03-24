@@ -1,13 +1,8 @@
 "use client"
 
-import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { Upload, X } from "lucide-react";
-
-export default function UploadEpisode() {
-  const router = useRouter();
-  const params = useParams();
-  const { id } = params;
+import { useState } from "react"
+import { useParams, useRouter } from "next/navigation"
+import { Upload, X } from "lucide-react"
 
 export default function UploadEpisode({ params }: { params: { id: string } }) {
   const router = useRouter()
@@ -22,7 +17,6 @@ export default function UploadEpisode({ params }: { params: { id: string } }) {
     episodeNumber: 1,
     description: "",
   })
-  const [showTitle, setShowTitle] = useState("")
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -58,14 +52,12 @@ export default function UploadEpisode({ params }: { params: { id: string } }) {
         throw new Error("Please select a video file to upload")
       }
 
-      // Create FormData for the API request
       const formData = new FormData()
-      formData.append("bucketName", "streamflixtest") // Replace with your actual bucket name
+      formData.append("bucketName", "streamflixtest") // Replace with actual bucket name
       formData.append("showId", params.id)
       formData.append("episodeNumber", episodeData.episodeNumber.toString())
       formData.append("file", selectedFile)
 
-      // Call the API to upload the episode
       const response = await fetch("/api/Files/upload-episode", {
         method: "POST",
         body: formData,
@@ -76,11 +68,9 @@ export default function UploadEpisode({ params }: { params: { id: string } }) {
         throw new Error(errorData.message || "Failed to upload episode")
       }
 
-      // Complete the progress
       setUploadProgress(100)
       setSuccess(`Episode ${episodeData.episodeNumber} uploaded successfully!`)
 
-      // Redirect after a short delay
       setTimeout(() => {
         router.push(`/admin/shows/${params.id}`)
       }, 2000)
@@ -101,7 +91,7 @@ export default function UploadEpisode({ params }: { params: { id: string } }) {
             Upload New Episode
           </h1>
 
-          {!id && <p className="text-red-500 mb-4">Error: Invalid show ID.</p>}
+          {!params.id && <p className="text-red-500 mb-4">Error: Invalid show ID.</p>}
           {error && <p className="text-red-500">{error}</p>}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
@@ -125,7 +115,10 @@ export default function UploadEpisode({ params }: { params: { id: string } }) {
               </label>
               <input
                 type="number"
+                name="episodeNumber"
                 min="1"
+                value={episodeData.episodeNumber}
+                onChange={handleInputChange}
                 required
                 className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
                 placeholder="Episode #"
@@ -193,16 +186,6 @@ export default function UploadEpisode({ params }: { params: { id: string } }) {
               </div>
             )}
 
-            <div className="bg-gray-800 p-4 rounded-md">
-              <h4 className="font-medium mb-2">API Integration Information</h4>
-              <p className="text-sm text-gray-400">When you submit this form, the following will happen:</p>
-              <ul className="list-disc list-inside text-sm text-gray-400 mt-2 space-y-1">
-                <li>The video file will be uploaded to Amazon S3 in the show's episodes folder</li>
-                <li>The file will be named according to the episode number</li>
-                <li>You'll be redirected to the show details page after successful upload</li>
-              </ul>
-            </div>
-
             <button
               type="submit"
               disabled={uploading || !selectedFile}
@@ -215,5 +198,4 @@ export default function UploadEpisode({ params }: { params: { id: string } }) {
       </main>
     </div>
   )
-}
 }
