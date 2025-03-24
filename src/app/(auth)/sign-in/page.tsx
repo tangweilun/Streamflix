@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
-import { AuthNavBarWithRegisterButton } from "@/components/navbar/auth-navbar-register";
+import { AuthNavBarWithRegisterButton } from "@/components/auth-navbar/auth-navbar-register";
 import { toast } from "react-toastify";
 import { useMutation } from "@tanstack/react-query";
 import { storeToken } from "@/lib/action";
@@ -43,7 +43,7 @@ const forgotPasswordSchema = z.object({
 
 async function loginUser(data: z.infer<typeof loginSchema>) {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/Auth/login`,
+    `${process.env.NEXT_PUBLIC_API_URL}/auth/login`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -68,7 +68,7 @@ async function loginUser(data: z.infer<typeof loginSchema>) {
 
 async function requestPasswordReset(email: string) {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/Auth/forgot-password`,
+    `${process.env.NEXT_PUBLIC_API_URL}/auth/forgot-password`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },

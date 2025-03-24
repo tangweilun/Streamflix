@@ -19,7 +19,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { AuthBarWithSignInButton } from "@/components/navbar/auth-navbar-sign-in";
+import { logout } from "@/lib/action";
+import { AuthBarWithSignInButton } from "@/components/auth-navbar/auth-navbar-sign-in";
 
 //  Define schema for password validation
 const passwordSchema = z.object({
@@ -32,14 +33,14 @@ const passwordSchema = z.object({
 // Reset Password API Function
 async function resetPassword(data: { token: string; password: string }) {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/Auth/reset-password`,
+    `${process.env.NEXT_PUBLIC_API_URL}/auth/reset-password`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     }
   );
-
+  logout();
   if (!response.ok) {
     const text = await response.text();
     try {

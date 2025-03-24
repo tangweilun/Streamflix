@@ -1,11 +1,13 @@
 "use client"
 
-import type React from "react"
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { Upload, X } from "lucide-react";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Upload, X, AlertCircle } from "lucide-react"
-import AdminNav from "@/components/AdminNav"
+export default function UploadEpisode() {
+  const router = useRouter();
+  const params = useParams();
+  const { id } = params;
 
 export default function UploadEpisode({ params }: { params: { id: string } }) {
   const router = useRouter()
@@ -93,39 +95,19 @@ export default function UploadEpisode({ params }: { params: { id: string } }) {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <AdminNav />
-      <main className="container mx-auto px-6 py-8 pt-24">
+      <main className="container px-6 py-8 pt-10">
         <div className="max-w-2xl mx-auto">
-          <h1 className="text-3xl font-bold text-orange-500 mb-8">Upload New Episode</h1>
+          <h1 className="text-3xl font-bold text-orange-500 mb-8">
+            Upload New Episode
+          </h1>
 
-          {error && (
-            <div className="mb-6 bg-red-900/50 border border-red-500 text-white p-4 rounded-md flex items-start">
-              <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
-              <p>{error}</p>
-            </div>
-          )}
-
-          {success && (
-            <div className="mb-6 bg-green-900/50 border border-green-500 text-white p-4 rounded-md">
-              <p>{success}</p>
-            </div>
-          )}
-
+          {!id && <p className="text-red-500 mb-4">Error: Invalid show ID.</p>}
+          {error && <p className="text-red-500">{error}</p>}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Show Title</label>
-              <input
-                type="text"
-                value={showTitle}
-                onChange={(e) => setShowTitle(e.target.value)}
-                required
-                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                placeholder="Enter show title"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Episode Title</label>
+              <label className="text-sm font-medium">
+                Episode Title<span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
                 name="title"
@@ -137,37 +119,23 @@ export default function UploadEpisode({ params }: { params: { id: string } }) {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Season Number</label>
-                <input
-                  type="number"
-                  name="seasonNumber"
-                  value={episodeData.seasonNumber}
-                  onChange={handleInputChange}
-                  min="1"
-                  required
-                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  placeholder="Season #"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Episode Number</label>
-                <input
-                  type="number"
-                  name="episodeNumber"
-                  value={episodeData.episodeNumber}
-                  onChange={handleInputChange}
-                  min="1"
-                  required
-                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  placeholder="Episode #"
-                />
-              </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">
+                Episode Number<span className="text-red-500">*</span>
+              </label>
+              <input
+                type="number"
+                min="1"
+                required
+                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                placeholder="Episode #"
+              />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Episode Description</label>
+              <label className="text-sm font-medium">
+                Episode Description<span className="text-red-500">*</span>
+              </label>
               <textarea
                 name="description"
                 value={episodeData.description}
@@ -180,7 +148,9 @@ export default function UploadEpisode({ params }: { params: { id: string } }) {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Video File</label>
+              <label className="text-sm font-medium">
+                Video File<span className="text-red-500">*</span>
+              </label>
               <div className="flex items-center justify-center w-full">
                 <label className="relative flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-orange-500">
                   {selectedFile ? (
@@ -246,4 +216,4 @@ export default function UploadEpisode({ params }: { params: { id: string } }) {
     </div>
   )
 }
-
+}
