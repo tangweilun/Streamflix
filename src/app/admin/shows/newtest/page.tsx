@@ -6,41 +6,47 @@ export default function CreateShow() {
   const [title, setTitle] = useState("");
   const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [message, setMessage] = useState("");
-  const [imageName, setImageName] = useState(""); // Store image name
+  const [imageName, setImageName] = useState(""); 
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       const file = event.target.files[0];
       setThumbnail(file);
-      setImageName(file.name); // Set image name
+      setImageName(file.name);
     }
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
+  
     if (!title || !thumbnail) {
       setMessage("Title and thumbnail are required.");
       return;
     }
-
+  
     const formData = new FormData();
-    formData.append("showId", title);
-    formData.append("thumbnail", thumbnail);
-
+    formData.append("showId", title); // Must match backend parameter name
+    formData.append("thumbnail", thumbnail); // Must match backend parameter name
+  
     try {
-      const response = await fetch("http://localhost:5000/api/files/create-show?bucketName=streamflixtest", {
-        method: "POST",
-        body: formData,
-      });
-
+      const response = await fetch(
+        `https://localhost:7230/api/files/create-show?bucketName=streamflixtest`, // BucketName stays in query
+        {
+          method: "POST",
+          body: formData,
+          mode: "cors",
+        }
+      );
+  
+      if (!response.ok) throw new Error(await response.text());
+  
       const result = await response.text();
-      setMessage(result);
-    } catch (error) {
-      setMessage("Error creating show.");
+      setMessage(`Success: ${result}`);
+    } catch (error: unknown) {
+      setMessage(error instanceof Error ? `Error: ${error.message}` : "An unknown error occurred.");
     }
   };
-
+  
   return (
     <div className="p-4 max-w-md mx-auto">
       <h1 className="text-xl font-bold mb-4">Create Show</h1>
@@ -57,9 +63,8 @@ export default function CreateShow() {
           accept="image/*"
           onChange={handleFileChange}
           className="border p-2 w-full"
-          key={thumbnail ? thumbnail.name : "file-input"}
         />
-        {imageName && <p className="text-sm text-gray-600">Selected file: {imageName}</p>} {/* Display image name */}
+        {imageName && <p className="text-sm text-gray-600">Selected file: {imageName}</p>}
         <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
           Create Show
         </button>

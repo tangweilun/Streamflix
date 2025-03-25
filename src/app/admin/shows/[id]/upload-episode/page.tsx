@@ -1,201 +1,76 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useParams, useRouter } from "next/navigation"
-import { Upload, X } from "lucide-react"
+import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 
-export default function UploadEpisode({ params }: { params: { id: string } }) {
-  const router = useRouter()
-  const [uploading, setUploading] = useState(false)
-  const [uploadProgress, setUploadProgress] = useState(0)
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
-  const [episodeData, setEpisodeData] = useState({
-    title: "",
-    seasonNumber: 1,
-    episodeNumber: 1,
-    description: "",
-  })
+export default function UploadEpisodePage() {
+  const searchParams = useSearchParams();
+  const showId = searchParams.get("showId") || "";
+  const folderName = searchParams.get("folderName") || "Unknown Show";
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setEpisodeData((prev) => ({ ...prev, [name]: value }))
-  }
+  const [episodeNumber, setEpisodeNumber] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [message, setMessage] = useState("");
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setSelectedFile(file)
+  const handleUpload = async () => {
+    if (!file || !episodeNumber) {
+      setMessage("Please select a file and enter an episode number.");
+      return;
     }
-  }
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setUploading(true)
-    setError(null)
-    setSuccess(null)
-
-    // Start progress simulation
-    const interval = setInterval(() => {
-      setUploadProgress((prev) => {
-        if (prev >= 95) {
-          clearInterval(interval)
-          return 95 // Hold at 95% until actual completion
-        }
-        return prev + 5
-      })
-    }, 500)
+    const formData = new FormData();
+    formData.append("bucketName", "your-s3-bucket-name"); // Change this!
+    formData.append("showId", showId);
+    formData.append("episodeNumber", episodeNumber);
+    formData.append("file", file);
 
     try {
-      if (!selectedFile) {
-        throw new Error("Please select a video file to upload")
-      }
-
-      const formData = new FormData()
-      formData.append("bucketName", "streamflixtest") // Replace with actual bucket name
-      formData.append("showId", params.id)
-      formData.append("episodeNumber", episodeData.episodeNumber.toString())
-      formData.append("file", selectedFile)
-
-      const response = await fetch("/api/Files/upload-episode", {
+      const res = await fetch("http://your-api-url/upload-episode", {
         method: "POST",
         body: formData,
-      })
+      });
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || "Failed to upload episode")
-      }
-
-      setUploadProgress(100)
-      setSuccess(`Episode ${episodeData.episodeNumber} uploaded successfully!`)
-
-      setTimeout(() => {
-        router.push(`/admin/shows/${params.id}`)
-      }, 2000)
-    } catch (err) {
-      console.error("Error uploading episode:", err)
-      setError(err instanceof Error ? err.message : "An unknown error occurred")
-    } finally {
-      clearInterval(interval)
-      setUploading(false)
+      const data = await res.text();
+      setMessage(data);
+    } catch (error) {
+      console.error("Upload error:", error);
+      setMessage("Upload failed.");
     }
-  }
+  };
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <main className="container px-6 py-8 pt-10">
-        <div className="max-w-2xl mx-auto">
-          <h1 className="text-3xl font-bold text-orange-500 mb-8">
-            Upload New Episode
-          </h1>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold text-orange-500">
+        Upload Episode for {folderName}
+      </h1>
 
-          {!params.id && <p className="text-red-500 mb-4">Error: Invalid show ID.</p>}
-          {error && <p className="text-red-500">{error}</p>}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">
-                Episode Title<span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="title"
-                value={episodeData.title}
-                onChange={handleInputChange}
-                required
-                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                placeholder="Enter episode title"
-              />
-            </div>
+      <div className="mt-4">
+        <label className="block text-sm font-medium text-gray-300">Episode Number:</label>
+        <input
+          type="number"
+          className="w-full p-2 mt-1 bg-gray-800 text-white rounded-md"
+          value={episodeNumber}
+          onChange={(e) => setEpisodeNumber(e.target.value)}
+        />
+      </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">
-                Episode Number<span className="text-red-500">*</span>
-              </label>
-              <input
-                type="number"
-                name="episodeNumber"
-                min="1"
-                value={episodeData.episodeNumber}
-                onChange={handleInputChange}
-                required
-                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                placeholder="Episode #"
-              />
-            </div>
+      <div className="mt-4">
+        <label className="block text-sm font-medium text-gray-300">Select File:</label>
+        <input
+          type="file"
+          className="w-full p-2 mt-1 bg-gray-800 text-white rounded-md"
+          onChange={(e) => setFile(e.target.files?.[0] || null)}
+        />
+      </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">
-                Episode Description<span className="text-red-500">*</span>
-              </label>
-              <textarea
-                name="description"
-                value={episodeData.description}
-                onChange={handleInputChange}
-                required
-                rows={4}
-                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                placeholder="Enter episode description"
-              />
-            </div>
+      <button
+        className="mt-4 px-4 py-2 bg-orange-600 text-black rounded-md hover:bg-orange-500 transition-colors"
+        onClick={handleUpload}
+      >
+        Upload
+      </button>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">
-                Video File<span className="text-red-500">*</span>
-              </label>
-              <div className="flex items-center justify-center w-full">
-                <label className="relative flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-orange-500">
-                  {selectedFile ? (
-                    <div className="flex items-center justify-between w-full px-4">
-                      <span className="text-sm truncate">{selectedFile.name}</span>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedFile(null)}
-                        className="p-1 hover:bg-gray-700 rounded-full"
-                      >
-                        <X className="w-5 h-5" />
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                      <Upload className="w-8 h-8 mb-4 text-gray-500" />
-                      <p className="text-sm text-gray-500">
-                        <span className="font-semibold">Click to upload</span> or drag and drop
-                      </p>
-                      <p className="text-xs text-gray-500">MP4, WebM or MKV (MAX. 4GB)</p>
-                    </div>
-                  )}
-                  <input type="file" className="hidden" accept="video/*" onChange={handleFileSelect} />
-                </label>
-              </div>
-            </div>
-
-            {uploading && (
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Upload progress</span>
-                  <span>{uploadProgress}%</span>
-                </div>
-                <div className="w-full bg-gray-800 rounded-full h-2">
-                  <div
-                    className="bg-orange-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${uploadProgress}%` }}
-                  />
-                </div>
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={uploading || !selectedFile}
-              className="w-full px-4 py-2 bg-orange-600 text-black rounded-md hover:bg-orange-500 transition-colors disabled:bg-orange-800 disabled:cursor-not-allowed"
-            >
-              {uploading ? "Uploading..." : "Upload Episode"}
-            </button>
-          </form>
-        </div>
-      </main>
+      {message && <p className="mt-4 text-sm text-white">{message}</p>}
     </div>
-  )
+  );
 }

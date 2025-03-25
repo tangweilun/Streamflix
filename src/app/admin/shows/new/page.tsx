@@ -6,7 +6,6 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { X, Plus, ChevronRight, ImageIcon, Users, Info, Layout, AlertCircle } from "lucide-react"
-import AdminNav from "@/components/AdminNav"
 
 type FormStep = "basic" | "media" | "cast" | "seasons" | "preview"
 
@@ -710,7 +709,6 @@ export default function NewShow() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <AdminNav />
       <main className="container mx-auto px-6 py-8 pt-24">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between mb-8">
