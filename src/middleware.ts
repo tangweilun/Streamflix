@@ -37,7 +37,7 @@ export default async function middleware(req: NextRequest) {
   }
 
   if (isPublicRoute && token) {
-    console.log("User already signed in, redirecting to /dashboard");
+    console.log("User already signed in. Redirecting to /dashboard");
     return NextResponse.redirect(new URL("/dashboard", req.nextUrl));
   }
 

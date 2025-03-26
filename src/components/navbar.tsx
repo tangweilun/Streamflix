@@ -3,7 +3,7 @@
 import type React from "react";
 import Link from "next/link";
 import Image from "next/image";
-//import { logout } from "@/lib/action";
+import { logout } from "@/lib/action";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search, ChevronDown, X } from "lucide-react";
@@ -122,8 +122,11 @@ export default function Navbar() {
                 Subscription
               </Link>
               <Link
-                href="/logout"
-                onClick={() => setDropdownOpen(false)}
+                href="/sign-in"
+                onClick={() => {
+                  setDropdownOpen(false);
+                  logout();
+                }}
                 className="block px-4 py-2 text-sm text-white hover:bg-orange-600 hover:text-black"
               >
                 Sign out

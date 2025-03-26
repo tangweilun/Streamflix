@@ -162,7 +162,7 @@ export default function SignInPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-black/75" />
 
         {/* Content */}
-        <Card className="w-full max-w-md relative z-10 bg-black border border-gray-800 rounded-lg shadow-md opacity-85">
+        <Card className="w-full max-w-md relative z-10 bg-black border border-gray-800 rounded-lg shadow-md">
           <CardHeader className="space-y-1 px-4 sm:px-6 pt-6 sm:pt-8">
             <h2 className="text-2xl font-bold text-center text-white">
               Sign In

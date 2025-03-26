@@ -34,7 +34,7 @@ interface User {
 // Fetch all users
 const fetchUsers = async (): Promise<User[]> => {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/admin/fetchAllUsers`,
+    `${process.env.NEXT_PUBLIC_API_URL}/admin/fetch-all-users`,
     {
       method: "GET",
       headers: { "Content-Type": "application/json" },
@@ -68,7 +68,7 @@ export default function UserManagement() {
       isAdmin: boolean;
     }) => {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/updateUserRole/${userId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/admin/update-user-role/${userId}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -97,7 +97,7 @@ export default function UserManagement() {
   const deleteMutation = useMutation({
     mutationFn: async (userId: string) => {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/deleteUser/${userId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/admin/delete-user/${userId}`,
         {
           method: "DELETE",
           credentials: "include",
