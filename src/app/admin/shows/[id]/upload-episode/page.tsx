@@ -2,46 +2,59 @@
 
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 export default function UploadEpisodePage() {
   const searchParams = useSearchParams();
-  const showId = searchParams.get("showId") || "";
-  const folderName = searchParams.get("folderName") || "Unknown Show";
+  const showTitle = searchParams.get("folderName") || "Unknown Show"; // Using folderName as showTitle
 
   const [episodeNumber, setEpisodeNumber] = useState("");
   const [file, setFile] = useState<File | null>(null);
-  const [message, setMessage] = useState("");
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isUploading, setIsUploading] = useState(false);
 
-  const handleUpload = async () => {
-    if (!file || !episodeNumber) {
-      setMessage("Please select a file and enter an episode number.");
-      return;
-    }
+  // Mutation for handling file upload
+  const uploadMutation = useMutation({
+    mutationFn: async () => {
+      if (!file || !episodeNumber) {
+        throw new Error("Please select a file and enter an episode number.");
+      }
 
-    const formData = new FormData();
-    formData.append("bucketName", "your-s3-bucket-name"); // Change this!
-    formData.append("showId", showId);
-    formData.append("episodeNumber", episodeNumber);
-    formData.append("file", file);
+      setIsUploading(true);
+      setUploadProgress(0);
 
-    try {
-      const res = await fetch("http://your-api-url/upload-episode", {
+      const formData = new FormData();
+      formData.append("bucketName", "streamflixtest");
+      formData.append("showTitle", showTitle);
+      formData.append("episodeNumber", episodeNumber);
+      formData.append("file", file);
+
+      const response = await fetch("https://localhost:7230/api/files/upload-episode", {
         method: "POST",
         body: formData,
+        headers: { "X-Requested-With": "XMLHttpRequest" },
       });
 
-      const data = await res.text();
-      setMessage(data);
-    } catch (error) {
-      console.error("Upload error:", error);
-      setMessage("Upload failed.");
-    }
-  };
+      if (!response.ok) throw new Error("Upload failed.");
+
+      return response.text();
+    },
+    onSuccess: (data) => {
+      toast.success("Upload successful!");
+      setUploadProgress(100);
+      setIsUploading(false);
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : "Upload failed.");
+      setIsUploading(false);
+    },
+  });
 
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold text-orange-500">
-        Upload Episode for {folderName}
+        Upload Episode for {showTitle}
       </h1>
 
       <div className="mt-4">
@@ -51,6 +64,7 @@ export default function UploadEpisodePage() {
           className="w-full p-2 mt-1 bg-gray-800 text-white rounded-md"
           value={episodeNumber}
           onChange={(e) => setEpisodeNumber(e.target.value)}
+          disabled={isUploading}
         />
       </div>
 
@@ -60,17 +74,32 @@ export default function UploadEpisodePage() {
           type="file"
           className="w-full p-2 mt-1 bg-gray-800 text-white rounded-md"
           onChange={(e) => setFile(e.target.files?.[0] || null)}
+          disabled={isUploading}
         />
       </div>
 
       <button
-        className="mt-4 px-4 py-2 bg-orange-600 text-black rounded-md hover:bg-orange-500 transition-colors"
-        onClick={handleUpload}
+        className={`mt-4 px-4 py-2 rounded-md transition-colors flex items-center justify-center ${
+          isUploading ? "bg-gray-500" : "bg-orange-600 hover:bg-orange-500"
+        } text-black`}
+        onClick={() => uploadMutation.mutate()}
+        disabled={isUploading}
       >
-        Upload
+        {isUploading ? (
+          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+        ) : (
+          "Upload"
+        )}
       </button>
 
-      {message && <p className="mt-4 text-sm text-white">{message}</p>}
+      {isUploading && (
+        <div className="w-full bg-gray-700 mt-4 rounded-md">
+          <div
+            className="h-2 bg-orange-500 rounded-md"
+            style={{ width: `${uploadProgress}%` }}
+          ></div>
+        </div>
+      )}
     </div>
   );
 }
