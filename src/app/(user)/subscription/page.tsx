@@ -10,55 +10,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Check, Loader2 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { Check } from "lucide-react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/skeleton";
 
 interface Plan {
+  id: string;
   planName: string;
   price: number;
   featuresJson: string;
   quality: string;
   maxStreams: number;
 }
-
-// const plans = [
-//   {
-//     name: "Basic",
-//     price: "RM35.99",
-//     features: [
-//       "Watch on 1 screen at a time",
-//       "Unlimited movies and TV shows.",
-//       "Watch on your laptop, TV, phone, and tablet.",
-//       "Cancel anytime.",
-//     ],
-//     quality: "Good",
-//   },
-//   {
-//     name: "Standard",
-//     price: "RM55.99",
-//     features: [
-//       "Watch on 2 screens at a time",
-//       "Unlimited movies and TV shows.",
-//       "Full HD (1080p)",
-//       "Watch on your laptop, TV, phone, and tablet.",
-//       "Cancel anytime.",
-//     ],
-//     quality: "Better",
-//   },
-//   {
-//     name: "Premium",
-//     price: "RM79.99",
-//     features: [
-//       "Watch on 5 screens at a time",
-//       "Unlimited movies and TV shows.",
-//       "Ultra HD (4K) and HDR",
-//       "Watch on your laptop, TV, phone, and tablet.",
-//       "Cancel anytime.",
-//     ],
-//     quality: "Best",
-//   },
-// ];
 
 const fetchSubscriptionPlans = async (): Promise<Plan[]> => {
   try {
@@ -93,7 +56,42 @@ export default function SubscriptionPage() {
     queryFn: fetchSubscriptionPlans,
   });
 
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const subscriptionMutation = useMutation({
+    mutationFn: async ({
+      userId,
+      planId,
+    }: {
+      userId: string;
+      planId: string;
+    }) => {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/subscription/subscribe`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ userId, planId }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to process checkout session.");
+      }
+
+      return response.text();
+    },
+
+    onSuccess: (sessionUrl) => {
+      window.location.href = sessionUrl;
+    },
+  });
+
+  const [selectedPlanName, setSelectedPlanName] = useState<string | null>(null);
+
+  // Get the full plan object to pass to the body of api call
+  const selectedPlanObj = plans?.find(
+    (plan) => plan.planName === selectedPlanName
+  );
 
   return (
     <div className="min-h-screen bg-black py-12 px-4 sm:px-6 lg:px-8">
@@ -159,7 +157,7 @@ export default function SubscriptionPage() {
                   <Card
                     key={plan.planName}
                     className={`flex flex-col justify-between bg-gray-900 border-2 ${
-                      selectedPlan === plan.planName
+                      selectedPlanName === plan.planName
                         ? "border-orange-700"
                         : "border-gray-700"
                     }`}
@@ -196,13 +194,13 @@ export default function SubscriptionPage() {
                     <CardFooter>
                       <Button
                         className={`w-full ${
-                          selectedPlan === plan.planName
+                          selectedPlanName === plan.planName
                             ? "bg-orange-700 hover:bg-orange-700"
                             : "bg-orange-600 hover:bg-orange-700"
                         }`}
-                        onClick={() => setSelectedPlan(plan.planName)}
+                        onClick={() => setSelectedPlanName(plan.planName)}
                       >
-                        {selectedPlan === plan.planName
+                        {selectedPlanName === plan.planName
                           ? "Selected"
                           : "Select Plan"}
                       </Button>
@@ -212,17 +210,17 @@ export default function SubscriptionPage() {
               })}
         </div>
 
-        {selectedPlan && !isLoading && (
+        {selectedPlanName && !isLoading && (
           <div className="mt-10 text-center">
-            <Button className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 text-lg font-semibold">
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                `Continue with ${selectedPlan} Plan`
-              )}
+            <Button
+              className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 text-lg font-semibold"
+              onClick={() => {
+                if (selectedPlanObj) {
+                  subscriptionMutation.mutate({});
+                }
+              }}
+            >
+              Continue with {selectedPlanName} Plan
             </Button>
           </div>
         )}

@@ -90,7 +90,7 @@ export default function RegisterPage() {
     onSuccess: (data) => {
       storeToken(data.token);
       toast.success("Registration successful!");
-      router.push("/dashboard");
+      router.push("/subscription");
     },
     onError: (error: unknown) => {
       if (error instanceof Error) {
@@ -117,7 +117,7 @@ export default function RegisterPage() {
         <div className="absolute inset-0 bg-[url('/images/netflix-background-home.jpg')] bg-cover bg-center bg-no-repeat brightness-200" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-black/75" />
 
-        <Card className="w-full max-w-4xl relative z-10 bg-black border border-gray-800 rounded-lg shadow-md opacity-85">
+        <Card className="w-full max-w-4xl relative z-10 bg-black border border-gray-800 rounded-lg shadow-md">
           <CardHeader className="space-y-1 px-4 sm:px-6 pt-6 sm:pt-8">
             <h2 className="text-2xl font-bold text-center text-white">
               Create your account
