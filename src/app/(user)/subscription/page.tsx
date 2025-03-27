@@ -10,10 +10,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Check } from "lucide-react";
+import { AlertCircle, Check, Loader2, RefreshCw } from "lucide-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/skeleton";
 import { getUserId } from "@/lib/action";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 
 interface Plan {
   id: string;
@@ -22,6 +24,11 @@ interface Plan {
   featuresJson: string;
   quality: string;
   maxStreams: number;
+}
+
+interface UserSubscription {
+  userId: string;
+  planId: string;
 }
 
 const fetchSubscriptionPlans = async (): Promise<Plan[]> => {
@@ -46,9 +53,7 @@ const fetchSubscriptionPlans = async (): Promise<Plan[]> => {
   }
 };
 
-const getSubscribedPlan = async (): Promise<Plan | null> => {
-  console.log(await getUserId());
-
+const getSubscribedPlan = async (): Promise<UserSubscription | null> => {
   try {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/subscription/get-subscribed-plan`,
@@ -152,10 +157,18 @@ export default function SubscriptionPage() {
                 ? error.message
                 : "Unknown error occurred"}
             </p>
+            <Button
+              variant="outline"
+              className="mt-2 border-red-700 text-white hover:bg-red-800"
+              onClick={() => window.location.reload()}
+            >
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Retry
+            </Button>
           </div>
         )}
 
-        <div className="mt-12 space-y-4 sm:mt-16 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-6 lg:max-w-4xl lg:mx-auto xl:max-w-none xl:grid-cols-3">
+        <div className="mt-8 space-y-4 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-6 lg:max-w-4xl lg:mx-auto xl:max-w-none xl:grid-cols-3">
           {isLoading
             ? Array(3)
                 .fill(0)
@@ -188,23 +201,33 @@ export default function SubscriptionPage() {
                 ))
             : plans?.map((plan) => {
                 const features = JSON.parse(plan.featuresJson) as string[];
+                const isCurrentPlan = plan.id === subscribedPlan?.planId;
 
                 return (
                   <Card
                     key={plan.planName}
                     className={`flex flex-col justify-between bg-gray-900 border-2 ${
-                      selectedPlanName === plan.planName
+                      isCurrentPlan
+                        ? "border-green-500"
+                        : selectedPlanName === plan.planName
                         ? "border-orange-700"
                         : "border-gray-700"
                     }`}
                   >
                     <CardHeader>
-                      <CardTitle className="text-2xl font-bold text-white">
-                        {plan.planName}
-                      </CardTitle>
-                      <CardDescription className="text-gray-400">
-                        {plan.quality}
-                      </CardDescription>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="text-2xl font-bold text-white">
+                            {plan.planName}
+                          </CardTitle>
+                          <CardDescription className="text-gray-400">
+                            {plan.quality}
+                          </CardDescription>
+                        </div>
+                        {isCurrentPlan && (
+                          <Badge className="bg-green-600">Current Plan</Badge>
+                        )}
+                      </div>
                     </CardHeader>
                     <CardContent>
                       <div className="text-5xl font-extrabold text-white">
@@ -228,18 +251,29 @@ export default function SubscriptionPage() {
                       </ul>
                     </CardContent>
                     <CardFooter>
-                      <Button
-                        className={`w-full ${
-                          selectedPlanName === plan.planName
-                            ? "bg-orange-700 hover:bg-orange-700"
-                            : "bg-orange-600 hover:bg-orange-700"
-                        }`}
-                        onClick={() => setSelectedPlanName(plan.planName)}
-                      >
-                        {selectedPlanName === plan.planName
-                          ? "Selected"
-                          : "Select Plan"}
-                      </Button>
+                      {isCurrentPlan ? (
+                        <Button
+                          className="w-full bg-green-600 hover:bg-green-700 cursor-default"
+                          disabled
+                        >
+                          Current Plan
+                        </Button>
+                      ) : (
+                        <Button
+                          className={`w-full ${
+                            selectedPlanName === plan.planName
+                              ? "bg-orange-700 hover:bg-orange-700"
+                              : "bg-orange-600 hover:bg-orange-700"
+                          }`}
+                          onClick={() => setSelectedPlanName(plan.planName)}
+                        >
+                          {selectedPlanName === plan.planName
+                            ? "Selected"
+                            : subscribedPlan
+                            ? "Select"
+                            : "Select Plan"}
+                        </Button>
+                      )}
                     </CardFooter>
                   </Card>
                 );
@@ -255,9 +289,26 @@ export default function SubscriptionPage() {
                   subscriptionMutation.mutate(selectedPlanObj.id);
                 }
               }}
+              disabled={subscriptionMutation.isPending}
             >
-              Continue with {selectedPlanName} Plan
+              {subscriptionMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Processing...
+                </>
+              ) : subscribedPlan ? (
+                `Switch to ${selectedPlanName} Plan`
+              ) : (
+                `Subscribe to ${selectedPlanName} Plan`
+              )}
             </Button>
+            {subscriptionMutation.isError && (
+              <p className="mt-2 text-red-500">
+                {subscriptionMutation.error instanceof Error
+                  ? subscriptionMutation.error.message
+                  : "Failed to process subscription. Please try again."}
+              </p>
+            )}
           </div>
         )}
 
@@ -279,6 +330,11 @@ export default function SubscriptionPage() {
                     {plans?.map((plan) => (
                       <th key={plan.planName} className="py-4 px-6 text-white">
                         {plan.planName}
+                        {subscribedPlan?.planId === plan.id && (
+                          <span className="ml-2 inline-block px-2 py-0.5 text-xs bg-green-600 rounded-full">
+                            Current
+                          </span>
+                        )}
                       </th>
                     ))}
                   </tr>
