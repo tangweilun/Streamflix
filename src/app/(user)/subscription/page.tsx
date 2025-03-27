@@ -13,7 +13,8 @@ import {
 import { Check } from "lucide-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/skeleton";
-import { getAuthToken } from "@/lib/action";
+import { getAuthToken, getUserName } from "@/lib/action";
+import { NextResponse } from "next/server";
 
 interface Plan {
   id: string;
@@ -25,7 +26,8 @@ interface Plan {
 }
 
 const fetchSubscriptionPlans = async (): Promise<Plan[]> => {
-  alert(getAuthToken());
+  alert(await getUserName());
+  alert(await getAuthToken());
 
   try {
     const response = await fetch(
