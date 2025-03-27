@@ -46,6 +46,37 @@ const fetchSubscriptionPlans = async (): Promise<Plan[]> => {
   }
 };
 
+const getSubscribedPlan = async (): Promise<Plan | null> => {
+  console.log(await getUserId());
+
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/subscription/get-subscribed-plan`,
+      {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      }
+    );
+
+    if (response.status === 401) {
+      throw new Error(
+        "Unauthorized: Please log in to view your subscription plan."
+      );
+    }
+
+    // Current user is not subscribing to any plan
+    if (response.status === 404) {
+      return null;
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error("Error fetching subscribed plan:", error);
+    throw error;
+  }
+};
+
 export default function SubscriptionPage() {
   const {
     data: plans,
@@ -55,6 +86,16 @@ export default function SubscriptionPage() {
   } = useQuery({
     queryKey: ["plans"],
     queryFn: fetchSubscriptionPlans,
+  });
+
+  const {
+    data: subscribedPlan,
+    isLoading: isSubscribedLoading,
+    isError: isSubscribedError,
+    error: subscribedError,
+  } = useQuery({
+    queryKey: ["subscribedPlan"],
+    queryFn: getSubscribedPlan,
   });
 
   const subscriptionMutation = useMutation({
