@@ -13,8 +13,7 @@ import {
 import { Check } from "lucide-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/skeleton";
-import { getAuthToken, getUserName } from "@/lib/action";
-import { NextResponse } from "next/server";
+import { getUserId } from "@/lib/action";
 
 interface Plan {
   id: string;
@@ -26,9 +25,6 @@ interface Plan {
 }
 
 const fetchSubscriptionPlans = async (): Promise<Plan[]> => {
-  alert(await getUserName());
-  alert(await getAuthToken());
-
   try {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/subscription/get-all-plans`,
@@ -62,20 +58,14 @@ export default function SubscriptionPage() {
   });
 
   const subscriptionMutation = useMutation({
-    mutationFn: async ({
-      userId,
-      planId,
-    }: {
-      userId: string;
-      planId: string;
-    }) => {
+    mutationFn: async (planId: string) => {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/subscription/subscribe`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body: JSON.stringify({ userId, planId }),
+          body: JSON.stringify({ userId: await getUserId(), planId: planId }),
         }
       );
 
@@ -219,11 +209,11 @@ export default function SubscriptionPage() {
           <div className="mt-10 text-center">
             <Button
               className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 text-lg font-semibold"
-              // onClick={() => {
-              //   if (selectedPlanObj) {
-              //     subscriptionMutation.mutate({});
-              //   }
-              // }}
+              onClick={() => {
+                if (selectedPlanObj) {
+                  subscriptionMutation.mutate(selectedPlanObj.id);
+                }
+              }}
             >
               Continue with {selectedPlanName} Plan
             </Button>

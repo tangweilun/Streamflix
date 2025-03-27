@@ -29,20 +29,17 @@ export async function getAuthToken(): Promise<string | undefined> {
   return token;
 }
 
-export async function getUserName(): Promise<string | null> {
+export async function getUserId(): Promise<string | null> {
   const token = (await cookies()).get("authToken")?.value;
 
   if (!token) return null;
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY as string) as {
-      userName: string;
+      nameid: string;
     };
-    alert("Username:" + decoded.userName);
-    return decoded.userName;
+    return await decoded.nameid;
   } catch (error) {
-    alert("Error");
-    console.log("Invalid token:", error);
     return null;
   }
 }

@@ -88,8 +88,6 @@ export default function RegisterPage() {
   const mutation = useMutation({
     mutationFn: registerUser,
     onSuccess: (data) => {
-      console.log(data);
-      console.log(data.token);
       storeToken(data.token);
       toast.success("Registration successful!");
       router.push("/subscription");
