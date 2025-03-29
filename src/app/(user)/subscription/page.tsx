@@ -10,11 +10,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { AlertCircle, Check, Loader2, RefreshCw } from "lucide-react";
+import { Check, Loader2, RefreshCw } from "lucide-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/skeleton";
 import { getUserId } from "@/lib/action";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 
 interface Plan {
@@ -250,15 +249,23 @@ export default function SubscriptionPage() {
                         ))}
                       </ul>
                     </CardContent>
-                    <CardFooter>
-                      {isCurrentPlan ? (
+                    {isCurrentPlan ? (
+                      <CardFooter className="flex flex-col gap-2">
                         <Button
                           className="w-full bg-green-600 hover:bg-green-700 cursor-default"
                           disabled
                         >
                           Current Plan
                         </Button>
-                      ) : (
+                        <Button
+                          variant="outline"
+                          className="w-full border-red-700 text-red-500 hover:bg-red-950 hover:text-red-400"
+                        >
+                          Cancel Plan
+                        </Button>
+                      </CardFooter>
+                    ) : (
+                      <CardFooter>
                         <Button
                           className={`w-full ${
                             selectedPlanName === plan.planName
@@ -273,8 +280,8 @@ export default function SubscriptionPage() {
                             ? "Select"
                             : "Select Plan"}
                         </Button>
-                      )}
-                    </CardFooter>
+                      </CardFooter>
+                    )}
                   </Card>
                 );
               })}
