@@ -50,7 +50,7 @@ export default function VideoPage() {
   const sendProgressUpdate = useMutation({
     mutationFn: async (time: number) => {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/watch/update-watch-progress`,
+        `${process.env.NEXT_PUBLIC_API_URL}/watch/update-progress`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
