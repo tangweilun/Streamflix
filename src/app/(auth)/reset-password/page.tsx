@@ -40,7 +40,7 @@ async function resetPassword(data: { token: string; password: string }) {
       body: JSON.stringify(data),
     }
   );
-  logout();
+  //logout();
   if (!response.ok) {
     const text = await response.text();
     try {
@@ -62,6 +62,7 @@ function ResetPasswordForm() {
   // Extract token from URL safely
   useEffect(() => {
     const urlToken = searchParams.get("token");
+    alert(urlToken);
     if (urlToken) setToken(urlToken);
   }, [searchParams]);
 

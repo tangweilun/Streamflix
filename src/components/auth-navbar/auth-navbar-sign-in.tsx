@@ -14,7 +14,7 @@ export function AuthBarWithSignInButton() {
 
         {/* Sign In Button - responsive padding and text size */}
         <Link
-          href="/auth/sign-in"
+          href="/sign-in"
           className="px-3 py-1 sm:px-4 sm:py-1.5 text-xs sm:text-sm font-medium text-white hover:bg-orange-600 bg-orange-500 rounded transition-colors"
         >
           Sign In

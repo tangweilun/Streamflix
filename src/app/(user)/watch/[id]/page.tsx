@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ThumbsUp, Plus } from "lucide-react";
 import Image from "next/image";
+import { useMutation } from "@tanstack/react-query";
+import { getUserId } from "@/lib/action";
 
 const video = {
   id: "1",
@@ -37,14 +39,100 @@ const relatedVideos = [
 ];
 
 export default function VideoPage() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [currentTime, setCurrentTime] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [inMyList, setInMyList] = useState(false);
+
+  const updateInterval = 30000;
+  const updateTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const sendProgressUpdate = useMutation({
+    mutationFn: async (time: number) => {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/watch/update-watch-progress`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            userId: await getUserId(),
+            videoId: parseInt(video.id),
+            currentPosition: Math.floor(time),
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update watch progress.");
+      }
+
+      return response.text();
+    },
+
+    onError: (error: any) => {
+      console.error("Error updating progress:", error);
+    },
+
+    onSuccess: (data) => {
+      console.log("Progress update sent:", data);
+    },
+  });
+
+  // Handle periodic updates
+  const startProgressBatching = () => {
+    if (!updateTimerRef.current) {
+      updateTimerRef.current = setInterval(() => {
+        sendProgressUpdate.mutate(currentTime);
+      }, updateInterval);
+    }
+  };
+
+  const stopProgressBatching = () => {
+    if (updateTimerRef.current) {
+      clearInterval(updateTimerRef.current);
+      updateTimerRef.current = null;
+      sendProgressUpdate.mutate(currentTime); // Send a final update when stopping
+    }
+  };
+
+  useEffect(() => {
+    const video = videoRef.current;
+
+    if (!video) return;
+
+    const handleTimeUpdate = () => {
+      setCurrentTime(video.currentTime);
+    };
+
+    const handlePlay = () => {
+      startProgressBatching();
+    };
+
+    const handlePause = () => {
+      stopProgressBatching();
+    };
+
+    video.addEventListener("timeupdate", handleTimeUpdate);
+    video.addEventListener("play", handlePlay);
+    video.addEventListener("pause", handlePause);
+    video.addEventListener("ended", handlePause);
+
+    return () => {
+      video.removeEventListener("timeupdate", handleTimeUpdate);
+      video.removeEventListener("play", handlePlay);
+      video.removeEventListener("pause", handlePause);
+      video.removeEventListener("ended", handlePause);
+      stopProgressBatching();
+    };
+  }, [currentTime]);
 
   return (
     <div className="container mx-auto p-8 min-h-screen">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-4">
           <video
+            ref={videoRef}
             src={video.src}
             poster={video.thumbnail}
             controls
