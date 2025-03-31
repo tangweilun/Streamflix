@@ -174,7 +174,9 @@ export default function LikedVideosPage() {
         </div>
 
         <div className="flex-1">
-          <h1 className="text-3xl font-bold mb-2">Liked Videos</h1>
+          <h1 className="text-3xl font-bold mb-2 text-orange-500">
+            Liked Videos
+          </h1>
           <div className="text-gray-400 text-sm space-y-1">
             <p>{likedVideos.length} videos</p>
             <p>Last updated on {new Date().toLocaleDateString()}</p>

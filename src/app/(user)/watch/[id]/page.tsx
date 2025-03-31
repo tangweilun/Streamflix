@@ -7,6 +7,7 @@ import { ThumbsUp, Plus } from "lucide-react";
 import Image from "next/image";
 import { useMutation } from "@tanstack/react-query";
 import { getUserId } from "@/lib/action";
+import router from "next/router";
 
 const video = {
   id: "1",
@@ -89,6 +90,7 @@ export default function VideoPage() {
   };
 
   const stopProgressBatching = () => {
+    alert("Stop");
     if (updateTimerRef.current) {
       clearInterval(updateTimerRef.current);
       updateTimerRef.current = null;
@@ -101,28 +103,24 @@ export default function VideoPage() {
 
     if (!video) return;
 
-    const handleTimeUpdate = () => {
-      setCurrentTime(video.currentTime);
-    };
+    video.addEventListener("play", startProgressBatching);
+    video.addEventListener("pause", stopProgressBatching);
+    video.addEventListener("ended", stopProgressBatching);
 
-    const handlePlay = () => {
-      startProgressBatching();
-    };
+    const handleBeforeUnload = () => sendProgressUpdate.mutate(currentTime);
+    const handleRouteChange = () => sendProgressUpdate.mutate(currentTime);
 
-    const handlePause = () => {
-      stopProgressBatching();
-    };
-
-    video.addEventListener("timeupdate", handleTimeUpdate);
-    video.addEventListener("play", handlePlay);
-    video.addEventListener("pause", handlePause);
-    video.addEventListener("ended", handlePause);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    router.events.on("routeChangeStart", handleRouteChange); // Trigger update on page navigation
 
     return () => {
-      video.removeEventListener("timeupdate", handleTimeUpdate);
-      video.removeEventListener("play", handlePlay);
-      video.removeEventListener("pause", handlePause);
-      video.removeEventListener("ended", handlePause);
+      video.removeEventListener("play", startProgressBatching);
+      video.removeEventListener("pause", stopProgressBatching);
+      video.removeEventListener("ended", stopProgressBatching);
+
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      router.events.off("routeChangeStart", handleRouteChange);
+
       stopProgressBatching();
     };
   }, [currentTime]);
