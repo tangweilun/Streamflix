@@ -41,15 +41,15 @@ const relatedVideos = [
 
 export default function VideoPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [currentTime, setCurrentTime] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [inMyList, setInMyList] = useState(false);
 
   const updateInterval = 30000;
+  const currentTime = useRef(0); // Store video progress to avoid triggering re-renders
   const updateTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const sendProgressUpdate = useMutation({
-    mutationFn: async (time: number) => {
+    mutationFn: async () => {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/watch/update-progress`,
         {
@@ -59,7 +59,7 @@ export default function VideoPage() {
           body: JSON.stringify({
             userId: await getUserId(),
             videoId: parseInt(video.id),
-            currentPosition: Math.floor(time),
+            currentPosition: Math.floor(currentTime.current),
           }),
         }
       );
@@ -71,7 +71,7 @@ export default function VideoPage() {
       return response.text();
     },
 
-    onError: (error: any) => {
+    onError: (error) => {
       console.error("Error updating progress:", error);
     },
 
@@ -80,21 +80,26 @@ export default function VideoPage() {
     },
   });
 
+  const updateCurrentTime = () => {
+    if (videoRef.current) {
+      currentTime.current = Math.floor(videoRef.current.currentTime);
+    }
+  };
+
   // Handle periodic updates
   const startProgressBatching = () => {
     if (!updateTimerRef.current) {
       updateTimerRef.current = setInterval(() => {
-        sendProgressUpdate.mutate(currentTime);
+        sendProgressUpdate.mutate();
       }, updateInterval);
     }
   };
 
   const stopProgressBatching = () => {
-    alert("Stop");
     if (updateTimerRef.current) {
       clearInterval(updateTimerRef.current);
       updateTimerRef.current = null;
-      sendProgressUpdate.mutate(currentTime); // Send a final update when stopping
+      sendProgressUpdate.mutate(); // Send a final update when stopping
     }
   };
 
@@ -103,17 +108,19 @@ export default function VideoPage() {
 
     if (!video) return;
 
+    video.addEventListener("timeupdate", updateCurrentTime);
     video.addEventListener("play", startProgressBatching);
     video.addEventListener("pause", stopProgressBatching);
     video.addEventListener("ended", stopProgressBatching);
 
-    const handleBeforeUnload = () => sendProgressUpdate.mutate(currentTime);
-    const handleRouteChange = () => sendProgressUpdate.mutate(currentTime);
+    const handleBeforeUnload = () => sendProgressUpdate.mutate();
+    const handleRouteChange = () => sendProgressUpdate.mutate();
 
     window.addEventListener("beforeunload", handleBeforeUnload);
     router.events.on("routeChangeStart", handleRouteChange); // Trigger update on page navigation
 
     return () => {
+      video.removeEventListener("timeupdate", updateCurrentTime);
       video.removeEventListener("play", startProgressBatching);
       video.removeEventListener("pause", stopProgressBatching);
       video.removeEventListener("ended", stopProgressBatching);
@@ -123,7 +130,7 @@ export default function VideoPage() {
 
       stopProgressBatching();
     };
-  }, [currentTime]);
+  }, []);
 
   return (
     <div className="container mx-auto p-8 min-h-screen">
