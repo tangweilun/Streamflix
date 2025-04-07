@@ -40,7 +40,7 @@ async function resetPassword(data: { token: string; password: string }) {
       body: JSON.stringify(data),
     }
   );
-  //logout();
+  logout();
   if (!response.ok) {
     const text = await response.text();
     try {

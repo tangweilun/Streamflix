@@ -92,12 +92,7 @@ export default function SubscriptionPage() {
     queryFn: fetchSubscriptionPlans,
   });
 
-  const {
-    data: subscribedPlan,
-    isLoading: isSubscribedLoading,
-    isError: isSubscribedError,
-    error: subscribedError,
-  } = useQuery({
+  const { data: subscribedPlan } = useQuery({
     queryKey: ["subscribedPlan"],
     queryFn: getSubscribedPlan,
   });

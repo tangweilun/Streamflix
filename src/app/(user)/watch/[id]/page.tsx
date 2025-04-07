@@ -130,7 +130,7 @@ export default function VideoPage() {
 
       stopProgressBatching();
     };
-  }, []);
+  }, [sendProgressUpdate, startProgressBatching, stopProgressBatching]);
 
   return (
     <div className="container mx-auto p-8 min-h-screen">

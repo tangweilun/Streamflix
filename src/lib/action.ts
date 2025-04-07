@@ -40,6 +40,7 @@ export async function getUserId(): Promise<string | null> {
     };
     return await decoded.nameid;
   } catch (error) {
+    console.error(error);
     return null;
   }
 }

@@ -15,13 +15,6 @@ import {
   DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Search,
   LayoutGrid,
   List,
@@ -142,7 +135,7 @@ export default function WatchHistoryPage() {
   const [watchHistory, setWatchHistory] = useState(initialWatchHistory);
   const [filter, setFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState("recent");
+  //const [sortBy, setSortBy] = useState("recent");
   const [selectedGenre, setSelectedGenre] = useState("All");
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [dateSortAscending, setDateSortAscending] = useState(false);
