@@ -7,6 +7,19 @@ import Providers from "@/lib/provider";
 export const metadata: Metadata = {
   title: "Streamflix",
   description: "Video streaming Platform",
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-icon.png",
+    shortcut: "/favicon-16x16.png",
+    other: [
+      {
+        rel: "icon",
+        type: "image/png",
+        sizes: "32x32",
+        url: "/favicon-32x32.png",
+      },
+    ],
+  },
 };
 
 export default function RootLayout({
