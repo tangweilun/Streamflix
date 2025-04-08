@@ -1,182 +1,105 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { Upload, X } from "lucide-react";
+import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
-export default function UploadEpisode() {
-  const router = useRouter();
-  const params = useParams();
-  const { id } = params;
+export default function UploadEpisodePage() {
+  const searchParams = useSearchParams();
+  const showTitle = searchParams.get("folderName") || "Unknown Show"; // Using folderName as showTitle
 
-  const [uploading, setUploading] = useState(false);
+  const [episodeNumber, setEpisodeNumber] = useState("");
+  const [file, setFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
-  useEffect(() => {
-    if (!id) {
-      console.error("Error: id is undefined.");
-    }
-  }, [id]);
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-
-    if (file) {
-      const allowedFormats = ["video/mp4", "video/webm", "video/mkv"];
-      if (!allowedFormats.includes(file.type)) {
-        setError("Invalid file format. Only MP4, WebM, and MKV are allowed.");
-        return;
-      }
-      if (file.size > 4 * 1024 * 1024 * 1024) {
-        setError("File size exceeds the 4GB limit.");
-        return;
+  // Mutation for handling file upload
+  const uploadMutation = useMutation({
+    mutationFn: async () => {
+      if (!file || !episodeNumber) {
+        throw new Error("Please select a file and enter an episode number.");
       }
 
-      setSelectedFile(file);
-      setError(null);
-    }
-  };
+      setIsUploading(true);
+      setUploadProgress(0);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!id) {
-      setError("Invalid show ID.");
-      return;
-    }
-    if (!selectedFile) {
-      setError("No file selected.");
-      return;
-    }
+      const formData = new FormData();
+      formData.append("bucketName", "streamflixtest");
+      formData.append("showTitle", showTitle);
+      formData.append("episodeNumber", episodeNumber);
+      formData.append("file", file);
 
-    setUploading(true);
-    setUploadProgress(0);
+      const response = await fetch("https://localhost:7230/api/files/upload-episode", {
+        method: "POST",
+        body: formData,
+        headers: { "X-Requested-With": "XMLHttpRequest" },
+      });
 
-    const interval = setInterval(() => {
-      setUploadProgress((prev) => (prev >= 100 ? 100 : prev + 10));
-    }, 500);
+      if (!response.ok) throw new Error("Upload failed.");
 
-    await new Promise((resolve) => setTimeout(resolve, 5000));
-    clearInterval(interval);
-
-    router.push(`/admin/shows/${id}`);
-  };
+      return response.text();
+    },
+    onSuccess: (data) => {
+      toast.success("Upload successful!");
+      setUploadProgress(100);
+      setIsUploading(false);
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : "Upload failed.");
+      setIsUploading(false);
+    },
+  });
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <main className="container px-6 py-8 pt-10">
-        <div className="max-w-2xl mx-auto">
-          <h1 className="text-3xl font-bold text-orange-500 mb-8">
-            Upload New Episode
-          </h1>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold text-orange-500">
+        Upload Episode for {showTitle}
+      </h1>
 
-          {!id && <p className="text-red-500 mb-4">Error: Invalid show ID.</p>}
-          {error && <p className="text-red-500">{error}</p>}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">
-                Episode Title<span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                required
-                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                placeholder="Enter episode title"
-              />
-            </div>
+      <div className="mt-4">
+        <label className="block text-sm font-medium text-gray-300">Episode Number:</label>
+        <input
+          type="number"
+          className="w-full p-2 mt-1 bg-gray-800 text-white rounded-md"
+          value={episodeNumber}
+          onChange={(e) => setEpisodeNumber(e.target.value)}
+          disabled={isUploading}
+        />
+      </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">
-                Episode Number<span className="text-red-500">*</span>
-              </label>
-              <input
-                type="number"
-                min="1"
-                required
-                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                placeholder="Episode #"
-              />
-            </div>
+      <div className="mt-4">
+        <label className="block text-sm font-medium text-gray-300">Select File:</label>
+        <input
+          type="file"
+          className="w-full p-2 mt-1 bg-gray-800 text-white rounded-md"
+          onChange={(e) => setFile(e.target.files?.[0] || null)}
+          disabled={isUploading}
+        />
+      </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">
-                Episode Description<span className="text-red-500">*</span>
-              </label>
-              <textarea
-                required
-                rows={4}
-                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                placeholder="Enter episode description"
-              />
-            </div>
+      <button
+        className={`mt-4 px-4 py-2 rounded-md transition-colors flex items-center justify-center ${
+          isUploading ? "bg-gray-500" : "bg-orange-600 hover:bg-orange-500"
+        } text-black`}
+        onClick={() => uploadMutation.mutate()}
+        disabled={isUploading}
+      >
+        {isUploading ? (
+          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+        ) : (
+          "Upload"
+        )}
+      </button>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">
-                Video File<span className="text-red-500">*</span>
-              </label>
-              <div className="flex items-center justify-center w-full">
-                <label className="relative flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-orange-500">
-                  {selectedFile ? (
-                    <div className="flex items-center justify-between w-full px-4">
-                      <span className="text-sm truncate">
-                        {selectedFile.name}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedFile(null)}
-                        className="p-1 hover:bg-gray-700 rounded-full"
-                      >
-                        <X className="w-5 h-5" />
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                      <Upload className="w-8 h-8 mb-4 text-gray-500" />
-                      <p className="text-sm text-gray-500">
-                        <span className="font-semibold">Click to upload</span>{" "}
-                        or drag and drop
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        MP4, WebM, or MKV (MAX. 4GB)
-                      </p>
-                    </div>
-                  )}
-                  <input
-                    type="file"
-                    className="hidden"
-                    accept="video/mp4,video/webm,video/mkv"
-                    onChange={handleFileSelect}
-                  />
-                </label>
-              </div>
-            </div>
-
-            {uploading && (
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Upload progress</span>
-                  <span>{uploadProgress}%</span>
-                </div>
-                <div className="w-full bg-gray-800 rounded-full h-2">
-                  <div
-                    className="bg-orange-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${uploadProgress}%` }}
-                  />
-                </div>
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={uploading || !selectedFile || !id}
-              className="w-full px-4 py-2 bg-orange-600 text-black rounded-md hover:bg-orange-500 transition-colors disabled:bg-orange-800 disabled:cursor-not-allowed"
-            >
-              {uploading ? "Uploading..." : "Upload Episode"}
-            </button>
-          </form>
+      {isUploading && (
+        <div className="w-full bg-gray-700 mt-4 rounded-md">
+          <div
+            className="h-2 bg-orange-500 rounded-md"
+            style={{ width: `${uploadProgress}%` }}
+          ></div>
         </div>
-      </main>
+      )}
     </div>
   );
 }
