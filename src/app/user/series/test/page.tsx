@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Image from "next/image";
+import React from "react";
 
 // Define the type for series data
 type SeriesItem = {

@@ -5,6 +5,7 @@ import { useSearchParams, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ThumbsUp, Plus } from "lucide-react";
 import Image from "next/image";
+import React from "react";
 
 interface Show {
   id: string;
