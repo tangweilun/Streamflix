@@ -32,13 +32,14 @@ export default function ShowGrid({ shows }: { shows: Show[] }) {
               <p>Last Updated: {show.lastUpdated}</p>
             </div>
             <div className="mt-4 flex gap-2">
-              <Link
-                href={`/admin/shows/${show.id}/upload-episode`}
-                className="flex-1 inline-flex items-center justify-center px-4 py-2 bg-orange-600 text-black rounded-md hover:bg-orange-500 transition-colors"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add Episode
-              </Link>
+            <Link
+              href={`/admin/shows/${show.id}/upload-episode?showId=${show.id}&folderName=${encodeURIComponent(show.title)}`}
+              className="flex-1 inline-flex items-center justify-center px-4 py-2 bg-orange-600 text-black rounded-md hover:bg-orange-500 transition-colors"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Episode
+            </Link>
+
               <Link
                 href={`/admin/shows/${show.id}/edit`}
                 className="p-2 bg-gray-800 text-white rounded-md hover:bg-gray-700 transition-colors"

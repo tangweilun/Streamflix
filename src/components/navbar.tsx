@@ -115,6 +115,20 @@ export default function Navbar() {
                 Profile
               </Link>
               <Link
+                href="/liked-videos"
+                onClick={() => setDropdownOpen(false)}
+                className="block px-4 py-2 text-sm text-white hover:bg-orange-600 hover:text-black"
+              >
+                Liked Videos
+              </Link>
+              <Link
+                href="/watch-history"
+                onClick={() => setDropdownOpen(false)}
+                className="block px-4 py-2 text-sm text-white hover:bg-orange-600 hover:text-black"
+              >
+                Watch History
+              </Link>
+              <Link
                 href="/subscription"
                 onClick={() => setDropdownOpen(false)}
                 className="block px-4 py-2 text-sm text-white hover:bg-orange-600 hover:text-black"

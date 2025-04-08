@@ -142,30 +142,6 @@ export default function SeriesVideosPage() {
     hasPrevPage: false,
   });
 
-  // const filteredVideos = useMemo((): typeof videos => {
-  //   return videos
-  //     .filter((video) => video.contentType === "Series")
-  //     .filter((video) => {
-  //       //genre filter function
-  //       if (selectedGenre !== "All" && video.genre !== selectedGenre) {
-  //         return false;
-  //       }
-
-  //       return true;
-  //     })
-  //     .sort((a, b) => {
-  //       if (sortBy === "dateAdded") {
-  //         return (
-  //           new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
-  //         );
-  //       } else if (sortBy === "title") {
-  //         return a.title.localeCompare(b.title);
-  //       }
-
-  //       return 0;
-  //     });
-  // }, [selectedGenre, sortBy]);
-
   // Fetch series data
   const fetchData = useCallback(async () => {
     setIsLoading(true);
