@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { useSearchParams, useParams } from "next/navigation";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useSearchParams, useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ThumbsUp, Plus } from "lucide-react";
 import Image from "next/image";
 import { useMutation } from "@tanstack/react-query";
 import { getUserId } from "@/lib/action";
-import router from "next/router";
 
 interface Show {
   id: string;
@@ -28,6 +27,7 @@ export default function VideoPage() {
   const { id } = useParams();
   const searchParams = useSearchParams();
   const title = searchParams.get("title") || "Unknown Show";
+  const router = useRouter();
 
   const [shows, setShows] = useState<Show[]>([]);
   const [episodes, setEpisodes] = useState<Episode[]>([]);
@@ -36,6 +36,10 @@ export default function VideoPage() {
   const [isLiked, setIsLiked] = useState(false);
   const [inMyList, setInMyList] = useState(false);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+
+  const updateInterval = 30000;
+  const currentTime = useRef(0); // Store video progress to avoid triggering re-renders
+  const updateTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Fetch the list of shows
   useEffect(() => {
@@ -72,33 +76,28 @@ export default function VideoPage() {
         if (!res.ok) throw new Error("Failed to fetch episodes");
         const data = await res.json();
         setEpisodes(data.episodes || []);
-      } catch (err) {
+      } catch (_err) {
         setError("Failed to load episodes. Please try again.");
+        console.error("Failed to load episodes:", _err);
       }
     }
     fetchEpisodes();
   }, [show]);
 
-  // Always render the hooks, but conditionally return early if we don't have valid data.
-  if (loading) return <div className="text-white">Loading...</div>;
-  if (error) return <div className="text-red-500">{error}</div>;
-  if (!show) return <div className="text-white">Show not found</div>;
-
-  // At this point, "show" is defined for sure.
-  const video = {
-    id: id as string,
-    title,
-    description: "The remarkable coming-of-age story of Stephen Curry...",
-    thumbnail: show.thumbnail || "/placeholder.svg",
-  };
-
-  const handleEpisodeSelect = (episodeUrl: string) => {
-    setVideoUrl(episodeUrl);
-  };
-
-  const updateInterval = 30000;
-  const currentTime = useRef(0); // Store video progress to avoid triggering re-renders
-  const updateTimerRef = useRef<NodeJS.Timeout | null>(null);
+  // Define video object before any conditional returns
+  const video = show
+    ? {
+        id: id as string,
+        title,
+        description: "The remarkable coming-of-age story of Stephen Curry...",
+        thumbnail: show.thumbnail || "/placeholder.svg",
+      }
+    : {
+        id: id as string,
+        title,
+        description: "The remarkable coming-of-age story of Stephen Curry...",
+        thumbnail: "/placeholder.svg",
+      };
 
   const sendProgressUpdate = useMutation({
     mutationFn: async () => {
@@ -132,28 +131,32 @@ export default function VideoPage() {
     },
   });
 
-  const updateCurrentTime = () => {
+  const updateCurrentTime = useCallback(() => {
     if (videoRef.current) {
       currentTime.current = Math.floor(videoRef.current.currentTime);
     }
-  };
+  }, []);
 
   // Handle periodic updates
-  const startProgressBatching = () => {
+  const startProgressBatching = useCallback(() => {
     if (!updateTimerRef.current) {
       updateTimerRef.current = setInterval(() => {
         sendProgressUpdate.mutate();
       }, updateInterval);
     }
-  };
+  }, [sendProgressUpdate, updateInterval]);
 
-  const stopProgressBatching = () => {
+  const stopProgressBatching = useCallback(() => {
     if (updateTimerRef.current) {
       clearInterval(updateTimerRef.current);
       updateTimerRef.current = null;
       sendProgressUpdate.mutate(); // Send a final update when stopping
     }
-  };
+  }, [sendProgressUpdate]);
+
+  const handleEpisodeSelect = useCallback((episodeUrl: string) => {
+    setVideoUrl(episodeUrl);
+  }, []);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -169,7 +172,7 @@ export default function VideoPage() {
     const handleRouteChange = () => sendProgressUpdate.mutate();
 
     window.addEventListener("beforeunload", handleBeforeUnload);
-    router.events.on("routeChangeStart", handleRouteChange); // Trigger update on page navigation
+    window.addEventListener("routechangestart", handleRouteChange);
 
     return () => {
       video.removeEventListener("timeupdate", updateCurrentTime);
@@ -178,11 +181,21 @@ export default function VideoPage() {
       video.removeEventListener("ended", stopProgressBatching);
 
       window.removeEventListener("beforeunload", handleBeforeUnload);
-      router.events.off("routeChangeStart", handleRouteChange);
+      window.removeEventListener("routechangestart", handleRouteChange);
 
       stopProgressBatching();
     };
-  }, [sendProgressUpdate, startProgressBatching, stopProgressBatching]);
+  }, [
+    sendProgressUpdate,
+    startProgressBatching,
+    stopProgressBatching,
+    updateCurrentTime,
+  ]);
+
+  // Conditional returns after all hooks
+  if (loading) return <div className="text-white">Loading...</div>;
+  if (error) return <div className="text-red-500">{error}</div>;
+  if (!show) return <div className="text-white">Show not found</div>;
 
   return (
     <div className="container mx-auto p-8 min-h-screen flex justify-center items-center">
@@ -191,6 +204,7 @@ export default function VideoPage() {
         <div className="relative w-full" style={{ paddingTop: "56.25%" }}>
           {videoUrl ? (
             <video
+              ref={videoRef}
               controls
               className="absolute top-0 left-0 w-full h-full"
               key={videoUrl}

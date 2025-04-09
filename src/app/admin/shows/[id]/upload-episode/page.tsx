@@ -43,7 +43,7 @@ export default function UploadEpisodePage() {
 
       return response.text();
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast.success("Upload successful!");
       setUploadProgress(100);
       setIsUploading(false);
