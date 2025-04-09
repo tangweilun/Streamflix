@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useSearchParams, useParams, useRouter } from "next/navigation";
+import { useSearchParams, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ThumbsUp, Plus } from "lucide-react";
 import Image from "next/image";
@@ -27,7 +27,6 @@ export default function VideoPage() {
   const { id } = useParams();
   const searchParams = useSearchParams();
   const title = searchParams.get("title") || "Unknown Show";
-  const router = useRouter();
 
   const [shows, setShows] = useState<Show[]>([]);
   const [episodes, setEpisodes] = useState<Episode[]>([]);
@@ -53,6 +52,7 @@ export default function VideoPage() {
         setShows(data);
       } catch (err) {
         setError("Failed to load shows. Please try again.");
+        console.error("Failed to load shows:", err);
       } finally {
         setLoading(false);
       }
