@@ -212,8 +212,6 @@ export default function UserProfilePage() {
     alert(
       "Account deleted successfully. You will be redirected to the homepage."
     );
-
-    //window.location.href = "/"
   };
 
   const handleSaveProfile = () => {
@@ -596,7 +594,7 @@ export default function UserProfilePage() {
                             access to premium features at the end of your
                             billing period.
                           </p>
-                          <Link href="/subscription">
+                          <Link href="/user/subscription">
                             <Button className="mt-4 bg-orange-500 hover:bg-orange-600">
                               Reactive Subscription
                             </Button>
@@ -605,7 +603,7 @@ export default function UserProfilePage() {
                       )}
                     </div>
                     {!isSubscriptionCancelled && (
-                      <Link href="/subscription">
+                      <Link href="/user/subscription">
                         <Button className="bg-orange-500 hover:bg-orange-600">
                           Change Plan
                         </Button>

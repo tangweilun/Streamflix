@@ -356,7 +356,7 @@ export default function WatchHistoryPage() {
 
                   <div className="flex-1">
                     <Link
-                      href={`/watch/${video.id}`}
+                      href={`/user/watch/${video.id}`}
                       className="hover:text-orange-500"
                     >
                       <h3 className="font-medium text-sm line-clamp-2">
@@ -429,7 +429,7 @@ export default function WatchHistoryPage() {
 
                   <div className="p-3">
                     <Link
-                      href={`/watch/${video.id}`}
+                      href={`/user/watch/${video.id}`}
                       className="hover:text-orange-500"
                     >
                       <h3 className="font-medium text-sm line-clamp-2">

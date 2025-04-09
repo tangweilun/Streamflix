@@ -271,7 +271,7 @@ export default function SeriesVideosPage() {
                   </div>
 
                   <div className="relative w-[160px] h-[90px]">
-                    <Link href={`/watch/${video.id}`}>
+                    <Link href={`/user/watch/${video.id}`}>
                       <Image
                         src={video.image || "/placeholder.svg"}
                         alt={video.title}
@@ -284,7 +284,7 @@ export default function SeriesVideosPage() {
 
                   <div className="flex-1">
                     <Link
-                      href={`/watch/${video.id}`}
+                      href={`/user/watch/${video.id}`}
                       className="hover:text-orange-500"
                     >
                       <h3 className="text-white hover:text-orange-500 transition-colors line-clamp-2">
@@ -315,7 +315,7 @@ export default function SeriesVideosPage() {
               {seriesData.map((video) => (
                 <div key={video.id} className="group">
                   <div className="relative">
-                    <Link href={`/watch/${video.id}`}>
+                    <Link href={`/user/watch/${video.id}`}>
                       <Image
                         src={video.image || "/placeholder.svg"}
                         alt={video.title}
@@ -329,7 +329,7 @@ export default function SeriesVideosPage() {
 
                   <div className="mt-2">
                     <Link
-                      href={`/watch/${video.id}`}
+                      href={`/user/watch/${video.id}`}
                       className="hover:text-orange-500"
                     >
                       <h3 className="text-white hover:text-orange-500 transition-colors line-clamp-2">

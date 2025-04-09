@@ -24,7 +24,7 @@ export default function Navbar() {
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      router.push(`/user/search?q=${encodeURIComponent(searchQuery.trim())}`);
       setIsSearchOpen(false);
     }
   };
@@ -34,26 +34,26 @@ export default function Navbar() {
       <div className="container mx-auto px-6 py-4 flex items-center justify-between">
         <div className="flex items-center">
           <Link
-            href="/watch"
+            href="/user/watch"
             className="text-3xl font-bold text-orange-500 mr-8"
           >
             StreamFlix
           </Link>
           <div className="hidden md:flex space-x-4">
             <Link
-              href="/watch"
+              href="/user/watch"
               className="text-white hover:text-orange-500 transition-colors"
             >
               Home
             </Link>
             <Link
-              href="/series"
+              href="/user/series"
               className="text-white hover:text-orange-500 transition-colors"
             >
               Series
             </Link>
             <Link
-              href="/movies"
+              href="/user/movies"
               className="text-white hover:text-orange-500 transition-colors"
             >
               Movies
@@ -108,35 +108,35 @@ export default function Navbar() {
             </DropdownMenuTrigger>
             <DropdownMenuContent className="absolute w-48 mt-3 -right-6 bg-black border-black rounded-none shadow-lg py-1">
               <Link
-                href="/profile"
+                href="/user/profile"
                 onClick={() => setDropdownOpen(false)}
                 className="block px-4 py-2 text-sm text-white hover:bg-orange-600 hover:text-black"
               >
                 Profile
               </Link>
               <Link
-                href="/liked-videos"
+                href="/user/liked-videos"
                 onClick={() => setDropdownOpen(false)}
                 className="block px-4 py-2 text-sm text-white hover:bg-orange-600 hover:text-black"
               >
                 Liked Videos
               </Link>
               <Link
-                href="/watch-history"
+                href="/user/watch-history"
                 onClick={() => setDropdownOpen(false)}
                 className="block px-4 py-2 text-sm text-white hover:bg-orange-600 hover:text-black"
               >
                 Watch History
               </Link>
               <Link
-                href="/subscription"
+                href="/user/subscription"
                 onClick={() => setDropdownOpen(false)}
                 className="block px-4 py-2 text-sm text-white hover:bg-orange-600 hover:text-black"
               >
                 Subscription
               </Link>
               <Link
-                href="/sign-in"
+                href="/user/sign-in"
                 onClick={() => {
                   setDropdownOpen(false);
                   logout();

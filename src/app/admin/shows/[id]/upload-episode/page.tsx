@@ -30,11 +30,14 @@ export default function UploadEpisodePage() {
       formData.append("episodeNumber", episodeNumber);
       formData.append("file", file);
 
-      const response = await fetch("https://localhost:7230/api/files/upload-episode", {
-        method: "POST",
-        body: formData,
-        headers: { "X-Requested-With": "XMLHttpRequest" },
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/files/upload-episode`,
+        {
+          method: "POST",
+          body: formData,
+          headers: { "X-Requested-With": "XMLHttpRequest" },
+        }
+      );
 
       if (!response.ok) throw new Error("Upload failed.");
 
@@ -58,7 +61,9 @@ export default function UploadEpisodePage() {
       </h1>
 
       <div className="mt-4">
-        <label className="block text-sm font-medium text-gray-300">Episode Number:</label>
+        <label className="block text-sm font-medium text-gray-300">
+          Episode Number:
+        </label>
         <input
           type="number"
           className="w-full p-2 mt-1 bg-gray-800 text-white rounded-md"
@@ -69,7 +74,9 @@ export default function UploadEpisodePage() {
       </div>
 
       <div className="mt-4">
-        <label className="block text-sm font-medium text-gray-300">Select File:</label>
+        <label className="block text-sm font-medium text-gray-300">
+          Select File:
+        </label>
         <input
           type="file"
           className="w-full p-2 mt-1 bg-gray-800 text-white rounded-md"

@@ -162,7 +162,7 @@ function SearchResultContent() {
       if (type !== "all") params.set("type", type);
       if (page > 1) params.set("page", page.toString());
 
-      router.push(`/search?${params.toString()}`, { scroll: false });
+      router.push(`/user/search?${params.toString()}`, { scroll: false });
     },
     [router]
   );
@@ -249,7 +249,7 @@ function SearchResultContent() {
                     </div>
                   </div>
                   <CardContent className="p-4">
-                    <Link href={`/watch/${item.id}`}>
+                    <Link href={`/user/watch/${item.id}`}>
                       <h3 className="font-semibold text-white hover:text-orange-500 transition-colors line-clamp-2">
                         {item.title}
                       </h3>

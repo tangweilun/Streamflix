@@ -42,7 +42,7 @@ export default function VideoPage() {
     async function fetchShows() {
       try {
         const response = await fetch(
-          "https://localhost:7230/api/files/list-shows?bucketName=streamflixtest"
+          `${process.env.NEXT_PUBLIC_API_URL}/files/list-shows?bucketName=streamflixtest`
         );
         if (!response.ok) throw new Error("Failed to fetch shows");
         const data = await response.json();
@@ -65,9 +65,9 @@ export default function VideoPage() {
       if (!show) return; // Guard: do nothing if show is undefined
       try {
         const res = await fetch(
-          `https://localhost:7230/api/files/watch?showName=${encodeURIComponent(
-            show.title
-          )}`
+          `${
+            process.env.NEXT_PUBLIC_API_URL
+          }/files/watch?showName=${encodeURIComponent(show.title)}`
         );
         if (!res.ok) throw new Error("Failed to fetch episodes");
         const data = await res.json();

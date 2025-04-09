@@ -3,7 +3,13 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -28,7 +34,7 @@ export default function TVSeriesPage() {
     async function fetchSeries() {
       try {
         const response = await fetch(
-          "https://localhost:7230/api/files/list-shows?bucketName=streamflixtest"
+          `${process.env.NEXT_PUBLIC_API_URL}/files/list-shows?bucketName=streamflixtest`
         );
         if (!response.ok) throw new Error("Failed to fetch series");
 
@@ -50,9 +56,8 @@ export default function TVSeriesPage() {
   );
 
   const handleCardClick = (id: string, title: string) => {
-    router.push(`/watch/${id}?title=${encodeURIComponent(title)}`);
+    router.push(`/user/watch/${id}?title=${encodeURIComponent(title)}`);
   };
-  
 
   return (
     <div className="min-h-screen bg-black text-black">
@@ -75,7 +80,10 @@ export default function TVSeriesPage() {
         {loading ? (
           <div className="space-y-4">
             {Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton key={i} className="h-24 w-full rounded-lg bg-gray-800" />
+              <Skeleton
+                key={i}
+                className="h-24 w-full rounded-lg bg-gray-800"
+              />
             ))}
           </div>
         ) : error ? (

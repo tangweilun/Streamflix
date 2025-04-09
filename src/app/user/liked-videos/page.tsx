@@ -295,7 +295,7 @@ export default function LikedVideosPage() {
 
               <div className="flex-1">
                 <Link
-                  href={`/watch/${video.id}`}
+                  href={`/user/watch/${video.id}`}
                   className="hover:text-orange-500"
                 >
                   <h3 className="font-medium text-sm line-clamp-2">
@@ -343,7 +343,7 @@ export default function LikedVideosPage() {
 
               <div className="mt-2">
                 <Link
-                  href={`/watch/${video.id}`}
+                  href={`/user/watch/${video.id}`}
                   className="hover:text-orange-500"
                 >
                   <h3 className="font-medium text-sm line-clamp-2">

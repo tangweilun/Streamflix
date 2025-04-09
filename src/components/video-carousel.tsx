@@ -73,7 +73,7 @@ export function VideoCarousel({ title, videos = [] }: VideoCarouselProps) {
                 </div>
                 <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-60 transition-opacity duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
                   <Link
-                    href={`/watch/${video.id}`}
+                    href={`/user/watch/${video.id}`}
                     className="text-white hover:text-orange-500 transition-colors mr-4"
                   >
                     <Play />
