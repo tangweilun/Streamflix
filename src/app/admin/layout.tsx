@@ -2,9 +2,10 @@
 
 import type React from "react";
 import Link from "next/link";
-import { LayoutDashboard, Film, Users, Upload, LogOut } from "lucide-react";
+import { LayoutDashboard, Film, Users, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { logout } from "@/lib/action";
+
 
 
 export default function AdminLayout({

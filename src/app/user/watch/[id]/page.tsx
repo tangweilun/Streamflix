@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ThumbsUp, Plus } from "lucide-react";
@@ -47,9 +47,6 @@ export default function VideoPage() {
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [videoDetails, setVideoDetails] = useState<VideoDetails | null>(null);
 
-  const updateInterval = 30000;
-  const currentTime = useRef(0); // Store video progress to avoid triggering re-renders
-  const updateTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Fetch the list of shows
   useEffect(() => {
