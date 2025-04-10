@@ -11,18 +11,19 @@ export default function UploadEpisodePage() {
 
   const [episodeNumber, setEpisodeNumber] = useState("");
   const [file, setFile] = useState<File | null>(null);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
+  const [error, setError] = useState("");
 
   // Mutation for handling file upload
   const uploadMutation = useMutation({
     mutationFn: async () => {
       if (!file || !episodeNumber) {
+        setError("Please select a file and enter an episode number.");
         throw new Error("Please select a file and enter an episode number.");
       }
 
+      setError(""); // Clear previous errors
       setIsUploading(true);
-      setUploadProgress(0);
 
       const formData = new FormData();
       formData.append("bucketName", "streamflixtest");
@@ -30,14 +31,11 @@ export default function UploadEpisodePage() {
       formData.append("episodeNumber", episodeNumber);
       formData.append("file", file);
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/files/upload-episode`,
-        {
-          method: "POST",
-          body: formData,
-          headers: { "X-Requested-With": "XMLHttpRequest" },
-        }
-      );
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/files/upload-episode`, {
+        method: "POST",
+        body: formData,
+        headers: { "X-Requested-With": "XMLHttpRequest" },
+      });
 
       if (!response.ok) throw new Error("Upload failed.");
 
@@ -45,7 +43,6 @@ export default function UploadEpisodePage() {
     },
     onSuccess: () => {
       toast.success("Upload successful!");
-      setUploadProgress(100);
       setIsUploading(false);
     },
     onError: (error) => {
@@ -55,58 +52,54 @@ export default function UploadEpisodePage() {
   });
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold text-orange-500">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-black">
+      <h1 className="text-3xl font-semibold text-orange-600 text-center mb-6">
         Upload Episode for {showTitle}
       </h1>
 
-      <div className="mt-4">
-        <label className="block text-sm font-medium text-gray-300">
-          Episode Number:
-        </label>
-        <input
-          type="number"
-          className="w-full p-2 mt-1 bg-gray-800 text-white rounded-md"
-          value={episodeNumber}
-          onChange={(e) => setEpisodeNumber(e.target.value)}
-          disabled={isUploading}
-        />
-      </div>
+      <div className="p-6 bg-[#111] rounded-lg shadow-lg w-full max-w-lg">
+        <div className="mt-4">
+          <label className="block text-sm font-bold text-orange-500 ">Episode Number:</label>
+          <input
+            type="number"
+            className="w-full p-3 mt-1 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
+            value={episodeNumber}
+            onChange={(e) => setEpisodeNumber(e.target.value)}
+            disabled={isUploading}
+            style={{ backgroundColor: "oklch(20.8% 0.042 265.755)" }}
 
-      <div className="mt-4">
-        <label className="block text-sm font-medium text-gray-300">
-          Select File:
-        </label>
-        <input
-          type="file"
-          className="w-full p-2 mt-1 bg-gray-800 text-white rounded-md"
-          onChange={(e) => setFile(e.target.files?.[0] || null)}
-          disabled={isUploading}
-        />
-      </div>
-
-      <button
-        className={`mt-4 px-4 py-2 rounded-md transition-colors flex items-center justify-center ${
-          isUploading ? "bg-gray-500" : "bg-orange-600 hover:bg-orange-500"
-        } text-black`}
-        onClick={() => uploadMutation.mutate()}
-        disabled={isUploading}
-      >
-        {isUploading ? (
-          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-        ) : (
-          "Upload"
-        )}
-      </button>
-
-      {isUploading && (
-        <div className="w-full bg-gray-700 mt-4 rounded-md">
-          <div
-            className="h-2 bg-orange-500 rounded-md"
-            style={{ width: `${uploadProgress}%` }}
-          ></div>
+          />
+          {error && <p className="mt-2 text-red-500 text-xs">{error}</p>}
         </div>
-      )}
+
+        <div className="mt-4">
+          <label className="block text-sm font-bold text-orange-500 ">Select File:</label>
+          <input
+            type="file"
+            className="w-full p-3 mt-1 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
+            onChange={(e) => setFile(e.target.files?.[0] || null)}
+            disabled={isUploading}
+            style={{ backgroundColor: "oklch(20.8% 0.042 265.755)" }}
+
+          />
+        </div>
+
+        <button
+          className={`w-full bg-orange-700 hover:bg-orange-800 text-white font-medium py-3 px-6 rounded-xl shadow-sm transition-colors duration-200 mt-6  ${
+            isUploading
+              ? "bg-gray-500 cursor-not-allowed"
+              : "bg-orange-600 hover:bg-orange-500"
+          } flex items-center justify-center`}
+          onClick={() => uploadMutation.mutate()}
+          disabled={isUploading}
+        >
+          {isUploading ? (
+            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          ) : (
+            "Upload Episode"
+          )}
+        </button>
+      </div>
     </div>
   );
 }

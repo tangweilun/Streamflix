@@ -1,458 +1,219 @@
 "use client";
 
-import type React from "react";
+import { useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-import { useState, useRef } from "react";
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Check, ImageIcon, Loader2, Plus, Save, X } from "lucide-react";
+type Actor = {
+  name: string;
+  biography: string;
+  birthDate: string;
+};
 
-const availableGenres = [
-  "Action",
-  "Adventure",
-  "Animation",
-  "Biography",
-  "Comedy",
-  "Crime",
-  "Documentary",
-  "Drama",
-  "Family",
-  "Fantasy",
-  "History",
-  "Horror",
-  "Music",
-  "Mystery",
-  "Romance",
-  "Sci-Fi",
-  "Sport",
-  "Thriller",
-  "War",
-  "Western",
-];
-
-export default function EditShowPage() {
-  const [isLoading] = useState(false);
-
+export default function UpdateVideoForm() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [releaseYear, setReleaseYear] = useState<number | null>(null);
-  const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
+  const [duration, setDuration] = useState("");
+  const [maturityRating, setMaturityRating] = useState("");
+  const [releaseDate, setReleaseDate] = useState("");
+  const [genre, setGenre] = useState("");
+  const [actors, setActors] = useState<Actor[]>([{ name: "", biography: "", birthDate: "" }]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [cast, setCast] = useState<string[]>([]);
-  const [newCastMember, setNewCastMember] = useState("");
-  const [creators, setCreators] = useState<string[]>([]);
-  const [newCreator, setNewCreator] = useState("");
-
-  const [posterImage, setPosterImage] = useState<string | null>(null);
-  const posterInputRef = useRef<HTMLInputElement>(null);
-
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
-
-  //shows poster image selection
-  const handlePosterSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setPosterImage(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
+  const handleActorChange = (index: number, field: string, value: string) => {
+    const updated = [...actors];
+    updated[index][field as keyof Actor] = value;
+    setActors(updated);
   };
 
-  const addCastMember = () => {
-    if (newCastMember.trim() && !cast.includes(newCastMember.trim())) {
-      setCast([...cast, newCastMember.trim()]);
-      setNewCastMember("");
-    }
+  const handleAddActor = () => {
+    setActors([...actors, { name: "", biography: "", birthDate: "" }]);
   };
 
-  const removeCastMember = (member: string) => {
-    setCast(cast.filter((m) => m !== member));
+  const handleRemoveActor = (index: number) => {
+    const updated = actors.filter((_, i) => i !== index);
+    setActors(updated);
   };
 
-  const addCreator = () => {
-    if (newCreator.trim() && !creators.includes(newCreator.trim())) {
-      setCreators([...creators, newCreator.trim()]);
-      setNewCreator("");
-    }
-  };
-
-  const removeCreator = (creator: string) => {
-    setCreators(creators.filter((c) => c !== creator));
-  };
-
-  const toggleGenre = (genre: string) => {
-    if (selectedGenres.includes(genre)) {
-      setSelectedGenres(selectedGenres.filter((g) => g !== genre));
-    } else {
-      setSelectedGenres([...selectedGenres, genre]);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!title || !description || !releaseYear || selectedGenres.length === 0) {
-      alert("Please fill in all required fields");
+    if (!title) {
+      toast.error("Title is required.");
       return;
     }
 
-    setIsSaving(true);
+    setIsSubmitting(true);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      const payload = {
+        title,
+        description,
+        duration: parseInt(duration),
+        maturityRating,
+        releaseDate,  // Ensure this is in the correct format (YYYY-MM-DD)   
+        thumbnailUrl: "",  
+        contentUrl: "",  
+        genre,
+        actors: actors.map((actor) => ({
+          name: actor.name,
+          biography: actor.biography,
+          birthDate: actor.birthDate,  // This should also be a string, ideally in the format YYYY-MM-DD
+        })),
+      };
 
-    // In a real application, you would send the data to your API here
-    // console.log({
-    //   id: "",
-    //   type: "",
-    //   title,
-    //   description,
-    //   releaseYear,
-    //   releaseDate,
-    //   genres: selectedGenres,
-    //   rating,
-    //   featured,
-    //   status,
-    //   seasons,
-    //   episodes,
-    //   duration,
-    //   cast,
-    //   creators,
-    //   directors,
-    //   // In a real app, you'd handle file uploads differently
-    //   posterImage: posterImage ? "Updated" : "Unchanged",
-    //   bannerImage: bannerImage ? "Updated" : "Unchanged",
-    // });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/videos/title/${title}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-    setIsSaving(false);
-    setSaveSuccess(true);
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Failed to update video");
+      }
 
-    // Reset success message after 3 seconds
-    setTimeout(() => {
-      setSaveSuccess(false);
-    }, 3000);
+      toast.success(" Video updated successfully!");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.error(err);
+        toast.error(`Update failed: ${err.message}`);
+      } else {
+        console.error('Unexpected error', err);
+        toast.error('Update failed: Unexpected error');
+      }
+    }    
   };
 
   return (
-    <div className="min-h-screen bg-black p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-orange-500">Edit Show</h1>
-          </div>
+    <div className="bg-black text-[#eee] min-h-screen p-8">
+      <h1 className="text-2xl font-bold text-center text-orange-500 mb-8">Update Video</h1>
+
+      <form onSubmit={handleUpdate} className="max-w-3xl mx-auto p-8 bg-[#111] rounded-lg shadow-lg">
+        {/* Title */}
+        <div className="mb-5">
+          <label className="block font-bold text-orange-500 mb-1">Title (existing):</label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+            className="w-full p-2 text-white border border-[#555] rounded"
+            style={{ backgroundColor: "oklch(20.8% 0.042 265.755)" }}
+          />
         </div>
 
-        {isLoading ? (
-          <div className="flex justify-center items-center py-20">
-            <Loader2 className="h-8 w-8 text-orange-500 animate-spin" />
-            <span className="ml-3 text-white">Loading show information...</span>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit}>
-            <Card className="bg-gray-900 border-gray-800">
-              <CardHeader>
-                <CardTitle className="text-xl text-white">
-                  Show Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* <div className="space-y-2">
-                  <label htmlFor="show-type" className="text-white">
-                    Show Type
-                  </label>
-                  <RadioGroup
-                    id="show-type"
-                    value={showType}
-                    onValueChange={(value) =>
-                      setShowType(value as "series" | "movie")
-                    }
-                    className="flex space-x-4"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem
-                        value="series"
-                        id="series"
-                      />
-                      <label
-                        htmlFor="series"
-                        className="text-white cursor-pointer"
-                      >
-                        TV Series
-                      </label>
-                    </div>
+        {/* Description */}
+        <div className="mb-5">
+          <label className="block font-bold text-orange-500 mb-1">Description:</label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="w-full h-24 p-2 text-white border border-[#555] rounded"
+            style={{ backgroundColor: "oklch(20.8% 0.042 265.755)" }}
+          />
+        </div>
 
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="movie" id="movie" />
-                      <label
-                        htmlFor="movie"
-                        className="text-white cursor-pointer"
-                      >
-                        Movie
-                      </label>
-                    </div>
-                  </RadioGroup>
-                </div> */}
+        {/* Duration & Maturity Rating */}
+        <div className="mb-5 flex gap-4">
+          <input
+            type="text"
+            placeholder="Duration"
+            value={duration}
+            onChange={(e) => setDuration(e.target.value)}
+            className="flex-1 p-2 text-white border border-[#555] rounded"
+            style={{ backgroundColor: "oklch(20.8% 0.042 265.755)" }}
+          />
+          <input
+            type="text"
+            placeholder="Maturity Rating"
+            value={maturityRating}
+            onChange={(e) => setMaturityRating(e.target.value)}
+            className="flex-1 p-2 text-white border border-[#555] rounded"
+            style={{ backgroundColor: "oklch(20.8% 0.042 265.755)" }}
+          />
+        </div>
 
-                <div className="space-y-2">
-                  <label htmlFor="title" className="text-white">
-                    Title <span className="text-red-500">*</span>
-                  </label>
-                  <Input
-                    id="title"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    className="bg-gray-800 border-gray-700 text-white"
-                    required
-                  />
-                </div>
+        {/* Release Date */}
+        <div className="mb-5">
+          <label className="block font-bold text-orange-500 mb-1">Release Date:</label>
+          <input
+            type="date"
+            value={releaseDate}
+            onChange={(e) => setReleaseDate(e.target.value)}
+            className="w-full p-2 text-white border border-[#555] rounded"
+            style={{ backgroundColor: "oklch(20.8% 0.042 265.755)" }}
+          />
+        </div>
 
-                <div className="space-y-2">
-                  <label htmlFor="description" className="text-white">
-                    Description <span className="text-red-500">*</span>
-                  </label>
-                  <Textarea
-                    id="description"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    className="bg-gray-800 border-gray-700 text-white min-h-[120px]"
-                    required
-                  />
-                </div>
+        {/* Genre */}
+        <div className="mb-5">
+          <input
+            type="text"
+            placeholder="Genre"
+            value={genre}
+            onChange={(e) => setGenre(e.target.value)}
+            className="w-full p-2 text-white border border-[#555] rounded"
+            style={{ backgroundColor: "oklch(20.8% 0.042 265.755)" }}
+          />
+        </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label htmlFor="release-year" className="text-white">
-                      Release Year<span className="text-red-500">*</span>
-                    </label>
-                    <Input
-                      id="release-year"
-                      type="number"
-                      min="1900"
-                      max={new Date().getFullYear() + 5}
-                      value={releaseYear || ""}
-                      onChange={(e) =>
-                        setReleaseYear(Number.parseInt(e.target.value) || null)
-                      }
-                      className="bg-gray-800 border-gray-700 text-white"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-white">
-                    Genres <span className="text-red-500">*</span>
-                  </label>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                    {availableGenres.map((genre) => (
-                      <div key={genre} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`genre-${genre}`}
-                          checked={selectedGenres.includes(genre)}
-                          onCheckedChange={() => toggleGenre(genre)}
-                          className="data-[state=unchecked]:border-white
-                          data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
-                        />
-                        <label
-                          htmlFor={`genre-${genre}`}
-                          className="text-white cursor-pointer text-sm"
-                        >
-                          {genre}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-white">Poster Image</label>
-                    <div className="border-2 border-dashed border-gray-700 rounded-lg p-4">
-                      {posterImage ? (
-                        <div className="relative">
-                          <div className="relative w-full h-[300px]">
-                            <Image
-                              src={posterImage || "/placeholder.svg"}
-                              alt="Poster preview"
-                              fill={true}
-                              style={{ objectFit: "contain" }}
-                              className="rounded"
-                            />
-                          </div>
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="icon"
-                            className="absolute top-2 right-2"
-                            onClick={() => setPosterImage(null)}
-                          >
-                            <X className="h-2 w-4" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="text-center">
-                          <ImageIcon className="h-12 w-12 text-gray-500 mx-auto mb-2" />
-                          <p className="text-white mb-2">Upload poster image</p>
-                          <p className="text-gray-400 text-sm mb-4">
-                            Recommended size: 2000x3000px
-                          </p>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className="bg-orange-500 hover:bg-orange-600 border-gray-700 text-whit"
-                            onClick={() => posterInputRef.current?.click()}
-                          >
-                            Select Image
-                          </Button>
-                          <input
-                            type="file"
-                            ref={posterInputRef}
-                            onChange={handlePosterSelect}
-                            accept="image/*"
-                            className="hidden"
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <label className="text-white">Cast Members</label>
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {cast.map((member) => (
-                        <div
-                          key={member}
-                          className="flex items-center bg-gray-800 rounded-full px-3 py-1"
-                        >
-                          <span className="text-white text-sm mr-2">
-                            {member}
-                          </span>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="h-5 w-5 rounded-full hover:bg-gray-700"
-                            onClick={() => removeCastMember(member)}
-                          >
-                            <X className="h-2 w-3 text-white" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="Add cast member..."
-                        value={newCastMember}
-                        onChange={(e) => setNewCastMember(e.target.value)}
-                        className="bg-gray-800 border-gray-700 text-white"
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            addCastMember();
-                          }
-                        }}
-                      />
-                      <Button
-                        type="button"
-                        onClick={addCastMember}
-                        className="bg-orange-500 hover:bg-orange-600"
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <label className="text-white">Creators</label>
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {creators.map((creator) => (
-                        <div
-                          key={creator}
-                          className="flex items-center bg-gray-800 rounded-full px-3 py-1"
-                        >
-                          <span className="text-white text-sm mr-2">
-                            {creator}
-                          </span>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="h-5 w-5 rounded-full hover:bg-gray-700"
-                            onClick={() => removeCreator(creator)}
-                          >
-                            <X className="h-2 w-3 text-white" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="Add creator..."
-                        value={newCreator}
-                        onChange={(e) => setNewCreator(e.target.value)}
-                        className="bg-gray-800 border-gray-700 text-white"
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            addCreator();
-                          }
-                        }}
-                      />
-                      <Button
-                        type="button"
-                        onClick={addCreator}
-                        className="bg-orange-500 hover:bg-orange-600"
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <div className="flex justify-end space-x-4 mt-6">
-              <Button
-                type="button"
-                variant="outline"
-                className="border-gray-700 bg-black  hover:bg-gray-800 text-white hover:text-white"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                className="bg-orange-500 hover:bg-orange-600 min-w-[120px]"
-                disabled={isSaving}
-              >
-                {isSaving ? (
-                  <span className="flex items-center">
-                    <Loader2 className="animate-spin mr-2 h-4 w-4" />
-                    Saving...
-                  </span>
-                ) : (
-                  <span className="flex items-center">
-                    {saveSuccess ? (
-                      <Check className="mr-2 h-4 w-4" />
-                    ) : (
-                      <Save className="mr-2 h-4 w-4" />
-                    )}{" "}
-                    {saveSuccess ? "Saved!" : "Save Changes"}
-                  </span>
-                )}
-              </Button>
+        {/* Actors */}
+        <div className="mb-5">
+          <label className="block font-bold text-orange-500 mb-1">Actors:</label>
+          {actors.map((actor, index) => (
+            <div key={index} className="mb-3 border border-[#555] p-2 rounded">
+              <input
+                type="text"
+                placeholder="Name"
+                value={actor.name}
+                onChange={(e) => handleActorChange(index, "name", e.target.value)}
+                className="w-full mb-1 p-1 text-white rounded bg-[#222]"
+              />
+              <input
+                type="text"
+                placeholder="Biography"
+                value={actor.biography}
+                onChange={(e) => handleActorChange(index, "biography", e.target.value)}
+                className="w-full mb-1 p-1 text-white rounded bg-[#222]"
+              />
+              <input
+                type="date"
+                placeholder="Birth Date"
+                value={actor.birthDate}
+                onChange={(e) => handleActorChange(index, "birthDate", e.target.value)}
+                className="w-full p-1 text-white rounded bg-[#222]"
+              />
+              <div className="flex justify-between items-center mt-1">
+                <button
+                  type="button"
+                  onClick={handleAddActor}
+                  className="text-sm text-orange-400 hover:underline"
+                >
+                   Add Actor
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleRemoveActor(index)}
+                  className="text-sm text-red-400 hover:underline"
+                >
+                  Remove
+                </button>
+              </div>
             </div>
-          </form>
-        )}
-      </div>
+          ))}
+        </div>
+
+        {/* Submit */}
+        <button
+          type="submit"
+          className="w-full p-3 bg-orange-500 text-white rounded hover:bg-orange-600"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "Updating..." : "Update Video"}
+        </button>
+      </form>
+
+      <ToastContainer position="bottom-right" autoClose={3000} />
     </div>
   );
 }

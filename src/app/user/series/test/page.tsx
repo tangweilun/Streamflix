@@ -14,13 +14,15 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Image from "next/image";
+import React from "react";
 
-// Define the type for series data
 type SeriesItem = {
   id: string;
   title: string;
   thumbnail: string;
   genres: string[];
+  releaseDate?: string;
+  genre?: string;
 };
 
 export default function TVSeriesPage() {
@@ -31,6 +33,24 @@ export default function TVSeriesPage() {
   const router = useRouter();
 
   useEffect(() => {
+    async function fetchVideoDetailsByTitle(title: string) {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/videos/title/${encodeURIComponent(title)}`
+        );
+        if (!response.ok) throw new Error("Failed to fetch details");
+
+        const data = await response.json();
+        return {
+          releaseDate: data.releaseDate,
+          genre: data.genre,
+        };
+      } catch (err) {
+        console.error(`Error fetching details for "${title}":`, err);
+        return null;
+      }
+    }
+
     async function fetchSeries() {
       try {
         const response = await fetch(
@@ -38,8 +58,17 @@ export default function TVSeriesPage() {
         );
         if (!response.ok) throw new Error("Failed to fetch series");
 
-        const data: SeriesItem[] = await response.json();
-        setSeries(data);
+        const basicData: SeriesItem[] = await response.json();
+
+        const detailedData = await Promise.all(
+          basicData.map(async (item) => {
+            const extra = await fetchVideoDetailsByTitle(item.title);
+            const genres = extra?.genre?.split(",").map((g: string) => g.trim()) || [];
+            return { ...item, releaseDate: extra?.releaseDate, genres };
+          })
+        );
+
+        setSeries(detailedData);
       } catch (error) {
         console.error("Error loading series:", error);
         setError("Failed to load series. Please try again.");
@@ -111,7 +140,12 @@ export default function TVSeriesPage() {
                     <h2 className="text-lg font-semibold text-white group-hover:text-orange-500">
                       {show.title}
                     </h2>
-                    <div className="flex gap-2 mt-2">
+                    {show.releaseDate && (
+                      <p className="text-sm text-gray-400 mt-1">
+                        Release Date: {new Date(show.releaseDate).toLocaleDateString()}
+                      </p>
+                    )}
+                    <div className="flex gap-2 mt-2 flex-wrap">
                       {show.genres?.map((genre) => (
                         <span
                           key={genre}
