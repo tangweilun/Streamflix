@@ -12,7 +12,7 @@ export default function AdminDashboard() {
     async function fetchShows() {
       try {
         const response = await fetch(
-          "https://localhost:7230/api/files/list-shows?bucketName=streamflixtest"
+          `${process.env.NEXT_PUBLIC_API_URL}/files/list-shows?bucketName=streamflixtest`
         );
         if (!response.ok) throw new Error("Failed to fetch shows");
 

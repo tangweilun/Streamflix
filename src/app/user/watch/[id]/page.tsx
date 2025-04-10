@@ -21,6 +21,17 @@ interface Episode {
   url: string;
 }
 
+interface Actor {
+  name: string;
+}
+
+interface VideoDetails {
+  title: string;
+  description: string;
+  thumbnail: string;
+  actors: Actor[];
+}
+
 export default function VideoPage() {
   const { id } = useParams();
   const searchParams = useSearchParams();
@@ -33,18 +44,19 @@ export default function VideoPage() {
   const [isLiked, setIsLiked] = useState(false);
   const [inMyList, setInMyList] = useState(false);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [videoDetails, setVideoDetails] = useState<VideoDetails | null>(null);
 
   // Fetch the list of shows
   useEffect(() => {
     async function fetchShows() {
       try {
         const response = await fetch(
-          "https://localhost:7230/api/files/list-shows?bucketName=streamflixtest"
+          `${process.env.NEXT_PUBLIC_API_URL}/files/list-shows?bucketName=streamflixtest`
         );
         if (!response.ok) throw new Error("Failed to fetch shows");
         const data = await response.json();
         setShows(data);
-      } catch (err) {
+      } catch {
         setError("Failed to load shows. Please try again.");
       } finally {
         setLoading(false);
@@ -53,40 +65,52 @@ export default function VideoPage() {
     fetchShows();
   }, []);
 
-  // Find the show matching the title
   const show = shows.find((s) => s.title === title);
 
-  // Fetch episodes only when "show" is defined.
+  // Fetch video details
+  useEffect(() => {
+    async function fetchVideoDetails() {
+      if (!title) return;
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/videos/title/${encodeURIComponent(title)}`
+        );
+        if (!response.ok) throw new Error("Failed to fetch video details");
+        const data = await response.json();
+        setVideoDetails(data);
+      } catch {
+        setError("Failed to load video details. Please try again.");
+      }
+    }
+    fetchVideoDetails();
+  }, [title]);
+
+  // Fetch episodes
   useEffect(() => {
     async function fetchEpisodes() {
-      if (!show) return; // Guard: do nothing if show is undefined
+      if (!show) return;
       try {
         const res = await fetch(
-          `https://localhost:7230/api/files/watch?showName=${encodeURIComponent(
-            show.title
-          )}`
+          `${process.env.NEXT_PUBLIC_API_URL}/files/watch?showName=${encodeURIComponent(show.title)}`
         );
         if (!res.ok) throw new Error("Failed to fetch episodes");
         const data = await res.json();
-        setEpisodes(data.episodes || []);
-      } catch (err) {
-        setError("Failed to load episodes. Please try again.");
+        setEpisodes(Array.isArray(data.episodes) ? data.episodes : []);
+      } catch {
       }
     }
     fetchEpisodes();
   }, [show]);
 
-  // Always render the hooks, but conditionally return early if we don't have valid data.
   if (loading) return <div className="text-white">Loading...</div>;
-  if (error) return <div className="text-red-500">{error}</div>;
+  if (error && !episodes.length) return <div className="text-red-500">{error}</div>;
   if (!show) return <div className="text-white">Show not found</div>;
 
-  // At this point, "show" is defined for sure.
   const video = {
     id: id as string,
     title,
-    description: "The remarkable coming-of-age story of Stephen Curry...",
-    thumbnail: show.thumbnail || "/placeholder.svg",
+    description: videoDetails?.description || "No description available.",
+    thumbnail: show.thumbnail || "/default-thumbnail.jpg",
   };
 
   const handleEpisodeSelect = (episodeUrl: string) => {
@@ -96,7 +120,10 @@ export default function VideoPage() {
   return (
     <div className="container mx-auto p-8 min-h-screen flex justify-center items-center">
       <div className="space-y-4 w-full max-w-4xl">
-        {/* Video Player Section */}
+        {/* Show Title at the top */}
+        <h1 className="text-4xl font-bold text-white">{video.title}</h1>
+
+        {/* Video Player */}
         <div className="relative w-full" style={{ paddingTop: "56.25%" }}>
           {videoUrl ? (
             <video
@@ -111,9 +138,10 @@ export default function VideoPage() {
             <Image
               src={video.thumbnail}
               alt={video.title}
-              layout="fill"
-              objectFit="cover"
+              fill
+              style={{ objectFit: "cover" }}
               className="rounded-lg"
+              priority
             />
           )}
         </div>
@@ -121,24 +149,46 @@ export default function VideoPage() {
         {/* Episodes List */}
         <div className="mt-4">
           <h3 className="text-xl font-bold text-white">Episodes</h3>
-          <div className="grid grid-cols-2 gap-2 mt-2 sm:grid-cols-3 md:grid-cols-4">
-            {episodes.map((episode) => (
-              <button
-                key={episode.episode}
-                onClick={() => handleEpisodeSelect(episode.url)}
-                className="p-2 text-sm bg-orange-500 rounded hover:bg-orange-600 text-white truncate"
-                title={`Play ${episode.episode}`}
-                aria-label={`Play ${episode.episode}`}
-              >
-                {episode.episode}
-              </button>
-            ))}
-          </div>
+          {episodes.length > 0 ? (
+            <div className="grid grid-cols-2 gap-2 mt-2 sm:grid-cols-3 md:grid-cols-4">
+              {episodes.map((episode) => (
+                <button
+                  key={episode.episode}
+                  onClick={() => handleEpisodeSelect(episode.url)}
+                  className="p-2 text-sm bg-orange-500 rounded hover:bg-orange-600 text-white truncate"
+                  title={`Play ${episode.episode}`}
+                  aria-label={`Play ${episode.episode}`}
+                >
+                  {episode.episode}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-400 mt-2">Episodes will be available soon. Stay tuned!</p>
+          )}
+        </div>      
+
+        {/* Description */}
+        <div className="bg-gray-800 p-4 rounded-lg">
+          <p className="text-white">{video.description}</p>
         </div>
 
-        {/* Show Metadata */}
-        <h1 className="text-2xl font-bold text-white mt-4">{video.title}</h1>
-        <div className="flex items-center space-x-4">
+        {/* Actors */}
+        <div className="mt-4">
+          <h3 className="text-xl font-bold text-white">Actors</h3>
+          {videoDetails?.actors.length ? (
+            <ul className="list-disc pl-6 text-white">
+              {videoDetails.actors.map((actor, index) => (
+                <li key={index} className="text-sm">{actor.name}</li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-gray-400 mt-2">No actors listed.</p>
+          )}
+        </div>
+
+        {/* Metadata and Like/Save Buttons */}
+        <div className="flex items-center space-x-4 mt-4">
           <Button
             onClick={() => setIsLiked(!isLiked)}
             className="bg-orange-500 hover:bg-orange-600"
@@ -155,11 +205,6 @@ export default function VideoPage() {
             <Plus className="w-4 h-4 mr-2" />
             {inMyList ? "In List" : "Add to List"}
           </Button>
-        </div>
-
-        {/* Description */}
-        <div className="bg-gray-800 p-4 rounded-lg">
-          <p className="text-white">{video.description}</p>
         </div>
       </div>
     </div>
