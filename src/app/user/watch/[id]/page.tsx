@@ -6,9 +6,6 @@ import { Button } from "@/components/ui/button";
 import { ThumbsUp, Plus } from "lucide-react";
 import Image from "next/image";
 import React from "react";
-import { useMutation } from "@tanstack/react-query";
-import { getUserId } from "@/lib/action";
-import router from "next/router";
 
 interface Show {
   id: string;
@@ -50,9 +47,6 @@ export default function VideoPage() {
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [videoDetails, setVideoDetails] = useState<VideoDetails | null>(null);
 
-  const updateInterval = 30000;
-  const currentTime = useRef(0); // Store video progress to avoid triggering re-renders
-  const updateTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Fetch the list of shows
   useEffect(() => {
@@ -82,9 +76,7 @@ export default function VideoPage() {
       if (!title) return;
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/videos/title/${encodeURIComponent(
-            title
-          )}`
+          `${process.env.NEXT_PUBLIC_API_URL}/videos/title/${encodeURIComponent(title)}`
         );
         if (!response.ok) throw new Error("Failed to fetch video details");
         const data = await response.json();
@@ -102,21 +94,19 @@ export default function VideoPage() {
       if (!show) return;
       try {
         const res = await fetch(
-          `${
-            process.env.NEXT_PUBLIC_API_URL
-          }/files/watch?showName=${encodeURIComponent(show.title)}`
+          `${process.env.NEXT_PUBLIC_API_URL}/files/watch?showName=${encodeURIComponent(show.title)}`
         );
         if (!res.ok) throw new Error("Failed to fetch episodes");
         const data = await res.json();
         setEpisodes(Array.isArray(data.episodes) ? data.episodes : []);
-      } catch {}
+      } catch {
+      }
     }
     fetchEpisodes();
   }, [show]);
 
   if (loading) return <div className="text-white">Loading...</div>;
-  if (error && !episodes.length)
-    return <div className="text-red-500">{error}</div>;
+  if (error && !episodes.length) return <div className="text-red-500">{error}</div>;
   if (!show) return <div className="text-white">Show not found</div>;
 
   const video = {
@@ -130,103 +120,22 @@ export default function VideoPage() {
     setVideoUrl(episodeUrl);
   };
 
-  const sendProgressUpdate = useMutation({
-    mutationFn: async () => {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/watch/update-progress`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({
-            userId: await getUserId(),
-            videoId: parseInt(video.id),
-            currentPosition: Math.floor(currentTime.current),
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to update watch progress.");
-      }
-
-      return response.text();
-    },
-
-    onSuccess: (data) => {
-      console.log("Progress update sent:", data);
-    },
-
-    onError: (error) => {
-      console.error("Error updating progress:", error);
-    },
-  });
-
-  const updateCurrentTime = () => {
-    if (videoRef.current) {
-      currentTime.current = Math.floor(videoRef.current.currentTime);
-    }
-  };
-
-  const startProgressBatching = () => {
-    if (!updateTimerRef.current) {
-      updateTimerRef.current = setInterval(() => {
-        sendProgressUpdate.mutate();
-      }, updateInterval);
-    }
-  };
-
-  const stopProgressBatching = () => {
-    alert("Stop");
-    if (updateTimerRef.current) {
-      clearInterval(updateTimerRef.current);
-      updateTimerRef.current = null;
-      sendProgressUpdate.mutate();
-    }
-  };
-
-  useEffect(() => {
-    const video = videoRef.current;
-
-    if (!video) return;
-
-    video.addEventListener("timeupdate", updateCurrentTime);
-    video.addEventListener("play", startProgressBatching);
-    video.addEventListener("pause", stopProgressBatching);
-    video.addEventListener("ended", stopProgressBatching);
-
-    const handleBeforeUnload = () => sendProgressUpdate.mutate();
-    const handleRouteChange = () => sendProgressUpdate.mutate();
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    router.events.on("routeChangeStart", handleRouteChange); // Trigger update on page navigation
-
-    return () => {
-      video.removeEventListener("timeupdate", updateCurrentTime);
-      video.removeEventListener("play", startProgressBatching);
-      video.removeEventListener("pause", stopProgressBatching);
-      video.removeEventListener("ended", stopProgressBatching);
-
-      stopProgressBatching();
-    };
-  }, []);
-
   return (
     <div className="container mx-auto p-8 min-h-screen flex justify-center items-center">
       <div className="space-y-4 w-full max-w-4xl">
+        {/* Show Title at the top */}
         <h1 className="text-4xl font-bold text-white">{video.title}</h1>
-        <div className="relative w-full">
+
+        {/* Video Player */}
+        <div className="relative w-full" style={{ paddingTop: "56.25%" }}>
           {videoUrl ? (
             <video
               ref={videoRef}
-              src={videoUrl}
-              poster={video.thumbnail}
-              style={{ objectFit: "cover" }}
               controls
               className="absolute top-0 left-0 w-full h-full"
               key={videoUrl}
             >
-              {/* <source src={videoUrl} type="video/mp4" /> */}
+              <source src={videoUrl} type="video/mp4" />
               Your browser does not support the video tag.
             </video>
           ) : (
@@ -241,6 +150,7 @@ export default function VideoPage() {
           )}
         </div>
 
+        {/* Episodes List */}
         <div className="mt-4">
           <h3 className="text-xl font-bold text-white">Episodes</h3>
           {episodes.length > 0 ? (
@@ -249,7 +159,7 @@ export default function VideoPage() {
                 <button
                   key={episode.episode}
                   onClick={() => handleEpisodeSelect(episode.url)}
-                  className="text-sm bg-orange-500 rounded hover:bg-orange-600 text-white truncate"
+                  className="p-2 text-sm bg-orange-500 rounded hover:bg-orange-600 text-white truncate"
                   title={`Play ${episode.episode}`}
                   aria-label={`Play ${episode.episode}`}
                 >
@@ -258,11 +168,9 @@ export default function VideoPage() {
               ))}
             </div>
           ) : (
-            <p className="text-gray-400 mt-2">
-              Episodes will be available soon. Stay tuned!
-            </p>
+            <p className="text-gray-400 mt-2">Episodes will be available soon. Stay tuned!</p>
           )}
-        </div>
+        </div>      
 
         {/* Description */}
         <div className="bg-gray-800 p-4 rounded-lg">
@@ -275,9 +183,7 @@ export default function VideoPage() {
           {videoDetails?.actors.length ? (
             <ul className="list-disc pl-6 text-white">
               {videoDetails.actors.map((actor, index) => (
-                <li key={index} className="text-sm">
-                  {actor.name}
-                </li>
+                <li key={index} className="text-sm">{actor.name}</li>
               ))}
             </ul>
           ) : (
