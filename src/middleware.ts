@@ -21,10 +21,35 @@ function isTokenExpired(token: string): boolean {
 
 function getUserRoleFromToken(token: string): string | null {
   try {
-    const payload = JSON.parse(atob(token.split(".")[1])); // Decode JWT payload
-    return payload.role || null;
+    console.log("Token received:", token.substring(0, 15) + "...");
+
+    const parts = token.split(".");
+    console.log("Token parts count:", parts.length);
+
+    if (parts.length !== 3) {
+      console.error("Invalid JWT format - expected 3 parts");
+      return null;
+    }
+
+    const encodedPayload = parts[1];
+    console.log("Encoded payload:", encodedPayload.substring(0, 15) + "...");
+
+    const decodedPayload = atob(encodedPayload);
+    console.log("Decoded payload:", decodedPayload.substring(0, 30) + "...");
+
+    const payload = JSON.parse(decodedPayload);
+    console.log("Parsed payload:", JSON.stringify(payload, null, 2));
+
+    const role = payload.role || null;
+    console.log("Extracted role:", role);
+
+    return role;
   } catch (error) {
     console.error("Error extracting role from token:", error);
+    console.error(
+      "Error details:",
+      error instanceof Error ? error.message : String(error)
+    );
     return null;
   }
 }
@@ -39,7 +64,7 @@ export default async function middleware(req: NextRequest) {
   const isAdminRoute = path.startsWith("/admin");
 
   const token = (await cookies()).get("authToken")?.value;
-  
+
   // Check if token is expired
   if (token && isTokenExpired(token)) {
     console.log("Token expired! Clearing cookie and redirecting...");
@@ -58,7 +83,9 @@ export default async function middleware(req: NextRequest) {
   if (isAdminRoute && token) {
     const role = getUserRoleFromToken(token);
     if (role !== "Admin") {
-      console.log("Non-admin trying to access admin route! Redirecting to /user/watch");
+      console.log(
+        "Non-admin trying to access admin route! Redirecting to /user/watch"
+      );
       return NextResponse.redirect(new URL("/user/watch", req.nextUrl));
     }
   }
@@ -66,7 +93,7 @@ export default async function middleware(req: NextRequest) {
   // If user is already signed in and trying to access public route
   if (isPublicRoute && token) {
     const role = getUserRoleFromToken(token);
-    
+
     if (role === "Admin") {
       console.log("Admin already signed in. Redirecting to /admin/dashboard");
       return NextResponse.redirect(new URL("/admin/dashboard", req.nextUrl));
