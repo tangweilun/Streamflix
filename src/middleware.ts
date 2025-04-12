@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
-const protectedRoutes = ["/dashboard", "/admin"];
-const publicRoutes = ["/sign-in", "/register"];
+// Update protected routes to check for path prefixes instead of exact matches
+const protectedPrefixes = ["/admin", "/user"];
+const publicRoutes = ["/sign-in", "/register", "/", "/reset-password"];
 
 function isTokenExpired(token: string): boolean {
   try {
@@ -20,7 +21,10 @@ function isTokenExpired(token: string): boolean {
 
 export default async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
-  const isProtectedRoute = protectedRoutes.includes(path);
+  // Check if path starts with any protected prefix
+  const isProtectedRoute = protectedPrefixes.some((prefix) =>
+    path.startsWith(prefix)
+  );
   const isPublicRoute = publicRoutes.includes(path);
 
   const token = (await cookies()).get("authToken")?.value;
