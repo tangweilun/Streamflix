@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Check, Loader2, RefreshCw } from "lucide-react";
+import { AlertCircle, Check, Loader2, Calendar, RefreshCw } from "lucide-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/skeleton";
 import { getUserId } from "@/lib/action";
@@ -28,6 +28,8 @@ interface Plan {
 interface UserSubscription {
   userId: string;
   planId: string;
+  endDate?: string;
+  status: number;
 }
 
 const fetchSubscriptionPlans = async (): Promise<Plan[]> => {
@@ -81,6 +83,17 @@ const getSubscribedPlan = async (): Promise<UserSubscription | null> => {
   }
 };
 
+const formatDate = (dateString: string | undefined): string => {
+  if (!dateString) return "N/A";
+
+  const date = new Date(dateString);
+  return new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }).format(date);
+};
+
 export default function SubscriptionPage() {
   const {
     data: plans,
@@ -121,12 +134,41 @@ export default function SubscriptionPage() {
     },
   });
 
+  const unsubscribeMutation = useMutation({
+    mutationFn: async (planId: string) => {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/subscription/unsubscribe`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ userId: await getUserId(), planId: planId }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to unsubscribe.");
+      }
+
+      return response.text();
+    },
+
+    onSuccess: (sessionUrl) => {
+      window.location.href = sessionUrl;
+    },
+  });
+
   const [selectedPlanName, setSelectedPlanName] = useState<string | null>(null);
 
   // Get the full plan object to pass to the body of api call
   const selectedPlanObj = plans?.find(
     (plan) => plan.planName === selectedPlanName
   );
+
+  const isCanceled = subscribedPlan?.status === 2;
+
+  console.log(subscribedPlan);
+  console.log(isCanceled);
 
   return (
     <div className="min-h-screen bg-black py-12 px-4 sm:px-6 lg:px-8">
@@ -201,7 +243,9 @@ export default function SubscriptionPage() {
                   <Card
                     key={plan.planName}
                     className={`flex flex-col justify-between bg-gray-900 border-2 ${
-                      isCurrentPlan
+                      isCurrentPlan && isCanceled
+                        ? "border-yellow-500"
+                        : isCurrentPlan
                         ? "border-green-500"
                         : selectedPlanName === plan.planName
                         ? "border-orange-700"
@@ -219,7 +263,13 @@ export default function SubscriptionPage() {
                           </CardDescription>
                         </div>
                         {isCurrentPlan && (
-                          <Badge className="bg-green-600">Current Plan</Badge>
+                          <Badge
+                            className={
+                              isCanceled ? "bg-yellow-600" : "bg-green-600"
+                            }
+                          >
+                            {isCanceled ? "Ending Soon" : "Current Plan"}
+                          </Badge>
                         )}
                       </div>
                     </CardHeader>
@@ -231,6 +281,19 @@ export default function SubscriptionPage() {
                           /month
                         </span>
                       </div>
+                      {isCurrentPlan &&
+                        isCanceled &&
+                        subscribedPlan?.endDate && (
+                          <div className="mt-4 p-3 bg-yellow-900/30 border border-yellow-700/50 rounded-md">
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-5 w-5 text-yellow-500" />
+                              <p className="text-yellow-400 text-sm font-medium">
+                                Access until:{" "}
+                                {formatDate(subscribedPlan.endDate)}
+                              </p>
+                            </div>
+                          </div>
+                        )}
                       <ul className="mt-6 space-y-4">
                         {features.map((feature) => (
                           <li key={feature} className="flex items-start">
@@ -247,17 +310,34 @@ export default function SubscriptionPage() {
                     {isCurrentPlan ? (
                       <CardFooter className="flex flex-col gap-2">
                         <Button
-                          className="w-full bg-green-600 hover:bg-green-700 cursor-default"
+                          className={`w-full ${
+                            isCanceled
+                              ? "bg-yellow-600 hover:bg-yellow-700"
+                              : "bg-green-600 hover:bg-green-700"
+                          } cursor-default`}
                           disabled
                         >
-                          Current Plan
+                          {isCanceled ? "Ending Soon" : "Current Plan"}
                         </Button>
-                        <Button
-                          variant="outline"
-                          className="w-full border-red-700 text-red-500 hover:bg-red-950 hover:text-red-400"
-                        >
-                          Cancel Plan
-                        </Button>
+                        {!isCanceled && (
+                          <Button
+                            variant="outline"
+                            className="w-full border-red-700 text-red-500 hover:bg-red-950 hover:text-red-400"
+                            onClick={() => {
+                              unsubscribeMutation.mutate(plan.id);
+                            }}
+                            disabled={unsubscribeMutation.isPending}
+                          >
+                            {unsubscribeMutation.isPending ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Processing...
+                              </>
+                            ) : (
+                              <>Cancel Plan</>
+                            )}
+                          </Button>
+                        )}
                       </CardFooter>
                     ) : (
                       <CardFooter>
@@ -333,8 +413,12 @@ export default function SubscriptionPage() {
                       <th key={plan.planName} className="py-4 px-6 text-white">
                         {plan.planName}
                         {subscribedPlan?.planId === plan.id && (
-                          <span className="ml-2 inline-block px-2 py-0.5 text-xs bg-green-600 rounded-full">
-                            Current
+                          <span
+                            className={`ml-2 inline-block px-2 py-0.5 text-xs ${
+                              isCanceled ? "bg-yellow-600" : "bg-green-600"
+                            } rounded-full`}
+                          >
+                            {isCanceled ? "Ending Soon" : "Current"}
                           </span>
                         )}
                       </th>
