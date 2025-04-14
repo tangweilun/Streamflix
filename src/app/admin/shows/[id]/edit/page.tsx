@@ -123,14 +123,19 @@ export default function UpdateVideoForm() {
             className="flex-1 p-2 text-white border border-[#555] rounded"
             style={{ backgroundColor: "oklch(20.8% 0.042 265.755)" }}
           />
-          <input
-            type="text"
-            placeholder="Maturity Rating"
+          <select
             value={maturityRating}
             onChange={(e) => setMaturityRating(e.target.value)}
             className="flex-1 p-2 text-white border border-[#555] rounded"
             style={{ backgroundColor: "oklch(20.8% 0.042 265.755)" }}
-          />
+          >
+            <option value="">Maturity Rating</option>
+            <option value="E">E (EVERYONE)</option>
+            <option value="E10+">E10+ (EVERYONE 10+)</option>
+            <option value="T">T (TEEN)</option>
+            <option value="M">M (MATURE 17+)</option>
+            <option value="AO">AO (ADULTS ONLY 18+)</option>
+          </select>
         </div>
 
         {/* Release Date */}
@@ -147,14 +152,21 @@ export default function UpdateVideoForm() {
 
         {/* Genre */}
         <div className="mb-5">
-          <input
-            type="text"
-            placeholder="Genre"
-            value={genre}
-            onChange={(e) => setGenre(e.target.value)}
-            className="w-full p-2 text-white border border-[#555] rounded"
-            style={{ backgroundColor: "oklch(20.8% 0.042 265.755)" }}
-          />
+        <select
+          value={genre}
+          onChange={(e) => setGenre(e.target.value)}
+          className="w-full p-2 text-white border border-[#555] rounded"
+          style={{ backgroundColor: "oklch(20.8% 0.042 265.755)" }}
+        >
+          <option value="">Select Genre</option>
+          <option value="Action">Action</option>
+          <option value="Comedy">Comedy</option>
+          <option value="Drama">Drama</option>
+          <option value="Sci-Fi">Sci-Fi</option>
+          <option value="Thriller">Thriller</option>
+          <option value="Horror">Horror</option>
+        </select>
+
         </div>
 
         {/* Actors */}

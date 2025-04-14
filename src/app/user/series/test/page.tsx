@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Select,
@@ -27,57 +28,60 @@ type SeriesItem = {
 
 export default function TVSeriesPage() {
   const [series, setSeries] = useState<SeriesItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [sortBy, setSortBy] = useState("title");
   const router = useRouter();
 
+  // Fetch details for each video title
+  async function fetchVideoDetailsByTitle(title: string) {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/videos/title/${encodeURIComponent(title)}`
+      );
+      if (!response.ok) throw new Error("Failed to fetch details");
+
+      const data = await response.json();
+      return {
+        releaseDate: data.releaseDate,
+        genre: data.genre,
+      };
+    } catch (err) {
+      console.error(`Error fetching details for "${title}":`, err);
+      return null;
+    }
+  }
+
+  // Mutation to fetch the series list and enhance each item
+  const fetchSeriesMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/files/list-shows?bucketName=streamflixtest`
+      );
+      if (!response.ok) throw new Error("Failed to fetch series");
+
+      const basicData: SeriesItem[] = await response.json();
+
+      const detailedData = await Promise.all(
+        basicData.map(async (item) => {
+          const extra = await fetchVideoDetailsByTitle(item.title);
+          const genres = extra?.genre?.split(",").map((g: string) => g.trim()) || [];
+          return { ...item, releaseDate: extra?.releaseDate, genres };
+        })
+      );
+
+      return detailedData;
+    },
+
+    onSuccess: (data) => {
+      setSeries(data);
+    },
+
+    onError: () => {
+      console.error("Error loading series.");
+    },
+  });
+
   useEffect(() => {
-    async function fetchVideoDetailsByTitle(title: string) {
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/videos/title/${encodeURIComponent(title)}`
-        );
-        if (!response.ok) throw new Error("Failed to fetch details");
-
-        const data = await response.json();
-        return {
-          releaseDate: data.releaseDate,
-          genre: data.genre,
-        };
-      } catch (err) {
-        console.error(`Error fetching details for "${title}":`, err);
-        return null;
-      }
-    }
-
-    async function fetchSeries() {
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/files/list-shows?bucketName=streamflixtest`
-        );
-        if (!response.ok) throw new Error("Failed to fetch series");
-
-        const basicData: SeriesItem[] = await response.json();
-
-        const detailedData = await Promise.all(
-          basicData.map(async (item) => {
-            const extra = await fetchVideoDetailsByTitle(item.title);
-            const genres = extra?.genre?.split(",").map((g: string) => g.trim()) || [];
-            return { ...item, releaseDate: extra?.releaseDate, genres };
-          })
-        );
-
-        setSeries(detailedData);
-      } catch (error) {
-        console.error("Error loading series:", error);
-        setError("Failed to load series. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchSeries();
+    fetchSeriesMutation.mutate();
   }, []);
 
   const sortedSeries = [...series].sort((a, b) =>
@@ -106,7 +110,7 @@ export default function TVSeriesPage() {
           </div>
         </div>
 
-        {loading ? (
+        {fetchSeriesMutation.isPending ? (
           <div className="space-y-4">
             {Array.from({ length: 5 }).map((_, i) => (
               <Skeleton
@@ -115,9 +119,9 @@ export default function TVSeriesPage() {
               />
             ))}
           </div>
-        ) : error ? (
+        ) : fetchSeriesMutation.isError ? (
           <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription>Failed to load series. Please try again.</AlertDescription>
           </Alert>
         ) : (
           <div className="space-y-6">

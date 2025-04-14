@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useParams } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { ThumbsUp, Plus } from "lucide-react";
 import Image from "next/image";
@@ -40,72 +41,79 @@ export default function VideoPage() {
 
   const [shows, setShows] = useState<Show[]>([]);
   const [episodes, setEpisodes] = useState<Episode[]>([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isLiked, setIsLiked] = useState(false);
   const [inMyList, setInMyList] = useState(false);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [videoDetails, setVideoDetails] = useState<VideoDetails | null>(null);
 
-
-  // Fetch the list of shows
-  useEffect(() => {
-    async function fetchShows() {
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/files/list-shows?bucketName=streamflixtest`
-        );
-        if (!response.ok) throw new Error("Failed to fetch shows");
-        const data = await response.json();
-        setShows(data);
-      } catch {
-        setError("Failed to load shows. Please try again.");
-        console.error("Failed to load shows:");
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchShows();
-  }, []);
+  // Fetch Shows
+  const fetchShowsMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/files/list-shows?bucketName=streamflixtest`
+      );
+      if (!res.ok) throw new Error("Failed to fetch shows");
+      return res.json();
+    },
+    onSuccess: (data) => {
+      setShows(data);
+    },
+    onError: () => {
+      setError("Failed to load shows. Please try again.");
+    },
+  });
 
   const show = shows.find((s) => s.title === title);
 
-  // Fetch video details
+  // Fetch Video Details
+  const fetchVideoDetailsMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/videos/title/${encodeURIComponent(title)}`
+      );
+      if (!res.ok) throw new Error("Failed to fetch video details");
+      return res.json();
+    },
+    onSuccess: (data) => {
+      setVideoDetails(data);
+    },
+    onError: () => {
+      setError("Failed to load video details. Please try again.");
+    },
+  });
+
+  // Fetch Episodes
+  const fetchEpisodesMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/files/watch?showName=${encodeURIComponent(title)}`
+      );
+      if (!res.ok) throw new Error("Failed to fetch episodes");
+      return res.json();
+    },
+    onSuccess: (data) => {
+      setEpisodes(Array.isArray(data.episodes) ? data.episodes : []);
+    },
+    onError: () => {
+      // Optional: handle episode fetch errors
+    },
+  });
+
+  // Call all mutations on mount
   useEffect(() => {
-    async function fetchVideoDetails() {
-      if (!title) return;
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/videos/title/${encodeURIComponent(title)}`
-        );
-        if (!response.ok) throw new Error("Failed to fetch video details");
-        const data = await response.json();
-        setVideoDetails(data);
-      } catch {
-        setError("Failed to load video details. Please try again.");
-      }
-    }
-    fetchVideoDetails();
+    fetchShowsMutation.mutate();
+  }, []);
+
+  useEffect(() => {
+    if (title) fetchVideoDetailsMutation.mutate();
   }, [title]);
 
-  // Fetch episodes
   useEffect(() => {
-    async function fetchEpisodes() {
-      if (!show) return;
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/files/watch?showName=${encodeURIComponent(show.title)}`
-        );
-        if (!res.ok) throw new Error("Failed to fetch episodes");
-        const data = await res.json();
-        setEpisodes(Array.isArray(data.episodes) ? data.episodes : []);
-      } catch {
-      }
-    }
-    fetchEpisodes();
+    if (show) fetchEpisodesMutation.mutate();
   }, [show]);
 
-  if (loading) return <div className="text-white">Loading...</div>;
+  if (fetchShowsMutation.isPending) return <div className="text-white">Loading...</div>;
   if (error && !episodes.length) return <div className="text-red-500">{error}</div>;
   if (!show) return <div className="text-white">Show not found</div>;
 
@@ -123,10 +131,8 @@ export default function VideoPage() {
   return (
     <div className="container mx-auto p-8 min-h-screen flex justify-center items-center">
       <div className="space-y-4 w-full max-w-4xl">
-        {/* Show Title at the top */}
         <h1 className="text-4xl font-bold text-white">{video.title}</h1>
 
-        {/* Video Player */}
         <div className="relative w-full" style={{ paddingTop: "56.25%" }}>
           {videoUrl ? (
             <video
@@ -150,7 +156,7 @@ export default function VideoPage() {
           )}
         </div>
 
-        {/* Episodes List */}
+        {/* Episodes */}
         <div className="mt-4">
           <h3 className="text-xl font-bold text-white">Episodes</h3>
           {episodes.length > 0 ? (
@@ -170,7 +176,7 @@ export default function VideoPage() {
           ) : (
             <p className="text-gray-400 mt-2">Episodes will be available soon. Stay tuned!</p>
           )}
-        </div>      
+        </div>
 
         {/* Description */}
         <div className="bg-gray-800 p-4 rounded-lg">
@@ -191,7 +197,7 @@ export default function VideoPage() {
           )}
         </div>
 
-        {/* Metadata and Like/Save Buttons */}
+        {/* Like / Add Buttons */}
         <div className="flex items-center space-x-4 mt-4">
           <Button
             onClick={() => setIsLiked(!isLiked)}
