@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -22,75 +22,46 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Search, LayoutGrid, List, Filter, Trash2 } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
+import { getUserId } from "@/lib/action";
 
-const likedVideos = [
-  {
-    id: 1,
-    title: "Stranger Things Season 4 - Official Trailer",
-    thumbnail: "/placeholder.svg?height=180&width=320",
-    views: "2.3M",
-    uploadedAt: "2 weeks ago",
-    duration: "2:47",
-    year: 2022,
-    genre: "Sci-Fi",
-    contentType: "Movie",
-  },
-  {
-    id: 2,
-    title: "The Witcher: Blood Origin - Behind the Scenes",
-    thumbnail: "/placeholder.svg?height=180&width=320",
-    views: "892K",
-    uploadedAt: "1 month ago",
-    duration: "5:16",
-    year: 2022,
-    genre: "Fantasy",
-    contentType: "Series",
-  },
-  {
-    id: 3,
-    title: "Wednesday - Thing's Best Moments",
-    thumbnail: "/placeholder.svg?height=180&width=320",
-    views: "1.1M",
-    uploadedAt: "3 weeks ago",
-    duration: "3:42",
-    year: 2023,
-    genre: "Comedy",
-    contentType: "Series",
-  },
-  {
-    id: 4,
-    title: "The Crown Season 5 Recap",
-    thumbnail: "/placeholder.svg?height=180&width=320",
-    views: "567K",
-    uploadedAt: "1 month ago",
-    duration: "8:15",
-    year: 2022,
-    genre: "Drama",
-    contentType: "Series",
-  },
-  {
-    id: 5,
-    title: "Squid Game - Final Game Explained",
-    thumbnail: "/placeholder.svg?height=180&width=320",
-    views: "3.4M",
-    uploadedAt: "6 months ago",
-    duration: "10:22",
-    year: 2021,
-    genre: "Thriller",
-    contentType: "Series",
-  },
-  {
-    id: 6,
-    title: "Money Heist - The Professor's Plan",
-    thumbnail: "/placeholder.svg?height=180&width=320",
-    views: "1.8M",
-    uploadedAt: "8 months ago",
-    duration: "7:33",
-    year: 2021,
-    genre: "Crime",
-    contentType: "Movie",
-  },
-];
+// Define TypeScript interfaces
+interface Video {
+  id: number;
+  title: string;
+  thumbnail: string;
+  views: string;
+  uploadedAt: string;
+  duration: string;
+  year: number;
+  genre: string;
+  contentType: "Movie" | "Series";
+}
+
+// API functions with TypeScript types
+const getFavoriteVideos = async (userId: number): Promise<Video[]> => {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/favorite-videos?userId=${userId}`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch favorite videos");
+  }
+  return response.json();
+};
+
+const removeFromFavorites = async (videoTitle: string, userId: number): Promise<boolean> => {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/favorite-videos/${encodeURIComponent(videoTitle)}?userId=${userId}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to remove from favorites");
+  }
+
+  return true;
+};
 
 const genres = [
   "All",
@@ -116,14 +87,75 @@ const genres = [
   "Western",
 ];
 
-export default function LikedVideosPage() {
-  const [filter, setFilter] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState("title");
-  const [selectedGenre, setSelectedGenre] = useState("All");
+export default function FavoriteVideosPage() {
+  const [filter, setFilter] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [sortBy, setSortBy] = useState<string>("title");
+  const [selectedGenre, setSelectedGenre] = useState<string>("All");
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
+  const [userId, setUserId] = useState<number | null>(null);
+
+  // Initialize query client
+  const queryClient = useQueryClient();
+
+  // Fetch user ID on component mount
+  useEffect(() => {
+    const fetchUserId = async () => {
+      try {
+        const id = await getUserId();
+        if (id) {
+          setUserId(parseInt(id, 10));
+        } else {
+          console.error("Failed to get user ID");
+          toast.error("Authentication error. Please sign in again.");
+        }
+      } catch (error) {
+        console.error("Error fetching user ID:", error);
+      }
+    };
+
+    fetchUserId();
+  }, []);
+
+  // Fetch favorite videos
+  const {
+    data: likedVideos = [],
+    isLoading,
+    error,
+  } = useQuery<Video[], Error>({
+    queryKey: ["favoriteVideos", userId],
+    queryFn: () => userId ? getFavoriteVideos(userId) : Promise.resolve([]),
+    enabled: !!userId, // Only run query when userId is available
+  });
+
+  // Remove from favorites mutation
+  const removeMutation = useMutation({
+    mutationFn: ({ videoTitle }: { videoTitle: string }) => {
+      if (!userId) throw new Error("User ID not available");
+      return removeFromFavorites(videoTitle, userId);
+    },
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ["favoriteVideos"] });
+      toast.success("Video removed from favorites");
+    },
+    onError: (error: Error) => {
+      toast.error(`Error: ${error.message}`);
+    },
+  });
+
+  // Handle remove from favorites
+  const handleRemoveFromFavorites = (videoTitle: string) => {
+    if (!userId) {
+      toast.error("Please sign in to manage favorites");
+      return;
+    }
+    removeMutation.mutate({ videoTitle });
+  };
 
   const filteredVideos = useMemo(() => {
+    if (!likedVideos || likedVideos.length === 0) return [];
+
     return likedVideos
       .filter((video) => {
         //video search function
@@ -150,8 +182,10 @@ export default function LikedVideosPage() {
       })
       .sort((a, b) => {
         if (sortBy === "dateAdded") {
+          // Using uploadedAt as a proxy for dateAdded
           return (
-            new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
+            new Date(b.uploadedAt || Date.now()).getTime() -
+            new Date(a.uploadedAt || Date.now()).getTime()
           );
         } else if (sortBy === "title") {
           return a.title.localeCompare(b.title);
@@ -159,7 +193,43 @@ export default function LikedVideosPage() {
 
         return 0;
       });
-  }, [searchQuery, selectedGenre, filter, sortBy]);
+  }, [likedVideos, searchQuery, selectedGenre, filter, sortBy]);
+
+  // Show loading state
+  if (!userId) {
+    return (
+      <div className="container mx-auto p-6 text-center">
+        <p>Please sign in to view your favorite videos</p>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-6 text-center">
+        <p>Loading your favorite videos...</p>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="container mx-auto p-6 text-center">
+        <p className="text-red-500">
+          Error loading favorite videos: {error.message}
+        </p>
+        <Button
+          className="mt-4 bg-orange-500 hover:bg-orange-600"
+          onClick={() =>
+            queryClient.invalidateQueries({ queryKey: ["favoriteVideos"] })
+          }
+        >
+          Try Again
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-6">
@@ -175,7 +245,7 @@ export default function LikedVideosPage() {
 
         <div className="flex-1">
           <h1 className="text-3xl font-bold mb-2 text-orange-500">
-            Liked Videos
+            Favorite Videos
           </h1>
           <div className="text-gray-400 text-sm space-y-1">
             <p>{likedVideos.length} videos</p>
@@ -188,7 +258,7 @@ export default function LikedVideosPage() {
         <div className="relative flex-grow max-w-md">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
-            placeholder="Search in liked videos"
+            placeholder="Search in favorite videos"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 bg-gray-800 border-gray-700"
@@ -295,7 +365,7 @@ export default function LikedVideosPage() {
 
               <div className="flex-1">
                 <Link
-                  href={`/user/watch/${video.id}`}
+                  href={`/user/watch/${video.id}?title=${encodeURIComponent(video.title)}`}
                   className="hover:text-orange-500"
                 >
                   <h3 className="font-medium text-sm line-clamp-2">
@@ -317,6 +387,8 @@ export default function LikedVideosPage() {
                   variant="ghost"
                   size="icon"
                   className="h-8 w-8 text-red-500 hover:text-red-600"
+                  onClick={() => handleRemoveFromFavorites(video.title)}
+                  disabled={removeMutation.isPending}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -329,21 +401,30 @@ export default function LikedVideosPage() {
       {viewMode === "grid" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {filteredVideos.map((video) => (
-            <div key={video.id} className="group">
+            <div key={video.id} className="group relative">
               <div className="relative">
                 <Image
                   src={video.thumbnail || "/placeholder.svg"}
                   alt={video.title}
                   width={320}
                   height={180}
-                  layout="responsive"
+                  style={{ objectFit: "cover" }}
                   className="rounded"
                 />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-2 right-2 h-8 w-8 bg-black bg-opacity-60 text-red-500 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={() => handleRemoveFromFavorites(video.title)}
+                  disabled={removeMutation.isPending}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </div>
 
               <div className="mt-2">
                 <Link
-                  href={`/user/watch/${video.id}`}
+                  href={`/user/watch/${video.id}?title=${encodeURIComponent(video.title)}`}
                   className="hover:text-orange-500"
                 >
                   <h3 className="font-medium text-sm line-clamp-2">
@@ -362,22 +443,26 @@ export default function LikedVideosPage() {
         </div>
       )}
 
-      {filteredVideos.length === 0 && (
+      {filteredVideos.length === 0 && !isLoading && (
         <div className="text-center py-12">
           <p className="text-gray-400 mb-2">
-            No videos match your search result
+            {likedVideos.length === 0
+              ? "You haven't added any videos to your favorites yet"
+              : "No videos match your search result"}
           </p>
-          <Button
-            variant="outline"
-            onClick={() => {
-              setSearchQuery("");
-              setSelectedGenre("All");
-              setFilter("all");
-            }}
-            className="bg-orange-500 hover:bg-orange-600 border-orange-500"
-          >
-            Clear Filters
-          </Button>
+          {likedVideos.length > 0 && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSearchQuery("");
+                setSelectedGenre("All");
+                setFilter("all");
+              }}
+              className="bg-orange-500 hover:bg-orange-600 border-orange-500"
+            >
+              Clear Filters
+            </Button>
+          )}
         </div>
       )}
     </div>

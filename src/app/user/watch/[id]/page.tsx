@@ -2,12 +2,15 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useParams } from "next/navigation";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { ThumbsUp, Plus } from "lucide-react";
+import { ThumbsUp, Plus, Heart } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { getUserId } from "@/lib/action";
 
 interface Show {
   id: string;
@@ -43,19 +46,43 @@ export default function VideoPage() {
   const [shows, setShows] = useState<Show[]>([]);
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [error, setError] = useState("");
-  const [isLiked, setIsLiked] = useState(false);
-  const [inMyList, setInMyList] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [videoDetails, setVideoDetails] = useState<VideoDetails | null>(null);
+  const [userId, setUserId] = useState<number | null>(null);
+
+  // Fetch user ID on component mount
+  useEffect(() => {
+    const fetchUserId = async () => {
+      try {
+        const id = await getUserId();
+        if (id) {
+          setUserId(parseInt(id, 10));
+        } else {
+          console.error("Failed to get user ID");
+          toast.error("Authentication error. Please sign in again.");
+        }
+      } catch (error) {
+        console.error("Error fetching user ID:", error);
+      }
+    };
+
+    fetchUserId();
+  }, []);
 
   // Fetch Shows
   const fetchShowsMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/files/list-shows?bucketName=streamflixtest`
-      );
-      if (!res.ok) throw new Error("Failed to fetch shows");
-      return res.json();
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/files/list-shows?bucketName=streamflixtest`
+        );
+        if (!res.ok) throw new Error("Failed to fetch shows");
+        return res.json();
+      } catch (error) {
+        console.error("Error fetching shows:", error);
+        throw error;
+      }
     },
     onSuccess: (data) => {
       setShows(data);
@@ -70,14 +97,22 @@ export default function VideoPage() {
   // Fetch Video Details
   const fetchVideoDetailsMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/videos/title/${encodeURIComponent(title)}`
-      );
-      if (!res.ok) throw new Error("Failed to fetch video details");
-      return res.json();
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/videos/title/${encodeURIComponent(
+            title
+          )}`
+        );
+        if (!res.ok) throw new Error("Failed to fetch video details");
+        return res.json();
+      } catch (error) {
+        console.error("Error fetching video details:", error);
+        throw error;
+      }
     },
     onSuccess: (data) => {
       setVideoDetails(data);
+      // We don't need to set videoId anymore
     },
     onError: () => {
       setError("Failed to load video details. Please try again.");
@@ -87,32 +122,164 @@ export default function VideoPage() {
   // Fetch Episodes
   const fetchEpisodesMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/files/watch?showName=${encodeURIComponent(title)}`
-      );
-      if (!res.ok) throw new Error("Failed to fetch episodes");
-      return res.json();
+      try {
+        const res = await fetch(
+          `${
+            process.env.NEXT_PUBLIC_API_URL
+          }/files/watch?showName=${encodeURIComponent(title)}`
+        );
+        if (!res.ok) throw new Error("Failed to fetch episodes");
+        return res.json();
+      } catch (error) {
+        console.error("Error fetching episodes:", error);
+        throw error;
+      }
     },
     onSuccess: (data) => {
       setEpisodes(Array.isArray(data.episodes) ? data.episodes : []);
     },
-    onError: () => {
+    onError: (error) => {
+      console.error("Episode fetch error:", error);
       // Optional: handle episode fetch errors
     },
   });
 
-  // Call all mutations on mount
+  // Check if video is in favorites - Updated to use userId
+  const checkFavoriteMutation = useMutation({
+    mutationFn: async () => {
+      if (!title || !userId) return false;
+
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/favorite-videos/Check/${encodeURIComponent(title)}?userId=${userId}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        if (!res.ok) throw new Error("Failed to check favorite status");
+        return res.json();
+      } catch (error) {
+        console.error("Error checking favorite status:", error);
+        return false;
+      }
+    },
+    onSuccess: (data) => {
+      setIsFavorite(data);
+    },
+    onError: (error) => {
+      console.error("Failed to check favorite status:", error);
+    },
+  });
+
+  // Toggle favorite status - Updated to use userId
+  const toggleFavoriteMutation = useMutation({
+    mutationFn: async () => {
+      if (!title) {
+        throw new Error("Video title not available");
+      }
+      
+      if (!userId) {
+        throw new Error("User ID not available");
+      }
+
+      try {
+        const method = isFavorite ? "DELETE" : "POST";
+        let url = `${process.env.NEXT_PUBLIC_API_URL}/favorite-videos/${encodeURIComponent(title)}`;
+        
+        // For DELETE requests, add userId as query parameter
+        if (method === "DELETE") {
+          url += `?userId=${userId}`;
+        }
+        
+        const options: RequestInit = {
+          method,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        };
+        
+        // For POST requests, add userId in the request body
+        if (method === "POST") {
+          options.body = JSON.stringify({ userId });
+        }
+        
+        const res = await fetch(url, options);
+        
+        if (!res.ok) {
+          const errorText = await res.text();
+          console.error("Favorite API error response:", errorText);
+          throw new Error(
+            `Failed to ${isFavorite ? "remove from" : "add to"} favorites`
+          );
+        }
+        return res.ok;
+      } catch (error) {
+        console.error("Error toggling favorite:", error);
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      setIsFavorite(!isFavorite);
+      toast.success(
+        isFavorite
+          ? `${title} has been removed from your favorites.`
+          : `${title} has been added to your favorites.`
+      );
+    },
+    onError: (error) => {
+      console.error("Favorite error:", error);
+      toast.error(
+        `Failed to ${
+          isFavorite ? "remove from" : "add to"
+        } favorites. Please try again.`
+      );
+    },
+  });
+
+  // Call mutations with error handling
   useEffect(() => {
-    fetchShowsMutation.mutate();
+    try {
+      fetchShowsMutation.mutate();
+    } catch (error) {
+      console.error("Error in fetchShowsMutation:", error);
+    }
   }, []);
 
   useEffect(() => {
-    if (title) fetchVideoDetailsMutation.mutate();
-  }, [title]);
+    if (title && userId) {
+      try {
+        fetchVideoDetailsMutation.mutate();
+        // Check favorite status when title and userId are available
+        checkFavoriteMutation.mutate();
+      } catch (error) {
+        console.error("Error in fetchVideoDetailsMutation:", error);
+      }
+    }
+  }, [title, userId]);
 
   useEffect(() => {
-    if (show) fetchEpisodesMutation.mutate();
+    if (show) {
+      try {
+        fetchEpisodesMutation.mutate();
+      } catch (error) {
+        console.error("Error in fetchEpisodesMutation:", error);
+      }
+    }
   }, [show]);
+
+  // We don't need this useEffect anymore since we're checking favorites based on title
+  // useEffect(() => {
+  //   if (videoId) {
+  //     try {
+  //       checkFavoriteMutation.mutate();
+  //     } catch (error) {
+  //       console.error("Error in checkFavoriteMutation:", error);
+  //     }
+  //   }
+  // }, [videoId]);
 
   if (fetchShowsMutation.isPending) {
     return (
@@ -121,7 +288,7 @@ export default function VideoPage() {
       </div>
     );
   }
-    if (error && !episodes.length) {
+  if (error && !episodes.length) {
     return (
       <div className="flex justify-center items-center min-h-screen px-4">
         <Alert variant="destructive" className="max-w-md w-full">
@@ -132,7 +299,7 @@ export default function VideoPage() {
       </div>
     );
   }
-    if (!show) return <div className="text-white">Show not found</div>;
+  if (!show) return <div className="text-white">Show not found</div>;
 
   const video = {
     id: id as string,
@@ -143,6 +310,20 @@ export default function VideoPage() {
 
   const handleEpisodeSelect = (episodeUrl: string) => {
     setVideoUrl(episodeUrl);
+  };
+
+  const handleToggleFavorite = () => {
+    if (!title) {
+      toast.error("Video information is not available. Please try again later.");
+      return;
+    }
+    
+    if (!userId) {
+      toast.error("Please sign in to add favorites.");
+      return;
+    }
+    
+    toggleFavoriteMutation.mutate();
   };
 
   return (
@@ -191,7 +372,9 @@ export default function VideoPage() {
               ))}
             </div>
           ) : (
-            <p className="text-gray-400 mt-2">Episodes will be available soon. Stay tuned!</p>
+            <p className="text-gray-400 mt-2">
+              Episodes will be available soon. Stay tuned!
+            </p>
           )}
         </div>
 
@@ -206,7 +389,9 @@ export default function VideoPage() {
           {videoDetails?.actors.length ? (
             <ul className="list-disc pl-6 text-white">
               {videoDetails.actors.map((actor, index) => (
-                <li key={index} className="text-sm">{actor.name}</li>
+                <li key={index} className="text-sm">
+                  {actor.name}
+                </li>
               ))}
             </ul>
           ) : (
@@ -214,23 +399,31 @@ export default function VideoPage() {
           )}
         </div>
 
-        {/* Like / Add Buttons */}
+        {/*  Favorite Buttons */}
+        {/* Favorite Button */}
         <div className="flex items-center space-x-4 mt-4">
           <Button
-            onClick={() => setIsLiked(!isLiked)}
-            className="bg-orange-500 hover:bg-orange-600"
-            aria-label={isLiked ? "Unlike" : "Like"}
+            onClick={handleToggleFavorite}
+            className={`${
+              isFavorite
+                ? "bg-red-500 hover:bg-red-600"
+                : "bg-orange-500 hover:bg-orange-600"
+            }`}
+            aria-label={
+              isFavorite ? "Remove from Favorites" : "Add to Favorites"
+            }
+            disabled={toggleFavoriteMutation.isPending || !userId}
           >
-            <ThumbsUp className="w-4 h-4 mr-2" />
-            {isLiked ? "Liked" : "Like"}
-          </Button>
-          <Button
-            onClick={() => setInMyList(!inMyList)}
-            className="bg-orange-500 hover:bg-orange-600"
-            aria-label={inMyList ? "Remove from List" : "Add to List"}
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            {inMyList ? "In List" : "Add to List"}
+            <Heart
+              className={`w-4 h-4 mr-2 ${isFavorite ? "fill-white" : ""}`}
+            />
+            {toggleFavoriteMutation.isPending
+              ? "Processing..."
+              : !userId
+              ? "Sign in to favorite"
+              : isFavorite
+              ? "Favorited"
+              : "Favorite"}
           </Button>
         </div>
       </div>

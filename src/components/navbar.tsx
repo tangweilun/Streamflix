@@ -115,7 +115,7 @@ export default function Navbar() {
                 Profile
               </Link>
               <Link
-                href="/user/liked-videos"
+                href="/user/favorite"
                 onClick={() => setDropdownOpen(false)}
                 className="block px-4 py-2 text-sm text-white hover:bg-orange-600 hover:text-black"
               >
