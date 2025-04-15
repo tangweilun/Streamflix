@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ThumbsUp, Plus } from "lucide-react";
 import Image from "next/image";
 import React from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface Show {
   id: string;
@@ -113,9 +114,25 @@ export default function VideoPage() {
     if (show) fetchEpisodesMutation.mutate();
   }, [show]);
 
-  if (fetchShowsMutation.isPending) return <div className="text-white">Loading...</div>;
-  if (error && !episodes.length) return <div className="text-red-500">{error}</div>;
-  if (!show) return <div className="text-white">Show not found</div>;
+  if (fetchShowsMutation.isPending) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <span className="text-white text-lg">Loading...</span>
+      </div>
+    );
+  }
+    if (error && !episodes.length) {
+    return (
+      <div className="flex justify-center items-center min-h-screen px-4">
+        <Alert variant="destructive" className="max-w-md w-full">
+          <AlertDescription className="flex flex-col space-y-2">
+            <span>Failed to load video details. Please try again.</span>
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+    if (!show) return <div className="text-white">Show not found</div>;
 
   const video = {
     id: id as string,

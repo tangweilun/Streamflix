@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { ChevronLeft, ChevronRight, Play, Plus } from "lucide-react";
+import { useRouter } from "next/navigation"; // Import useRouter
 
 type Video = {
   id: string | number;
@@ -18,6 +18,7 @@ type VideoCarouselProps = {
 
 export function VideoCarousel({ title, videos = [] }: VideoCarouselProps) {
   const [startIndex, setStartIndex] = useState(0);
+  const router = useRouter(); // Initialize router
 
   if (!videos || videos.length === 0) {
     return (
@@ -40,6 +41,10 @@ export function VideoCarousel({ title, videos = [] }: VideoCarouselProps) {
     setStartIndex(
       (prevIndex) => (prevIndex - 1 + videos.length) % videos.length
     );
+  };
+
+  const handleCardClick = (id: string | number, title: string) => {
+    router.push(`/user/watch/${id}?title=${encodeURIComponent(title)}`);
   };
 
   return (
@@ -72,12 +77,12 @@ export function VideoCarousel({ title, videos = [] }: VideoCarouselProps) {
                   />
                 </div>
                 <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-60 transition-opacity duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
-                  <Link
-                    href={`/user/watch/${video.id}`}
+                  <button
+                    onClick={() => handleCardClick(video.id, video.title)} // Using handleCardClick here
                     className="text-white hover:text-orange-500 transition-colors mr-4"
                   >
                     <Play />
-                  </Link>
+                  </button>
                   <button className="text-white hover:text-orange-500 transition-colors">
                     <Plus />
                   </button>
