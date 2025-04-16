@@ -71,6 +71,7 @@ export default function VideoPage() {
   }, []);
 
   // Fetch Shows
+<<<<<<< Updated upstream
   const fetchShowsMutation = useMutation({
     mutationFn: async () => {
       try {
@@ -91,6 +92,42 @@ export default function VideoPage() {
       setError("Failed to load shows. Please try again.");
     },
   });
+=======
+  // const fetchShowsMutation = useMutation({
+  //   mutationFn: async () => {
+  //     const response = await fetch(
+  //       `${process.env.NEXT_PUBLIC_API_URL}/files/list-shows?bucketName=streamflixtest`
+  //     );
+  //     if (!response.ok) throw new Error("Failed to fetch shows");
+  //     return response.json();
+  //   },
+  //   onSuccess: (data) => {
+  //     setShows(data);
+  //   },
+  //   onError: () => {
+  //     setError("Failed to load shows. Please try again.");
+  //   },
+  // });
+
+  const fetchShows = async (): Promise<Show> => {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/files/list-shows?bucketName=streamflixtest`,
+      {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch users.");
+    }
+
+    alert(response.json());
+
+    return response.json();
+  };
+>>>>>>> Stashed changes
 
   const fetchShows = async (): Promise<Show> => {
     const response = await fetch(
@@ -116,6 +153,7 @@ export default function VideoPage() {
   // Fetch Video Details
   const fetchVideoDetailsMutation = useMutation({
     mutationFn: async () => {
+<<<<<<< Updated upstream
       try {
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/videos/title/${encodeURIComponent(
@@ -128,6 +166,8 @@ export default function VideoPage() {
         console.error("Error fetching video details:", error);
         throw error;
       }
+=======
+>>>>>>> Stashed changes
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/videos/title/${encodeURIComponent(
           title
@@ -177,6 +217,7 @@ export default function VideoPage() {
     },
   });
 
+<<<<<<< Updated upstream
   // Check if video is in favorites - Updated to use userId
   const checkFavoriteMutation = useMutation({
     mutationFn: async () => {
@@ -286,6 +327,8 @@ export default function VideoPage() {
       console.error("Error in fetchShowsMutation:", error);
     }
   }, []);
+=======
+>>>>>>> Stashed changes
   // Call all mutations on mount
   // useEffect(() => {
   //   fetchShowsMutation.mutate();
@@ -313,6 +356,7 @@ export default function VideoPage() {
     }
   }, [show]);
 
+<<<<<<< Updated upstream
   // We don't need this useEffect anymore since we're checking favorites based on title
   // useEffect(() => {
   //   if (videoId) {
@@ -331,6 +375,8 @@ export default function VideoPage() {
       </div>
     );
   }
+=======
+>>>>>>> Stashed changes
   // if (fetchShowsMutation.isPending) {
   //   return (
   //     <div className="flex justify-center items-center min-h-screen">
@@ -362,6 +408,7 @@ export default function VideoPage() {
     setVideoUrl(episodeUrl);
   };
 
+<<<<<<< Updated upstream
   const handleToggleFavorite = () => {
     if (!title) {
       toast.error(
@@ -377,6 +424,8 @@ export default function VideoPage() {
 
     toggleFavoriteMutation.mutate();
   };
+=======
+>>>>>>> Stashed changes
   const {
     data: s,
     isLoading,
