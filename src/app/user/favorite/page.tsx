@@ -30,7 +30,7 @@ import { getUserId } from "@/lib/action";
 interface Video {
   id: number;
   title: string;
-  thumbnail: string;
+  thumbnailUrl: string;
   views: string;
   uploadedAt: string;
   duration: string;
@@ -39,22 +39,56 @@ interface Video {
   contentType: "Movie" | "Series";
 }
 
+interface BucketThumbnail {
+  id: string;
+  title: string;
+  thumbnail: string;
+}
+
 // API functions with TypeScript types
 const getFavoriteVideos = async (userId: number): Promise<Video[]> => {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/favorite-videos?userId=${userId}`);
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/favorite-videos?userId=${userId}`
+  );
   if (!response.ok) {
     throw new Error("Failed to fetch favorite videos");
   }
   return response.json();
 };
 
-const removeFromFavorites = async (videoTitle: string, userId: number): Promise<boolean> => {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/favorite-videos/${encodeURIComponent(videoTitle)}?userId=${userId}`, {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+// New function to fetch thumbnails from bucket
+const getThumbnailsFromBucket = async (): Promise<BucketThumbnail[]> => {
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/files/list-shows?bucketName=${
+        process.env.S3_BUCKET_NAME || "streamflixtest"
+      }`
+    );
+    if (!response.ok) {
+      throw new Error("Failed to fetch thumbnails from bucket");
+    }
+    return response.json();
+  } catch (error) {
+    console.error("Error fetching thumbnails from bucket:", error);
+    return [];
+  }
+};
+
+const removeFromFavorites = async (
+  videoTitle: string,
+  userId: number
+): Promise<boolean> => {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/favorite-videos/${encodeURIComponent(
+      videoTitle
+    )}?userId=${userId}`,
+    {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
 
   if (!response.ok) {
     throw new Error("Failed to remove from favorites");
@@ -94,6 +128,9 @@ export default function FavoriteVideosPage() {
   const [selectedGenre, setSelectedGenre] = useState<string>("All");
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [userId, setUserId] = useState<number | null>(null);
+  const [bucketThumbnails, setBucketThumbnails] = useState<BucketThumbnail[]>(
+    []
+  );
 
   // Initialize query client
   const queryClient = useQueryClient();
@@ -117,16 +154,51 @@ export default function FavoriteVideosPage() {
     fetchUserId();
   }, []);
 
+  // Fetch thumbnails from bucket
+  useEffect(() => {
+    const fetchThumbnails = async () => {
+      try {
+        const thumbnails = await getThumbnailsFromBucket();
+        setBucketThumbnails(thumbnails);
+      } catch (error) {
+        console.error("Error fetching thumbnails:", error);
+        toast.error("Failed to load thumbnails");
+      }
+    };
+
+    fetchThumbnails();
+  }, []);
+
   // Fetch favorite videos
   const {
-    data: likedVideos = [],
+    data: rawLikedVideos = [],
     isLoading,
     error,
   } = useQuery<Video[], Error>({
     queryKey: ["favoriteVideos", userId],
-    queryFn: () => userId ? getFavoriteVideos(userId) : Promise.resolve([]),
+    queryFn: () => (userId ? getFavoriteVideos(userId) : Promise.resolve([])),
     enabled: !!userId, // Only run query when userId is available
   });
+
+  // Merge favorite videos with bucket thumbnails
+  const likedVideos = useMemo(() => {
+    return rawLikedVideos.map((video) => {
+      // Find matching thumbnail from bucket
+      const matchingThumbnail = bucketThumbnails.find(
+        (item) => item.title.toLowerCase() === video.title.toLowerCase()
+      );
+
+      // Update thumbnailUrl if found in bucket
+      if (matchingThumbnail) {
+        return {
+          ...video,
+          thumbnailUrl: matchingThumbnail.thumbnail,
+        };
+      }
+
+      return video;
+    });
+  }, [rawLikedVideos, bucketThumbnails]);
 
   // Remove from favorites mutation
   const removeMutation = useMutation({
@@ -236,7 +308,7 @@ export default function FavoriteVideosPage() {
       <div className="flex items-start gap-6 mb-8">
         <div className="relative w-[280px] h-[157px] rounded-lg overflow-hidden bg-gray-800">
           <Image
-            src={likedVideos[0]?.thumbnail || "/placeholder.svg"}
+            src={likedVideos[0]?.thumbnailUrl || "/placeholder.svg"}
             alt="Playlist thumbnail"
             fill={true}
             style={{ objectFit: "cover" }}
@@ -249,7 +321,6 @@ export default function FavoriteVideosPage() {
           </h1>
           <div className="text-gray-400 text-sm space-y-1">
             <p>{likedVideos.length} videos</p>
-            <p>Last updated on {new Date().toLocaleDateString()}</p>
           </div>
         </div>
       </div>
@@ -355,7 +426,7 @@ export default function FavoriteVideosPage() {
 
               <div className="relative w-[160px] h-[90px]">
                 <Image
-                  src={video.thumbnail || "/placeholder.svg"}
+                  src={video.thumbnailUrl || "/placeholder.svg"}
                   alt={video.title}
                   fill={true}
                   style={{ objectFit: "cover" }}
@@ -365,7 +436,9 @@ export default function FavoriteVideosPage() {
 
               <div className="flex-1">
                 <Link
-                  href={`/user/watch/${video.id}?title=${encodeURIComponent(video.title)}`}
+                  href={`/user/watch/${video.id}?title=${encodeURIComponent(
+                    video.title
+                  )}`}
                   className="hover:text-orange-500"
                 >
                   <h3 className="font-medium text-sm line-clamp-2">
@@ -373,12 +446,19 @@ export default function FavoriteVideosPage() {
                   </h3>
                 </Link>
 
-                <span className="text-xs bg-gray-700 px-1.5 py-0.5 rounded">
-                  {video.genre}
-                </span>
-
-                <div className="text-sm text-gray-400">
-                  {video.views} views • {video.uploadedAt}
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-xs bg-gray-700 px-1.5 py-0.5 rounded">
+                    {video.genre}
+                  </span>
+                  <span className="text-xs text-gray-400">
+                    {typeof video.duration === "string"
+                      ? video.duration
+                      : `${Math.floor(video.duration / 60)}:${(
+                          video.duration % 60
+                        )
+                          .toString()
+                          .padStart(2, "0")}`}
+                  </span>
                 </div>
               </div>
 
@@ -404,7 +484,7 @@ export default function FavoriteVideosPage() {
             <div key={video.id} className="group relative">
               <div className="relative">
                 <Image
-                  src={video.thumbnail || "/placeholder.svg"}
+                  src={video.thumbnailUrl || "/placeholder.svg"}
                   alt={video.title}
                   width={320}
                   height={180}
@@ -424,18 +504,28 @@ export default function FavoriteVideosPage() {
 
               <div className="mt-2">
                 <Link
-                  href={`/user/watch/${video.id}?title=${encodeURIComponent(video.title)}`}
+                  href={`/user/watch/${video.id}?title=${encodeURIComponent(
+                    video.title
+                  )}`}
                   className="hover:text-orange-500"
                 >
                   <h3 className="font-medium text-sm line-clamp-2">
                     {video.title}
                   </h3>
                 </Link>
-                <span className="text-xs bg-gray-700 px-1.5 py-0.5 rounded">
-                  {video.genre}
-                </span>
-                <div className="text-xs text-gray-400">
-                  {video.views} views • {video.uploadedAt}
+                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                  <span className="text-xs bg-gray-700 px-1.5 py-0.5 rounded">
+                    {video.genre}
+                  </span>
+                  <span className="text-xs text-gray-400">
+                    {typeof video.duration === "string"
+                      ? video.duration
+                      : `${Math.floor(video.duration / 60)}:${(
+                          video.duration % 60
+                        )
+                          .toString()
+                          .padStart(2, "0")}`}
+                  </span>
                 </div>
               </div>
             </div>

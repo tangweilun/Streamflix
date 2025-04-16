@@ -63,7 +63,7 @@ export default function CreateVideoWithThumbnail() {
       formData.append("thumbnail", thumbnail);
   
       const uploadRes = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/files/create-show?bucketName=streamflixtest`,
+        `${process.env.NEXT_PUBLIC_API_URL}/files/create-show?bucketName=${process.env.S3_BUCKET_NAME || "streamflixtest"}`,
         {
           method: "POST",
           body: formData,

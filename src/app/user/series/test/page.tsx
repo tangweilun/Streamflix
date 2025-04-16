@@ -35,7 +35,9 @@ export default function TVSeriesPage() {
   async function fetchVideoDetailsByTitle(title: string) {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/videos/title/${encodeURIComponent(title)}`
+        `${process.env.NEXT_PUBLIC_API_URL}/videos/title/${encodeURIComponent(
+          title
+        )}`
       );
       if (!response.ok) throw new Error("Failed to fetch details");
 
@@ -54,7 +56,9 @@ export default function TVSeriesPage() {
   const fetchSeriesMutation = useMutation({
     mutationFn: async () => {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/files/list-shows?bucketName=streamflixtest`
+        `${process.env.NEXT_PUBLIC_API_URL}/files/list-shows?bucketName=${
+          process.env.S3_BUCKET_NAME || "streamflixtest"
+        }`
       );
       if (!response.ok) throw new Error("Failed to fetch series");
 
@@ -63,7 +67,8 @@ export default function TVSeriesPage() {
       const detailedData = await Promise.all(
         basicData.map(async (item) => {
           const extra = await fetchVideoDetailsByTitle(item.title);
-          const genres = extra?.genre?.split(",").map((g: string) => g.trim()) || [];
+          const genres =
+            extra?.genre?.split(",").map((g: string) => g.trim()) || [];
           return { ...item, releaseDate: extra?.releaseDate, genres };
         })
       );
@@ -121,7 +126,9 @@ export default function TVSeriesPage() {
           </div>
         ) : fetchSeriesMutation.isError ? (
           <Alert variant="destructive">
-            <AlertDescription>Failed to load series. Please try again.</AlertDescription>
+            <AlertDescription>
+              Failed to load series. Please try again.
+            </AlertDescription>
           </Alert>
         ) : (
           <div className="space-y-6">
@@ -146,7 +153,8 @@ export default function TVSeriesPage() {
                     </h2>
                     {show.releaseDate && (
                       <p className="text-sm text-gray-400 mt-1">
-                        Release Date: {new Date(show.releaseDate).toLocaleDateString()}
+                        Release Date:{" "}
+                        {new Date(show.releaseDate).toLocaleDateString()}
                       </p>
                     )}
                     <div className="flex gap-2 mt-2 flex-wrap">

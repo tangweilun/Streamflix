@@ -82,7 +82,7 @@ export default function ShowGrid({ shows }: { shows: Show[] }) {
 
     try {
       // Step 1: Delete files from S3
-      const s3Response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/Files?bucketName=streamflixtest&prefix=shows/${encodeURIComponent(showTitle)}`, {
+      const s3Response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/Files?bucketName=${process.env.S3_BUCKET_NAME || "streamflixtest"}&prefix=shows/${encodeURIComponent(showTitle)}`, {
         method: "DELETE",
       });
 

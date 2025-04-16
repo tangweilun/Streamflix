@@ -75,7 +75,9 @@ export default function VideoPage() {
     mutationFn: async () => {
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/files/list-shows?bucketName=streamflixtest`
+          `${process.env.NEXT_PUBLIC_API_URL}/files/list-shows?bucketName=${
+            process.env.S3_BUCKET_NAME || "streamflixtest"
+          }`
         );
         if (!res.ok) throw new Error("Failed to fetch shows");
         return res.json();
@@ -151,7 +153,11 @@ export default function VideoPage() {
 
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/favorite-videos/Check/${encodeURIComponent(title)}?userId=${userId}`,
+          `${
+            process.env.NEXT_PUBLIC_API_URL
+          }/favorite-videos/Check/${encodeURIComponent(
+            title
+          )}?userId=${userId}`,
           {
             method: "GET",
             headers: {
@@ -180,34 +186,36 @@ export default function VideoPage() {
       if (!title) {
         throw new Error("Video title not available");
       }
-      
+
       if (!userId) {
         throw new Error("User ID not available");
       }
 
       try {
         const method = isFavorite ? "DELETE" : "POST";
-        let url = `${process.env.NEXT_PUBLIC_API_URL}/favorite-videos/${encodeURIComponent(title)}`;
-        
+        let url = `${
+          process.env.NEXT_PUBLIC_API_URL
+        }/favorite-videos/${encodeURIComponent(title)}`;
+
         // For DELETE requests, add userId as query parameter
         if (method === "DELETE") {
           url += `?userId=${userId}`;
         }
-        
+
         const options: RequestInit = {
           method,
           headers: {
             "Content-Type": "application/json",
           },
         };
-        
+
         // For POST requests, add userId in the request body
         if (method === "POST") {
           options.body = JSON.stringify({ userId });
         }
-        
+
         const res = await fetch(url, options);
-        
+
         if (!res.ok) {
           const errorText = await res.text();
           console.error("Favorite API error response:", errorText);
@@ -314,15 +322,17 @@ export default function VideoPage() {
 
   const handleToggleFavorite = () => {
     if (!title) {
-      toast.error("Video information is not available. Please try again later.");
+      toast.error(
+        "Video information is not available. Please try again later."
+      );
       return;
     }
-    
+
     if (!userId) {
       toast.error("Please sign in to add favorites.");
       return;
     }
-    
+
     toggleFavoriteMutation.mutate();
   };
 

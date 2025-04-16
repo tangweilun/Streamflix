@@ -6,7 +6,7 @@ import { PlayCircle } from "lucide-react";
 import { VideoCarousel } from "@/components/video-carousel";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation"; 
+import { useRouter } from "next/navigation";
 
 type Show = {
   id: string;
@@ -36,7 +36,7 @@ export default function HomePage() {
     seasons: 0,
     lastUpdated: "",
   };
-  
+
   const fallbackTrendingVideos: Video[] = [
     {
       id: "trending1",
@@ -54,7 +54,7 @@ export default function HomePage() {
       image: "/samplevideo/avengers.jpg",
     },
   ];
-  
+
   const fallbackPopularVideos: Video[] = [
     {
       id: "popular1",
@@ -70,12 +70,14 @@ export default function HomePage() {
       id: "popular3",
       title: "Python",
       image: "/samplevideo/python.jpg",
-    }  
+    },
   ];
-  
+
   const fetchShows = async (): Promise<Show[]> => {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/files/list-shows?bucketName=streamflixtest`
+      `${process.env.NEXT_PUBLIC_API_URL}/files/list-shows?bucketName=${
+        process.env.S3_BUCKET_NAME || "streamflixtest"
+      }`
     );
     if (!res.ok) throw new Error("Failed to fetch shows");
     return res.json();
@@ -98,7 +100,7 @@ export default function HomePage() {
         setTrendingVideos(fallbackTrendingVideos);
         setPopularVideos(fallbackPopularVideos);
       }
-    },    
+    },
   });
 
   useEffect(() => {
@@ -106,13 +108,17 @@ export default function HomePage() {
   }, [mutate]);
 
   const handleCardClick = (id: string, title: string) => {
-    if (id.startsWith("default") || id.startsWith("trending") || id.startsWith("popular")) return;
+    if (
+      id.startsWith("default") ||
+      id.startsWith("trending") ||
+      id.startsWith("popular")
+    )
+      return;
     router.push(`/user/watch/${id}?title=${encodeURIComponent(title)}`);
   };
-  
 
   if (isPending || !featuredVideo) {
-    return(
+    return (
       <div className="flex justify-center items-center min-h-screen">
         <span className="text-white text-lg">Loading...</span>
       </div>
@@ -136,7 +142,9 @@ export default function HomePage() {
           <h1 className="text-4xl font-bold mb-2">{featuredVideo.title}</h1>
           <Button
             className="bg-orange-500 hover:bg-orange-600 text-white"
-            onClick={() => handleCardClick(featuredVideo.id, featuredVideo.title)} // Use handleCardClick
+            onClick={() =>
+              handleCardClick(featuredVideo.id, featuredVideo.title)
+            } // Use handleCardClick
           >
             <PlayCircle className="mr-2 h-5 w-5" />
             Play Now
