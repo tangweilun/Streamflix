@@ -91,25 +91,10 @@ export default function VideoPage() {
       setError("Failed to load shows. Please try again.");
     },
   });
-  // const fetchShowsMutation = useMutation({
-  //   mutationFn: async () => {
-  //     const response = await fetch(
-  //       `${process.env.NEXT_PUBLIC_API_URL}/files/list-shows?bucketName=streamflixtest`
-  //     );
-  //     if (!response.ok) throw new Error("Failed to fetch shows");
-  //     return response.json();
-  //   },
-  //   onSuccess: (data) => {
-  //     setShows(data);
-  //   },
-  //   onError: () => {
-  //     setError("Failed to load shows. Please try again.");
-  //   },
-  // });
 
   const fetchShows = async (): Promise<Show> => {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/files/list-shows?bucketName=streamflixtest`,
+      `${process.env.NEXT_PUBLIC_API_URL}/files/list-shows?bucketName=${process.env.NEXT_PUBLIC_S3_BUCKET_NAME}`,
       {
         method: "GET",
         headers: { "Content-Type": "application/json" },

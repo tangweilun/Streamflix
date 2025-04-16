@@ -174,9 +174,6 @@ export default function UserProfilePage() {
   const [passwordError, setPasswordError] = useState("");
   const [passwordSuccess, setPasswordSuccess] = useState(false);
 
-  const [cancellationReason, setCancellationReason] = useState("");
-  const [isSubscriptionCancelled, setIsSubscriptionCancelled] = useState(false);
-
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
 
   // const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
