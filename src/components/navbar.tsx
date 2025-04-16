@@ -119,7 +119,7 @@ export default function Navbar() {
                 onClick={() => setDropdownOpen(false)}
                 className="block px-4 py-2 text-sm text-white hover:bg-orange-600 hover:text-black"
               >
-                Liked Videos
+                Favorite Videos
               </Link>
               <Link
                 href="/user/watch-history"

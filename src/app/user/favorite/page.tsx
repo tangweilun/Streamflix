@@ -27,22 +27,28 @@ import { toast } from "react-toastify";
 import { getUserId } from "@/lib/action";
 
 // Define TypeScript interfaces
+// Update the Video interface to include the new fields
 interface Video {
   id: number;
   title: string;
   thumbnailUrl: string;
   views: string;
   uploadedAt: string;
-  duration: string;
+  duration: string | number;
   year: number;
   genre: string;
   contentType: "Movie" | "Series";
+  episodeCount?: number; // Add this field
+  lastUpdated?: string; // Add this field
 }
 
 interface BucketThumbnail {
   id: string;
   title: string;
   thumbnail: string;
+  episodeCount: number;
+  seasons: number;
+  lastUpdated: string;
 }
 
 // API functions with TypeScript types
@@ -56,18 +62,16 @@ const getFavoriteVideos = async (userId: number): Promise<Video[]> => {
   return response.json();
 };
 
-// New function to fetch thumbnails from bucket
+// Function to fetch thumbnails from bucket
 const getThumbnailsFromBucket = async (): Promise<BucketThumbnail[]> => {
   try {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/files/list-shows?bucketName=${process.env.NEXT_PUBLIC_S3_BUCKET_NAME}`
     );
-    if (!response.ok) {
-      throw new Error("Failed to fetch thumbnails from bucket");
-    }
-    return response.json();
+    if (!response.ok) throw new Error("Failed to fetch thumbnails");
+    return await response.json();
   } catch (error) {
-    console.error("Error fetching thumbnails from bucket:", error);
+    console.error("Error fetching thumbnails:", error);
     return [];
   }
 };
@@ -180,21 +184,27 @@ export default function FavoriteVideosPage() {
 
   // Merge favorite videos with bucket thumbnails
   const likedVideos = useMemo(() => {
-    return rawLikedVideos.map((video) => {
-      // Find matching thumbnail from bucket
+    // First filter favorite videos that exist in bucket thumbnails
+    const validTitles = new Set(
+      bucketThumbnails.map((t) => t.title.toLowerCase())
+    );
+    const filteredFavorites = rawLikedVideos.filter((video) =>
+      validTitles.has(video.title.toLowerCase())
+    );
+
+    // Then merge with thumbnail data
+    return filteredFavorites.map((video) => {
       const matchingThumbnail = bucketThumbnails.find(
         (item) => item.title.toLowerCase() === video.title.toLowerCase()
       );
 
-      // Update thumbnailUrl if found in bucket
-      if (matchingThumbnail) {
-        return {
-          ...video,
-          thumbnailUrl: matchingThumbnail.thumbnail,
-        };
-      }
-
-      return video;
+      return {
+        ...video,
+        thumbnailUrl: matchingThumbnail?.thumbnail || "/placeholder.svg",
+        episodeCount: matchingThumbnail?.episodeCount || 0,
+        lastUpdated: matchingThumbnail?.lastUpdated || "",
+        bucketId: matchingThumbnail?.id || "", // Add the bucket ID
+      };
     });
   }, [rawLikedVideos, bucketThumbnails]);
 
@@ -430,13 +440,17 @@ export default function FavoriteVideosPage() {
                   style={{ objectFit: "cover" }}
                   className="rounded"
                 />
+                {/* Add content type badge */}
+                <div className="absolute top-1 left-1 bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded">
+                  {video.contentType}
+                </div>
               </div>
 
               <div className="flex-1">
                 <Link
-                  href={`/user/watch/${video.id}?title=${encodeURIComponent(
-                    video.title
-                  )}`}
+                  href={`/user/watch/${
+                    video.bucketId || video.id
+                  }?title=${encodeURIComponent(video.title)}`}
                   className="hover:text-orange-500"
                 >
                   <h3 className="font-medium text-sm line-clamp-2">
@@ -444,10 +458,13 @@ export default function FavoriteVideosPage() {
                   </h3>
                 </Link>
 
-                <div className="flex items-center gap-2 mt-1">
+                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                  {/* Display genre */}
                   <span className="text-xs bg-gray-700 px-1.5 py-0.5 rounded">
                     {video.genre}
                   </span>
+
+                  {/* Display duration */}
                   <span className="text-xs text-gray-400">
                     {typeof video.duration === "string"
                       ? video.duration
@@ -457,6 +474,23 @@ export default function FavoriteVideosPage() {
                           .toString()
                           .padStart(2, "0")}`}
                   </span>
+
+                  {/* Display episode count for series */}
+                  {video.contentType === "Series" &&
+                    video.episodeCount !== undefined && (
+                      <span className="text-xs text-gray-400">
+                        {video.episodeCount}{" "}
+                        {video.episodeCount === 1 ? "episode" : "episodes"}
+                      </span>
+                    )}
+
+                  {/* Display last updated date if available */}
+                  {video.lastUpdated && (
+                    <span className="text-xs text-gray-400">
+                      Updated:{" "}
+                      {new Date(video.lastUpdated).toLocaleDateString()}
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -489,6 +523,10 @@ export default function FavoriteVideosPage() {
                   style={{ objectFit: "cover" }}
                   className="rounded"
                 />
+                {/* Add content type badge */}
+                <div className="absolute top-2 left-2 bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded">
+                  {video.contentType}
+                </div>
                 <Button
                   variant="ghost"
                   size="icon"
@@ -502,9 +540,9 @@ export default function FavoriteVideosPage() {
 
               <div className="mt-2">
                 <Link
-                  href={`/user/watch/${video.id}?title=${encodeURIComponent(
-                    video.title
-                  )}`}
+                  href={`/user/watch/${
+                    video.bucketId || video.id
+                  }?title=${encodeURIComponent(video.title)}`}
                   className="hover:text-orange-500"
                 >
                   <h3 className="font-medium text-sm line-clamp-2">
@@ -512,9 +550,12 @@ export default function FavoriteVideosPage() {
                   </h3>
                 </Link>
                 <div className="flex items-center gap-2 mt-1 flex-wrap">
+                  {/* Display genre */}
                   <span className="text-xs bg-gray-700 px-1.5 py-0.5 rounded">
                     {video.genre}
                   </span>
+
+                  {/* Display duration */}
                   <span className="text-xs text-gray-400">
                     {typeof video.duration === "string"
                       ? video.duration
@@ -524,7 +565,23 @@ export default function FavoriteVideosPage() {
                           .toString()
                           .padStart(2, "0")}`}
                   </span>
+
+                  {/* Display episode count for series */}
+                  {video.contentType === "Series" &&
+                    video.episodeCount !== undefined && (
+                      <span className="text-xs text-gray-400">
+                        {video.episodeCount}{" "}
+                        {video.episodeCount === 1 ? "episode" : "episodes"}
+                      </span>
+                    )}
                 </div>
+
+                {/* Display last updated date if available */}
+                {video.lastUpdated && (
+                  <div className="text-xs text-gray-400 mt-1">
+                    Updated: {new Date(video.lastUpdated).toLocaleDateString()}
+                  </div>
+                )}
               </div>
             </div>
           ))}

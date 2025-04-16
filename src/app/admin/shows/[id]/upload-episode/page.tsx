@@ -28,7 +28,7 @@ export default function UploadEpisodePage() {
       const formData = new FormData();
       formData.append(
         "bucketName",
-        process.env.S3_BUCKET_NAME || "streamflixbucket"
+        process.env.NEXT_PUBLIC_S3_BUCKET_NAME || "streamflixbucket"
       );
       formData.append("showTitle", showTitle);
       formData.append("episodeNumber", episodeNumber);
