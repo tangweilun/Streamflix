@@ -47,47 +47,14 @@ export default function Navbar() {
               Home
             </Link>
             <Link
-              href="/user/series"
+              href="/user/shows"
               className="text-white hover:text-orange-500 transition-colors"
             >
-              Series
-            </Link>
-            <Link
-              href="/user/movies"
-              className="text-white hover:text-orange-500 transition-colors"
-            >
-              Movies
+              Shows
             </Link>
           </div>
         </div>
         <div className="flex items-center space-x-4">
-          {isSearchOpen ? (
-            <form onSubmit={handleSearchSubmit} className="relative animate-in">
-              <Input
-                type="text"
-                placeholder="Search for movies, TV shows..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-gray-800 text-white rounded-full py-1 pl-4 pr-10 w-[250px] focus:outline-none focus:ring-2 focus:ring-orange-500"
-                autoFocus
-              />
-              <button
-                type="button"
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
-                onClick={() => setIsSearchOpen(false)}
-              >
-                <X size={10} />
-              </button>
-            </form>
-          ) : (
-            <button
-              className="text-white hover:text-orange-500 transition-colors"
-              onClick={() => setIsSearchOpen(true)}
-            >
-              <Search />
-            </button>
-          )}
-
           <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
             <DropdownMenuTrigger
               className="focus:outline-none focus:ring-0"

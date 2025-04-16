@@ -99,7 +99,7 @@ export default function TVSeriesPage() {
     <div className="min-h-screen bg-black text-black">
       <main className="container mx-auto px-6 py-8 pt-10">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-orange-500">TV Series</h1>
+          <h1 className="text-3xl font-bold text-orange-500">Shows</h1>
           <div className="flex gap-3">
             <Select onValueChange={setSortBy}>
               <SelectTrigger className="w-[150px]">
