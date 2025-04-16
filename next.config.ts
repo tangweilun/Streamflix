@@ -5,7 +5,8 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "streamflixtest.s3.amazonaws.com",
+        hostname:
+          process.env.S3_BUCKET_HOSTNAME || "streamflixbucket.s3.amazonaws.com",
       },
     ],
   },

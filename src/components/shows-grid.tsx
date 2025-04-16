@@ -16,7 +16,9 @@ type Show = {
 
 export default function ShowGrid({ shows }: { shows: Show[] }) {
   const [showsWithGenres, setShowsWithGenres] = useState<Show[]>([]);
-  const [showsWithGenresAndEpisodes, setShowsWithGenresAndEpisodes] = useState<Show[]>([]);
+  const [showsWithGenresAndEpisodes, setShowsWithGenresAndEpisodes] = useState<
+    Show[]
+  >([]);
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Fetch genres
@@ -25,7 +27,11 @@ export default function ShowGrid({ shows }: { shows: Show[] }) {
       const updatedShows = await Promise.all(
         shows.map(async (show) => {
           try {
-            const genresResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/videos/title/${encodeURIComponent(show.title)}`);
+            const genresResponse = await fetch(
+              `${
+                process.env.NEXT_PUBLIC_API_URL
+              }/videos/title/${encodeURIComponent(show.title)}`
+            );
             if (!genresResponse.ok) throw new Error("Failed to fetch genres");
 
             const genresData = await genresResponse.json();
@@ -53,7 +59,11 @@ export default function ShowGrid({ shows }: { shows: Show[] }) {
       const updatedShows = await Promise.all(
         showsWithGenres.map(async (show) => {
           try {
-            const episodesResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/files/watch?showName=${encodeURIComponent(show.title)}`);
+            const episodesResponse = await fetch(
+              `${
+                process.env.NEXT_PUBLIC_API_URL
+              }/files/watch?showName=${encodeURIComponent(show.title)}`
+            );
             if (!episodesResponse.ok) return { ...show, episodeCount: 0 };
 
             const episodesData = await episodesResponse.json();
@@ -61,7 +71,10 @@ export default function ShowGrid({ shows }: { shows: Show[] }) {
 
             return { ...show, episodeCount };
           } catch (error) {
-            console.error(`Error fetching episodes for "${show.title}":`, error);
+            console.error(
+              `Error fetching episodes for "${show.title}":`,
+              error
+            );
             return { ...show, episodeCount: 0 };
           }
         })
@@ -82,18 +95,30 @@ export default function ShowGrid({ shows }: { shows: Show[] }) {
 
     try {
       // Step 1: Delete files from S3
-      const s3Response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/Files?bucketName=${process.env.S3_BUCKET_NAME || "streamflixtest"}&prefix=shows/${encodeURIComponent(showTitle)}`, {
-        method: "DELETE",
-      });
+      const s3Response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/Files?bucketName=${
+          process.env.S3_BUCKET_NAME
+        }&prefix=shows/${encodeURIComponent(showTitle)}`,
+        {
+          method: "DELETE",
+        }
+      );
 
-      if (!s3Response.ok) throw new Error("Failed to delete show files from S3.");
+      if (!s3Response.ok)
+        throw new Error("Failed to delete show files from S3.");
 
       // Step 2: Delete video record from database
-      const dbResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/videos/title/${encodeURIComponent(showTitle)}`, {
-        method: "DELETE",
-      });
+      const dbResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/videos/title/${encodeURIComponent(
+          showTitle
+        )}`,
+        {
+          method: "DELETE",
+        }
+      );
 
-      if (!dbResponse.ok) throw new Error("Failed to delete show record from database.");
+      if (!dbResponse.ok)
+        throw new Error("Failed to delete show record from database.");
 
       toast.success(`Show "${showTitle}" was deleted successfully.`, {
         position: "bottom-right",
@@ -135,12 +160,16 @@ export default function ShowGrid({ shows }: { shows: Show[] }) {
                 <p>Last Updated: {show.lastUpdated}</p>
                 <div>
                   <strong>Genres:</strong>{" "}
-                  {show.genres.length > 0 ? show.genres.join(", ") : "No genres available"}
+                  {show.genres.length > 0
+                    ? show.genres.join(", ")
+                    : "No genres available"}
                 </div>
               </div>
               <div className="mt-4 flex gap-2">
                 <Link
-                  href={`/admin/shows/${show.id}/upload-episode?showId=${show.id}&folderName=${encodeURIComponent(show.title)}`}
+                  href={`/admin/shows/${show.id}/upload-episode?showId=${
+                    show.id
+                  }&folderName=${encodeURIComponent(show.title)}`}
                   className="flex-1 inline-flex items-center justify-center px-4 py-2 bg-orange-600 text-black rounded-md hover:bg-orange-500 transition-colors"
                 >
                   <Plus className="w-4 h-4 mr-2" />
