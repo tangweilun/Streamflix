@@ -30,7 +30,7 @@ export default function CreateShow() {
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/files/create-show?bucketName=${process.env.S3_BUCKET_NAME}`, // BucketName stays in query
+        `${process.env.NEXT_PUBLIC_API_URL}/files/create-show?bucketName=${process.env.NEXT_PUBLIC_S3_BUCKET_NAME}`, // BucketName stays in query
         {
           method: "POST",
           body: formData,

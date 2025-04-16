@@ -56,7 +56,7 @@ export default function TVSeriesPage() {
   const fetchSeriesMutation = useMutation({
     mutationFn: async () => {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/files/list-shows?bucketName=${process.env.S3_BUCKET_NAME}`
+        `${process.env.NEXT_PUBLIC_API_URL}/files/list-shows?bucketName=${process.env.NEXT_PUBLIC_S3_BUCKET_NAME}`
       );
       if (!response.ok) throw new Error("Failed to fetch series");
 

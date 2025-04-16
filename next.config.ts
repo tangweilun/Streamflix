@@ -6,7 +6,8 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname:
-          process.env.S3_BUCKET_HOSTNAME || "streamflixbucket.s3.amazonaws.com",
+          process.env.NEXT_PUBLIC_S3_BUCKET_HOSTNAME ||
+          "streamflixbucket.s3.amazonaws.com",
       },
     ],
   },
