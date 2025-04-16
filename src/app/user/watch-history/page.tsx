@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -25,87 +25,35 @@ import {
   ArrowDown,
   X,
 } from "lucide-react";
+import { getUserId } from "@/lib/action";
+import { useQuery } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
-const initialWatchHistory = [
-  {
-    id: "1",
-    title: "Stranger Things Season 4 - Official Trailer",
-    thumbnail: "/placeholder.svg?height=180&width=320",
-    views: "2.3M",
-    uploadedAt: "2 weeks ago",
-    watchedAt: new Date("2023-03-28"),
-    duration: "2:47",
-    year: 2022,
-    genre: "Sci-Fi",
-    contentType: "Movie",
-    progress: 20,
-  },
-  {
-    id: "2",
-    title: "The Witcher: Blood Origin - Behind the Scenes",
-    thumbnail: "/placeholder.svg?height=180&width=320",
-    views: "892K",
-    uploadedAt: "1 month ago",
-    watchedAt: new Date("2023-03-25"),
-    duration: "5:16",
-    year: 2022,
-    genre: "Fantasy",
-    contentType: "Series",
-    progress: 80,
-  },
-  {
-    id: "3",
-    title: "Wednesday - Thing's Best Moments",
-    thumbnail: "/placeholder.svg?height=180&width=320",
-    views: "1.1M",
-    uploadedAt: "3 weeks ago",
-    watchedAt: new Date("2023-02-15"),
-    duration: "3:42",
-    year: 2023,
-    genre: "Comedy",
-    contentType: "Series",
-    progress: 75,
-  },
-  {
-    id: "4",
-    title: "The Crown Season 5 Recap",
-    thumbnail: "/placeholder.svg?height=180&width=320",
-    views: "567K",
-    uploadedAt: "1 month ago",
-    watchedAt: new Date("2023-01-20"),
-    duration: "8:15",
-    year: 2022,
-    genre: "Drama",
-    contentType: "Series",
-    progress: 100,
-  },
-  {
-    id: "5",
-    title: "Squid Game - Final Game Explained",
-    thumbnail: "/placeholder.svg?height=180&width=320",
-    views: "3.4M",
-    uploadedAt: "6 months ago",
-    watchedAt: new Date("2023-02-10"),
-    duration: "10:22",
-    year: 2021,
-    genre: "Thriller",
-    contentType: "Series",
-    progress: 30,
-  },
-  {
-    id: "6",
-    title: "Money Heist - The Professor's Plan",
-    thumbnail: "/placeholder.svg?height=180&width=320",
-    views: "1.8M",
-    uploadedAt: "8 months ago",
-    watchedAt: new Date("2022-12-15"),
-    duration: "7:33",
-    year: 2021,
-    genre: "Crime",
-    contentType: "Movie",
-    progress: 50,
-  },
-];
+interface Video {
+  id: number;
+  videoTitle: string;
+  description: string;
+  duration: number;
+  maturityRating: string;
+  genre: string;
+  contentType: "Movie" | "Series";
+  releaseDate: string;
+  thumbnailUrl: string;
+  contentUrl: string;
+  lastUpdated: Date;
+  currentPosition?: number;
+  watchedAt?: Date;
+  progress?: number;
+}
+
+interface BucketThumbnail {
+  id: string;
+  title: string;
+  thumbnail: string;
+  episodeCount: number;
+  seasons: number;
+  lastUpdated: Date;
+}
 
 const genres = [
   "All",
@@ -131,22 +79,97 @@ const genres = [
   "Western",
 ];
 
+const getWatchHistories = async (userId: number): Promise<Video[]> => {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/watch-history/get-all-history?userId=${userId}`
+  );
+  if (!response.ok) {
+    throw new Error("Failed to fetch watch histories.");
+  }
+  return response.json();
+};
+
+const getThumbnailsFromBucket = async (): Promise<BucketThumbnail[]> => {
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/files/list-shows?bucketName=${process.env.NEXT_PUBLIC_S3_BUCKET_NAME}`
+    );
+    if (!response.ok) throw new Error("Failed to fetch thumbnails");
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching thumbnails:", error);
+    return [];
+  }
+};
+
 export default function WatchHistoryPage() {
-  const [watchHistory, setWatchHistory] = useState(initialWatchHistory);
   const [filter, setFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  //const [sortBy, setSortBy] = useState("recent");
   const [selectedGenre, setSelectedGenre] = useState("All");
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [dateSortAscending, setDateSortAscending] = useState(false);
+  const [bucketThumbnails, setBucketThumbnails] = useState<BucketThumbnail[]>(
+    []
+  );
+
+  const userIdQuery = useQuery({
+    queryKey: ["userId"],
+    queryFn: getUserId,
+    staleTime: Infinity,
+  });
+
+  const {
+    data: rawWatchHistories = [],
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["watch-history", userIdQuery.data],
+    queryFn: async () => {
+      const data = await getWatchHistories(Number(userIdQuery.data));
+      return data.map((video) => ({
+        ...video,
+        watchedAt: new Date(video.lastUpdated || new Date()),
+        progress: video.currentPosition ?? 0,
+      }));
+    },
+    enabled: !!userIdQuery.data,
+  });
+
+  // Merge favorite videos with bucket thumbnails
+  const watchedVideos = useMemo(() => {
+    // First filter favorite videos that exist in bucket thumbnails
+    const validTitles = new Set(
+      bucketThumbnails.map((t) => t.title.toLowerCase())
+    );
+    const filteredFavorites = rawWatchHistories.filter((video) =>
+      validTitles.has(video.videoTitle.toLowerCase())
+    );
+
+    // Then merge with thumbnail data
+    return filteredFavorites.map((video) => {
+      const matchingThumbnail = bucketThumbnails.find(
+        (item) => item.title.toLowerCase() === video.videoTitle.toLowerCase()
+      );
+
+      return {
+        ...video,
+        thumbnailUrl: matchingThumbnail?.thumbnail || "/placeholder.svg",
+        episodeCount: matchingThumbnail?.episodeCount || 0,
+        lastUpdated: matchingThumbnail?.lastUpdated || "",
+        bucketId: matchingThumbnail?.id || "", // Add the bucket ID
+      };
+    });
+  }, [rawWatchHistories, bucketThumbnails]);
 
   const filteredVideos = useMemo(() => {
-    return watchHistory
+    if (!watchedVideos) return [];
+
+    return watchedVideos
       .filter((video) => {
         // Video search function
         if (
           searchQuery &&
-          !video.title.toLowerCase().includes(searchQuery.toLowerCase())
+          !video.videoTitle.toLowerCase().includes(searchQuery.toLowerCase())
         ) {
           return false;
         }
@@ -170,14 +193,14 @@ export default function WatchHistoryPage() {
           ? a.watchedAt.getTime() - b.watchedAt.getTime()
           : b.watchedAt.getTime() - a.watchedAt.getTime();
       });
-  }, [watchHistory, searchQuery, selectedGenre, filter, dateSortAscending]);
+  }, [watchedVideos, searchQuery, selectedGenre, filter, dateSortAscending]);
 
   // Group videos by month and year
   const groupedVideos = useMemo(() => {
     const groups: Record<string, typeof filteredVideos> = {};
 
     filteredVideos.forEach((video) => {
-      const date = video.watchedAt;
+      const date = new Date(video.lastUpdated);
       const monthYear = `${date.toLocaleString("default", {
         month: "long",
       })} ${date.getFullYear()}`;
@@ -196,9 +219,19 @@ export default function WatchHistoryPage() {
     setDateSortAscending(!dateSortAscending);
   };
 
-  const removeFromHistory = (id: string) => {
-    setWatchHistory(watchHistory.filter((item) => item.id !== id));
-  };
+  useEffect(() => {
+    const fetchThumbnails = async () => {
+      try {
+        const thumbnails = await getThumbnailsFromBucket();
+        setBucketThumbnails(thumbnails);
+      } catch (error) {
+        console.error("Error fetching thumbnails:", error);
+        toast.error("Failed to load thumbnails");
+      }
+    };
+
+    fetchThumbnails();
+  }, []);
 
   return (
     <div className="container mx-auto p-6">
@@ -207,7 +240,7 @@ export default function WatchHistoryPage() {
           Watch History
         </h1>
         <div className="text-gray-400 text-sm space-y-1">
-          <p>{watchHistory.length} videos</p>
+          <p>{watchedVideos.length} videos</p>
         </div>
       </div>
 
@@ -289,20 +322,6 @@ export default function WatchHistoryPage() {
         </div>
       </div>
 
-      <Tabs defaultValue="all" className="mb-6">
-        <TabsList className="bg-gray-800">
-          <TabsTrigger value="all" onClick={() => setFilter("all")}>
-            All
-          </TabsTrigger>
-          <TabsTrigger value="movies" onClick={() => setFilter("movies")}>
-            Movies
-          </TabsTrigger>
-          <TabsTrigger value="series" onClick={() => setFilter("series")}>
-            Series
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
-
       {Object.keys(groupedVideos).length === 0 && (
         <div className="text-center py-12">
           <p className="text-gray-400 mb-2">
@@ -335,8 +354,8 @@ export default function WatchHistoryPage() {
                 >
                   <div className="relative w-[160px] h-[90px]">
                     <Image
-                      src={video.thumbnail || "/placeholder.svg"}
-                      alt={video.title}
+                      src={video.thumbnailUrl || "/placeholder.svg"}
+                      alt={video.videoTitle}
                       fill={true}
                       style={{ objectFit: "cover" }}
                       className="rounded"
@@ -356,33 +375,19 @@ export default function WatchHistoryPage() {
 
                   <div className="flex-1">
                     <Link
-                      href={`/user/watch/${video.id}`}
+                      href={`/user/watch/${
+                        video.bucketId || video.id
+                      }?title=${encodeURIComponent(video.videoTitle)}`}
                       className="hover:text-orange-500"
                     >
                       <h3 className="font-medium text-sm line-clamp-2">
-                        {video.title}
+                        {video.videoTitle}
                       </h3>
                     </Link>
 
-                    <span className="text-xs bg-gray-700 px-1.5 py-0.5 rounded">
-                      {video.genre}
-                    </span>
-
                     <div className="text-sm text-gray-400">
-                      {video.views} views •{" "}
-                      {video.watchedAt.toLocaleDateString()}
+                      {new Date(video.lastUpdated).toLocaleDateString()}
                     </div>
-                  </div>
-
-                  <div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeFromHistory(video.id)}
-                      className="h-8 w-8 text-red-500 hover:text-red-600"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
                   </div>
                 </div>
               ))}
@@ -398,8 +403,8 @@ export default function WatchHistoryPage() {
                 >
                   <div className="relative">
                     <Image
-                      src={video.thumbnail || "/placeholder.svg"}
-                      alt={video.title}
+                      src={video.thumbnailUrl || "/placeholder.svg"}
+                      alt={video.videoTitle}
                       width={320}
                       height={180}
                       layout="responsive"
@@ -416,32 +421,21 @@ export default function WatchHistoryPage() {
                         style={{ width: `${video.progress}%` }}
                       ></div>
                     </div>
-
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeFromHistory(video.id)}
-                      className="absolute top-1 right-1 bg-black/50 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
                   </div>
 
                   <div className="p-3">
                     <Link
-                      href={`/user/watch/${video.id}`}
+                      href={`/user/watch/${
+                        video.bucketId || video.id
+                      }?title=${encodeURIComponent(video.videoTitle)}`}
                       className="hover:text-orange-500"
                     >
                       <h3 className="font-medium text-sm line-clamp-2">
-                        {video.title}
+                        {video.videoTitle}
                       </h3>
                     </Link>
-                    <span className="text-xs bg-gray-700 px-1.5 py-0.5 rounded">
-                      {video.genre}
-                    </span>
                     <div className="text-xs text-gray-400">
-                      {video.views} views •{" "}
-                      {video.watchedAt.toLocaleDateString()}
+                      {new Date(video.lastUpdated).toLocaleDateString()}
                     </div>
                   </div>
                 </div>
@@ -450,25 +444,6 @@ export default function WatchHistoryPage() {
           )}
         </div>
       ))}
-
-      {/* {filteredVideos.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-gray-400 mb-2">
-            No videos match your search result
-          </p>
-          <Button
-            variant="outline"
-            onClick={() => {
-              setSearchQuery("");
-              setSelectedGenre("All");
-              setFilter("all");
-            }}
-            className="bg-orange-500 hover:bg-orange-600 border-orange-500"
-          >
-            Clear Filters
-          </Button>
-        </div>
-      )} */}
     </div>
   );
 }

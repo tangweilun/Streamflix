@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { getUserId } from "@/lib/action";
+import router from "next/router";
 
 interface Show {
   id: string;
@@ -50,6 +51,9 @@ export default function VideoPage() {
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [videoDetails, setVideoDetails] = useState<VideoDetails | null>(null);
   const [userId, setUserId] = useState<number | null>(null);
+  const [previousProgress, setPreviousProgress] = useState<number>(0);
+
+  const currentTimeRef = useRef(0); // Store video progress to avoid triggering re-renders
 
   // Fetch user ID on component mount
   useEffect(() => {
@@ -70,10 +74,96 @@ export default function VideoPage() {
     fetchUserId();
   }, []);
 
+  const fetchWatchProgress = async (): Promise<number> => {
+    const response = await fetch(
+      `${
+        process.env.NEXT_PUBLIC_API_URL
+      }/watch-history/get-progress/${encodeURIComponent(
+        title
+      )}?userId=${userId}`,
+      {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+
+    if (!response.ok) throw new Error("Failed to fetch progress.");
+
+    const data = await response.json();
+    setPreviousProgress(data.currentPosition);
+    return data.currentPosition;
+  };
+
+  const sendProgressUpdate = useMutation({
+    mutationFn: async () => {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/watch-history/update-progress`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            userId: await getUserId(),
+            videoTitle: encodeURIComponent(title),
+            currentPosition: currentTimeRef.current,
+          }),
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to update watch progress.");
+
+      return response.text();
+    },
+
+    onError: (error) => console.error("Error updating progress:", error),
+    onSuccess: (data) => console.log("Progress update sent:", data),
+  });
+
+  const captureProgress = () => {
+    if (videoRef.current) {
+      currentTimeRef.current = Math.floor(videoRef.current.currentTime);
+      sendProgressUpdate.mutate();
+    }
+  };
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || previousProgress === undefined) return;
+
+    const handleLoadedMetadata = () => {
+      if (previousProgress > 0) {
+        video.currentTime = previousProgress;
+      }
+    };
+
+    // Call immediately if already loaded
+    if (video.readyState >= 1) {
+      handleLoadedMetadata();
+    }
+
+    const handlePause = () => {
+      captureProgress();
+    };
+    const handleEnded = () => captureProgress();
+    const handleBeforeUnload = () => sendProgressUpdate.mutate();
+    const handleRouteChange = () => sendProgressUpdate.mutate();
+
+    video.addEventListener("loadedmetadata", handleLoadedMetadata);
+    video.addEventListener("pause", handlePause);
+    video.addEventListener("ended", handleEnded);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    router.events.on("routeChangeStart", handleRouteChange);
+
+    return () => {
+      video.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      video.removeEventListener("pause", handlePause);
+      video.removeEventListener("ended", handleEnded);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      router.events.off("routeChangeStart", handleRouteChange);
+    };
+  }, [videoUrl, previousProgress]);
+
   // Fetch Shows
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
   const fetchShowsMutation = useMutation({
     mutationFn: async () => {
       try {
@@ -94,105 +184,24 @@ export default function VideoPage() {
       setError("Failed to load shows. Please try again.");
     },
   });
-=======
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-  // const fetchShowsMutation = useMutation({
-  //   mutationFn: async () => {
-  //     const response = await fetch(
-  //       `${process.env.NEXT_PUBLIC_API_URL}/files/list-shows?bucketName=streamflixtest`
-  //     );
-  //     if (!response.ok) throw new Error("Failed to fetch shows");
-  //     return response.json();
-  //   },
-  //   onSuccess: (data) => {
-  //     setShows(data);
-  //   },
-  //   onError: () => {
-  //     setError("Failed to load shows. Please try again.");
-  //   },
-  // });
-
-  const fetchShows = async (): Promise<Show> => {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/files/list-shows?bucketName=streamflixtest`,
-      {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch users.");
-    }
-
-    alert(response.json());
-
-    return response.json();
-  };
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-
-  const fetchShows = async (): Promise<Show> => {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/files/list-shows?bucketName=${process.env.NEXT_PUBLIC_S3_BUCKET_NAME}`,
-      {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch users.");
-    }
-
-    alert(response.json());
-
-    return response.json();
-  };
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 
   const show = shows.find((s) => s.title === title);
 
   // Fetch Video Details
   const fetchVideoDetailsMutation = useMutation({
     mutationFn: async () => {
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
       try {
-        const res = await fetch(
+        const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/videos/title/${encodeURIComponent(
             title
           )}`
         );
-        if (!res.ok) throw new Error("Failed to fetch video details");
-        return res.json();
+        if (!response.ok) throw new Error("Failed to fetch video details");
+        return response.json();
       } catch (error) {
         console.error("Error fetching video details:", error);
         throw error;
       }
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/videos/title/${encodeURIComponent(
-          title
-        )}`
-      );
-      if (!response.ok) throw new Error("Failed to fetch video details");
-      return response.json();
     },
     onSuccess: (data) => {
       setVideoDetails(data);
@@ -207,24 +216,17 @@ export default function VideoPage() {
   const fetchEpisodesMutation = useMutation({
     mutationFn: async () => {
       try {
-        const res = await fetch(
+        const response = await fetch(
           `${
             process.env.NEXT_PUBLIC_API_URL
           }/files/watch?showName=${encodeURIComponent(title)}`
         );
-        if (!res.ok) throw new Error("Failed to fetch episodes");
-        return res.json();
+        if (!response.ok) throw new Error("Failed to fetch episodes");
+        return response.json();
       } catch (error) {
         console.error("Error fetching episodes:", error);
         throw error;
       }
-      const res = await fetch(
-        `${
-          process.env.NEXT_PUBLIC_API_URL
-        }/files/watch?showName=${encodeURIComponent(title)}`
-      );
-      if (!res.ok) throw new Error("Failed to fetch episodes");
-      return res.json();
     },
     onSuccess: (data) => {
       setEpisodes(Array.isArray(data.episodes) ? data.episodes : []);
@@ -235,9 +237,6 @@ export default function VideoPage() {
     },
   });
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
   // Check if video is in favorites - Updated to use userId
   const checkFavoriteMutation = useMutation({
     mutationFn: async () => {
@@ -343,16 +342,11 @@ export default function VideoPage() {
   useEffect(() => {
     try {
       fetchShowsMutation.mutate();
+      // fetchWatchProgress();
     } catch (error) {
       console.error("Error in fetchShowsMutation:", error);
     }
   }, []);
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
   // Call all mutations on mount
   // useEffect(() => {
   //   fetchShowsMutation.mutate();
@@ -364,25 +358,24 @@ export default function VideoPage() {
         fetchVideoDetailsMutation.mutate();
         // Check favorite status when title and userId are available
         checkFavoriteMutation.mutate();
+        // fetchWatchProgress();
       } catch (error) {
         console.error("Error in fetchVideoDetailsMutation:", error);
       }
     }
-  }, [title, userId]);
+  }, []);
 
   useEffect(() => {
     if (show) {
       try {
         fetchEpisodesMutation.mutate();
+        fetchWatchProgress();
       } catch (error) {
         console.error("Error in fetchEpisodesMutation:", error);
       }
     }
   }, [show]);
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
   // We don't need this useEffect anymore since we're checking favorites based on title
   // useEffect(() => {
   //   if (videoId) {
@@ -401,19 +394,7 @@ export default function VideoPage() {
       </div>
     );
   }
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-  // if (fetchShowsMutation.isPending) {
-  //   return (
-  //     <div className="flex justify-center items-center min-h-screen">
-  //       <span className="text-white text-lg">Loading...</span>
-  //     </div>
-  //   );
-  // }
+
   if (error && !episodes.length) {
     return (
       <div className="flex justify-center items-center min-h-screen px-4">
@@ -438,9 +419,6 @@ export default function VideoPage() {
     setVideoUrl(episodeUrl);
   };
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
   const handleToggleFavorite = () => {
     if (!title) {
       toast.error(
@@ -456,20 +434,6 @@ export default function VideoPage() {
 
     toggleFavoriteMutation.mutate();
   };
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-  const {
-    data: s,
-    isLoading,
-    refetch,
-  } = useQuery({
-    queryKey: ["show"],
-    queryFn: fetchShows,
-  });
 
   return (
     <div className="container mx-auto p-8 min-h-screen flex justify-center items-center">

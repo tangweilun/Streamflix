@@ -26,8 +26,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { getUserId } from "@/lib/action";
 
-// Define TypeScript interfaces
-// Update the Video interface to include the new fields
 interface Video {
   id: number;
   title: string;
@@ -38,8 +36,8 @@ interface Video {
   year: number;
   genre: string;
   contentType: "Movie" | "Series";
-  episodeCount?: number; // Add this field
-  lastUpdated?: string; // Add this field
+  episodeCount?: number;
+  lastUpdated?: string;
 }
 
 interface BucketThumbnail {
@@ -406,20 +404,6 @@ export default function FavoriteVideosPage() {
           </div>
         </div>
       </div>
-
-      <Tabs defaultValue="all" className="mb-6">
-        <TabsList className="bg-gray-800">
-          <TabsTrigger value="all" onClick={() => setFilter("all")}>
-            All
-          </TabsTrigger>
-          <TabsTrigger value="movies" onClick={() => setFilter("movies")}>
-            Movies
-          </TabsTrigger>
-          <TabsTrigger value="series" onClick={() => setFilter("series")}>
-            Series
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
 
       {viewMode === "list" && (
         <div className="space-y-4">
