@@ -73,6 +73,7 @@ export default function VideoPage() {
   // Fetch Shows
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
   const fetchShowsMutation = useMutation({
     mutationFn: async () => {
       try {
@@ -94,6 +95,8 @@ export default function VideoPage() {
     },
   });
 =======
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
   // const fetchShowsMutation = useMutation({
@@ -131,6 +134,7 @@ export default function VideoPage() {
     return response.json();
   };
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 >>>>>>> Stashed changes
 
   const fetchShows = async (): Promise<Show> => {
@@ -153,12 +157,15 @@ export default function VideoPage() {
   };
 =======
 >>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
 
   const show = shows.find((s) => s.title === title);
 
   // Fetch Video Details
   const fetchVideoDetailsMutation = useMutation({
     mutationFn: async () => {
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
       try {
@@ -173,6 +180,8 @@ export default function VideoPage() {
         console.error("Error fetching video details:", error);
         throw error;
       }
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 =======
@@ -226,6 +235,7 @@ export default function VideoPage() {
     },
   });
 
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
   // Check if video is in favorites - Updated to use userId
@@ -341,6 +351,8 @@ export default function VideoPage() {
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
   // Call all mutations on mount
   // useEffect(() => {
   //   fetchShowsMutation.mutate();
@@ -370,6 +382,7 @@ export default function VideoPage() {
 
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
   // We don't need this useEffect anymore since we're checking favorites based on title
   // useEffect(() => {
   //   if (videoId) {
@@ -388,6 +401,8 @@ export default function VideoPage() {
       </div>
     );
   }
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 =======
@@ -425,6 +440,7 @@ export default function VideoPage() {
 
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
   const handleToggleFavorite = () => {
     if (!title) {
       toast.error(
@@ -440,6 +456,8 @@ export default function VideoPage() {
 
     toggleFavoriteMutation.mutate();
   };
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 =======
