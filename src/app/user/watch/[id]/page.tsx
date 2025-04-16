@@ -71,7 +71,6 @@ export default function VideoPage() {
   }, []);
 
   // Fetch Shows
-<<<<<<< Updated upstream
   const fetchShowsMutation = useMutation({
     mutationFn: async () => {
       try {
@@ -92,7 +91,6 @@ export default function VideoPage() {
       setError("Failed to load shows. Please try again.");
     },
   });
-=======
   // const fetchShowsMutation = useMutation({
   //   mutationFn: async () => {
   //     const response = await fetch(
@@ -127,14 +125,12 @@ export default function VideoPage() {
 
     return response.json();
   };
->>>>>>> Stashed changes
 
   const show = shows.find((s) => s.title === title);
 
   // Fetch Video Details
   const fetchVideoDetailsMutation = useMutation({
     mutationFn: async () => {
-<<<<<<< Updated upstream
       try {
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/videos/title/${encodeURIComponent(
@@ -147,7 +143,6 @@ export default function VideoPage() {
         console.error("Error fetching video details:", error);
         throw error;
       }
-=======
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/videos/title/${encodeURIComponent(
           title
@@ -155,7 +150,6 @@ export default function VideoPage() {
       );
       if (!response.ok) throw new Error("Failed to fetch video details");
       return response.json();
->>>>>>> Stashed changes
     },
     onSuccess: (data) => {
       setVideoDetails(data);
@@ -169,7 +163,6 @@ export default function VideoPage() {
   // Fetch Episodes
   const fetchEpisodesMutation = useMutation({
     mutationFn: async () => {
-<<<<<<< Updated upstream
       try {
         const res = await fetch(
           `${
@@ -182,7 +175,6 @@ export default function VideoPage() {
         console.error("Error fetching episodes:", error);
         throw error;
       }
-=======
       const res = await fetch(
         `${
           process.env.NEXT_PUBLIC_API_URL
@@ -190,7 +182,6 @@ export default function VideoPage() {
       );
       if (!res.ok) throw new Error("Failed to fetch episodes");
       return res.json();
->>>>>>> Stashed changes
     },
     onSuccess: (data) => {
       setEpisodes(Array.isArray(data.episodes) ? data.episodes : []);
@@ -201,7 +192,6 @@ export default function VideoPage() {
     },
   });
 
-<<<<<<< Updated upstream
   // Check if video is in favorites - Updated to use userId
   const checkFavoriteMutation = useMutation({
     mutationFn: async () => {
@@ -311,12 +301,10 @@ export default function VideoPage() {
       console.error("Error in fetchShowsMutation:", error);
     }
   }, []);
-=======
   // Call all mutations on mount
   // useEffect(() => {
   //   fetchShowsMutation.mutate();
   // }, []);
->>>>>>> Stashed changes
 
   useEffect(() => {
     if (title && userId) {
@@ -340,7 +328,6 @@ export default function VideoPage() {
     }
   }, [show]);
 
-<<<<<<< Updated upstream
   // We don't need this useEffect anymore since we're checking favorites based on title
   // useEffect(() => {
   //   if (videoId) {
@@ -359,7 +346,6 @@ export default function VideoPage() {
       </div>
     );
   }
-=======
   // if (fetchShowsMutation.isPending) {
   //   return (
   //     <div className="flex justify-center items-center min-h-screen">
@@ -367,7 +353,6 @@ export default function VideoPage() {
   //     </div>
   //   );
   // }
->>>>>>> Stashed changes
   if (error && !episodes.length) {
     return (
       <div className="flex justify-center items-center min-h-screen px-4">
@@ -392,7 +377,6 @@ export default function VideoPage() {
     setVideoUrl(episodeUrl);
   };
 
-<<<<<<< Updated upstream
   const handleToggleFavorite = () => {
     if (!title) {
       toast.error(
@@ -408,7 +392,6 @@ export default function VideoPage() {
 
     toggleFavoriteMutation.mutate();
   };
-=======
   const {
     data: s,
     isLoading,
@@ -417,7 +400,6 @@ export default function VideoPage() {
     queryKey: ["show"],
     queryFn: fetchShows,
   });
->>>>>>> Stashed changes
 
   return (
     <div className="container mx-auto p-8 min-h-screen flex justify-center items-center">
