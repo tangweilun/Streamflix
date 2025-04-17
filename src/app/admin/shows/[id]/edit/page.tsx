@@ -17,7 +17,9 @@ export default function UpdateVideoForm() {
   const [maturityRating, setMaturityRating] = useState("");
   const [releaseDate, setReleaseDate] = useState("");
   const [genre, setGenre] = useState("");
-  const [actors, setActors] = useState<Actor[]>([{ name: "", biography: "", birthDate: "" }]);
+  const [actors, setActors] = useState<Actor[]>([
+    { name: "", biography: "", birthDate: "" },
+  ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleActorChange = (index: number, field: string, value: string) => {
@@ -50,22 +52,25 @@ export default function UpdateVideoForm() {
         description,
         duration: parseInt(duration),
         maturityRating,
-        releaseDate,  // Ensure this is in the correct format (YYYY-MM-DD)   
-        thumbnailUrl: "",  
-        contentUrl: "",  
+        releaseDate, // Ensure this is in the correct format (YYYY-MM-DD)
+        thumbnailUrl: "",
+        contentUrl: "",
         genre,
         actors: actors.map((actor) => ({
           name: actor.name,
           biography: actor.biography,
-          birthDate: actor.birthDate,  // This should also be a string, ideally in the format YYYY-MM-DD
+          birthDate: actor.birthDate, // This should also be a string, ideally in the format YYYY-MM-DD
         })),
       };
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/videos/title/${title}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/videos/title/${title}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
 
       if (!res.ok) {
         const error = await res.json();
@@ -78,20 +83,27 @@ export default function UpdateVideoForm() {
         console.error(err);
         toast.error(`Update failed: ${err.message}`);
       } else {
-        console.error('Unexpected error', err);
-        toast.error('Update failed: Unexpected error');
+        console.error("Unexpected error", err);
+        toast.error("Update failed: Unexpected error");
       }
-    }    
+    }
   };
 
   return (
     <div className="bg-black text-[#eee] min-h-screen p-8">
-      <h1 className="text-2xl font-bold text-center text-orange-500 mb-8">Update Video</h1>
+      <h1 className="text-2xl font-bold text-center text-orange-500 mb-8">
+        Update Shows Details
+      </h1>
 
-      <form onSubmit={handleUpdate} className="max-w-3xl mx-auto p-8 bg-[#111] rounded-lg shadow-lg">
+      <form
+        onSubmit={handleUpdate}
+        className="max-w-3xl mx-auto p-8 bg-[#111] rounded-lg shadow-lg"
+      >
         {/* Title */}
         <div className="mb-5">
-          <label className="block font-bold text-orange-500 mb-1">Title (existing):</label>
+          <label className="block font-bold text-orange-500 mb-1">
+            Title (existing):
+          </label>
           <input
             type="text"
             value={title}
@@ -104,7 +116,9 @@ export default function UpdateVideoForm() {
 
         {/* Description */}
         <div className="mb-5">
-          <label className="block font-bold text-orange-500 mb-1">Description:</label>
+          <label className="block font-bold text-orange-500 mb-1">
+            Description:
+          </label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -140,7 +154,9 @@ export default function UpdateVideoForm() {
 
         {/* Release Date */}
         <div className="mb-5">
-          <label className="block font-bold text-orange-500 mb-1">Release Date:</label>
+          <label className="block font-bold text-orange-500 mb-1">
+            Release Date:
+          </label>
           <input
             type="date"
             value={releaseDate}
@@ -152,47 +168,54 @@ export default function UpdateVideoForm() {
 
         {/* Genre */}
         <div className="mb-5">
-        <select
-          value={genre}
-          onChange={(e) => setGenre(e.target.value)}
-          className="w-full p-2 text-white border border-[#555] rounded"
-          style={{ backgroundColor: "oklch(20.8% 0.042 265.755)" }}
-        >
-          <option value="">Select Genre</option>
-          <option value="Action">Action</option>
-          <option value="Comedy">Comedy</option>
-          <option value="Drama">Drama</option>
-          <option value="Sci-Fi">Sci-Fi</option>
-          <option value="Thriller">Thriller</option>
-          <option value="Horror">Horror</option>
-        </select>
-
+          <select
+            value={genre}
+            onChange={(e) => setGenre(e.target.value)}
+            className="w-full p-2 text-white border border-[#555] rounded"
+            style={{ backgroundColor: "oklch(20.8% 0.042 265.755)" }}
+          >
+            <option value="">Select Genre</option>
+            <option value="Action">Action</option>
+            <option value="Comedy">Comedy</option>
+            <option value="Drama">Drama</option>
+            <option value="Sci-Fi">Sci-Fi</option>
+            <option value="Thriller">Thriller</option>
+            <option value="Horror">Horror</option>
+          </select>
         </div>
 
         {/* Actors */}
         <div className="mb-5">
-          <label className="block font-bold text-orange-500 mb-1">Actors:</label>
+          <label className="block font-bold text-orange-500 mb-1">
+            Actors:
+          </label>
           {actors.map((actor, index) => (
             <div key={index} className="mb-3 border border-[#555] p-2 rounded">
               <input
                 type="text"
                 placeholder="Name"
                 value={actor.name}
-                onChange={(e) => handleActorChange(index, "name", e.target.value)}
+                onChange={(e) =>
+                  handleActorChange(index, "name", e.target.value)
+                }
                 className="w-full mb-1 p-1 text-white rounded bg-[#222]"
               />
               <input
                 type="text"
                 placeholder="Biography"
                 value={actor.biography}
-                onChange={(e) => handleActorChange(index, "biography", e.target.value)}
+                onChange={(e) =>
+                  handleActorChange(index, "biography", e.target.value)
+                }
                 className="w-full mb-1 p-1 text-white rounded bg-[#222]"
               />
               <input
                 type="date"
                 placeholder="Birth Date"
                 value={actor.birthDate}
-                onChange={(e) => handleActorChange(index, "birthDate", e.target.value)}
+                onChange={(e) =>
+                  handleActorChange(index, "birthDate", e.target.value)
+                }
                 className="w-full p-1 text-white rounded bg-[#222]"
               />
               <div className="flex justify-between items-center mt-1">
@@ -201,7 +224,7 @@ export default function UpdateVideoForm() {
                   onClick={handleAddActor}
                   className="text-sm text-orange-400 hover:underline"
                 >
-                   Add Actor
+                  Add Actor
                 </button>
                 <button
                   type="button"
@@ -221,7 +244,7 @@ export default function UpdateVideoForm() {
           className="w-full p-3 bg-orange-500 text-white rounded hover:bg-orange-600"
           disabled={isSubmitting}
         >
-          {isSubmitting ? "Updating..." : "Update Video"}
+          {isSubmitting ? "Updating..." : "Update"}
         </button>
       </form>
 

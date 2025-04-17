@@ -124,7 +124,7 @@ export default function CreateVideoWithThumbnail() {
   return (
     <div className="bg-black text-[#eee] min-h-screen p-8">
       <h1 className="text-2xl font-bold text-center text-orange-500 mb-8">
-        Create New Video
+        Create New Shows
       </h1>
 
       <form
@@ -347,7 +347,7 @@ export default function CreateVideoWithThumbnail() {
                 disabled={isSubmitting}
                 className="bg-orange-700 hover:bg-orange-500 text-white font-medium py-3 px-6 rounded-xl shadow-sm transition-colors duration-200 mt-6"
               >
-                {isSubmitting ? "Uploading..." : "Upload Video"}
+                {isSubmitting ? "Uploading..." : "Upload Shows"}
               </button>
             </div>
 

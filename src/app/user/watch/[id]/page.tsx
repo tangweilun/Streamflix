@@ -11,7 +11,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { getUserId } from "@/lib/action";
-import router from "next/router";
 
 interface Show {
   id: string;
@@ -52,7 +51,6 @@ export default function VideoPage() {
   const [videoDetails, setVideoDetails] = useState<VideoDetails | null>(null);
   const [userId, setUserId] = useState<number | null>(null);
   const [previousProgress, setPreviousProgress] = useState<number>(0);
-
   const currentTimeRef = useRef(0); // Store video progress to avoid triggering re-renders
 
   // Fetch user ID on component mount
@@ -99,13 +97,35 @@ export default function VideoPage() {
     onSuccess: (data) => console.log("Progress update sent:", data),
   });
 
+  const hasSetProgressRef = useRef(false);
+
   useEffect(() => {
     const video = videoRef.current;
     if (!video || previousProgress === undefined) return;
 
     const handleLoadedMetadata = () => {
-      if (previousProgress > 0) {
+      if (!hasSetProgressRef.current && previousProgress > 0) {
         video.currentTime = previousProgress;
+        hasSetProgressRef.current = true;
+      }
+    };
+
+    const handleTimeUpdate = () => {
+      if (videoRef.current) {
+        currentTimeRef.current = Math.floor(videoRef.current.currentTime);
+      }
+    };
+
+    const captureProgress = () => {
+      sendProgressUpdate.mutate();
+    };
+
+    const handlePause = () => captureProgress();
+    const handleEnded = () => captureProgress();
+    const handleBeforeUnload = () => captureProgress();
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        captureProgress();
       }
     };
 
@@ -114,35 +134,24 @@ export default function VideoPage() {
       handleLoadedMetadata();
     }
 
-    const captureProgress = () => {
-      if (videoRef.current) {
-        currentTimeRef.current = Math.floor(videoRef.current.currentTime);
-        sendProgressUpdate.mutate();
-      }
-    };
-
-    const handlePause = () => {
-      captureProgress();
-    };
-
-    const handleEnded = () => captureProgress();
-    const handleBeforeUnload = () => sendProgressUpdate.mutate();
-    const handleRouteChange = () => sendProgressUpdate.mutate();
-
     video.addEventListener("loadedmetadata", handleLoadedMetadata);
+    video.addEventListener("timeupdate", handleTimeUpdate);
     video.addEventListener("pause", handlePause);
     video.addEventListener("ended", handleEnded);
     window.addEventListener("beforeunload", handleBeforeUnload);
-    router.events.on("routeChangeStart", handleRouteChange);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
+      captureProgress();
       video.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      video.removeEventListener("timeupdate", handleTimeUpdate);
       video.removeEventListener("pause", handlePause);
       video.removeEventListener("ended", handleEnded);
       window.removeEventListener("beforeunload", handleBeforeUnload);
-      router.events.off("routeChangeStart", handleRouteChange);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      hasSetProgressRef.current = false;
     };
-  }, [sendProgressUpdate, videoUrl, previousProgress]);
+  }, [videoUrl, previousProgress]);
 
   // Fetch Shows
   const fetchShowsMutation = useMutation({
@@ -346,10 +355,10 @@ export default function VideoPage() {
 
   useEffect(() => {
     if (show) {
-      try {
-        fetchEpisodesMutation.mutate();
+      fetchEpisodesMutation.mutate();
 
-        (async () => {
+      (async () => {
+        try {
           const response = await fetch(
             `${
               process.env.NEXT_PUBLIC_API_URL
@@ -366,12 +375,12 @@ export default function VideoPage() {
 
           const data = await response.json();
           setPreviousProgress(data.currentPosition);
-        })();
-      } catch (error) {
-        console.error("Error in fetchEpisodesMutation:", error);
-      }
+        } catch (error) {
+          console.error("Error fetching progress:", error);
+        }
+      })();
     }
-  }, [title, userId, fetchEpisodesMutation, show]);
+  }, [title, userId, show]);
 
   // We don't need this useEffect anymore since we're checking favorites based on title
   // useEffect(() => {
