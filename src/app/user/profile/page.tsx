@@ -1,15 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -19,10 +16,8 @@ import { Badge } from "@/components/ui/badge";
 import {
   Edit,
   Save,
-  CreditCard,
   Lock,
   Trash2,
-  Calendar,
   CheckCircle,
   AlertCircle,
 } from "lucide-react";
@@ -137,7 +132,7 @@ const fetchUserProfile = async (): Promise<User> => {
 
     if (!response.ok) throw new Error("Failed to fetch user profile.");
 
-    var userData = response.json();
+    const userData = response.json();
 
     console.log(userData);
 
@@ -149,21 +144,12 @@ const fetchUserProfile = async (): Promise<User> => {
 };
 
 export default function UserProfilePage() {
-  const {
-    data: user,
-    isLoading,
-    isError,
-  } = useQuery({
+  const { data: user } = useQuery({
     queryKey: ["user"],
     queryFn: fetchUserProfile,
   });
 
-  // const [user, setUser] = useState(userData);
   const [isEditing, setIsEditing] = useState(false);
-  // const [formData, setFormData] = useState({
-  //   name: user.name,
-  //   email: user.email,
-  // });
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -175,13 +161,6 @@ export default function UserProfilePage() {
   const [passwordSuccess, setPasswordSuccess] = useState(false);
 
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
-
-  // const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   setFormData({
-  //     ...formData,
-  //     [e.target.name]: e.target.value,
-  //   });
-  // };
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPasswordData({

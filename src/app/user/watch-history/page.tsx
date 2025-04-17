@@ -5,7 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,11 +18,9 @@ import {
   LayoutGrid,
   List,
   Filter,
-  Trash2,
   Calendar,
   ArrowUp,
   ArrowDown,
-  X,
 } from "lucide-react";
 import { getUserId } from "@/lib/action";
 import { useQuery } from "@tanstack/react-query";
@@ -118,11 +115,7 @@ export default function WatchHistoryPage() {
     staleTime: Infinity,
   });
 
-  const {
-    data: rawWatchHistories = [],
-    isLoading,
-    error,
-  } = useQuery({
+  const { data: rawWatchHistories = [] } = useQuery({
     queryKey: ["watch-history", userIdQuery.data],
     queryFn: async () => {
       const data = await getWatchHistories(Number(userIdQuery.data));

@@ -85,7 +85,7 @@ export default function TVSeriesPage() {
 
   useEffect(() => {
     fetchSeriesMutation.mutate();
-  }, []);
+  });
 
   const sortedSeries = [...series].sort((a, b) =>
     sortBy === "title" ? a.title.localeCompare(b.title) : 0
