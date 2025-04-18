@@ -2,11 +2,9 @@
 
 import type React from "react";
 import Link from "next/link";
-import { LayoutDashboard, Film, Users, Upload } from "lucide-react";
+import { Film, Users, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { logout } from "@/lib/action";
-
-
 
 export default function AdminLayout({
   children,
@@ -27,13 +25,6 @@ export default function AdminLayout({
         </div>
 
         <nav className="space-y-1">
-          <Link
-            href="/admin/dashboard"
-            className="flex items-center px-4 py-3 text-white hover:bg-gray-800 rounded-md"
-          >
-            <LayoutDashboard className="mr-3 h-5 w-5 text-orange-500" />
-            Dashboard
-          </Link>
           <Link
             href="/admin/shows"
             className="flex items-center px-4 py-3 text-white hover:bg-gray-800 rounded-md"
@@ -59,15 +50,15 @@ export default function AdminLayout({
 
         <div className="absolute bottom-0 left-0 w-64 p-4 border-t border-gray-800">
           <div className="space-y-1">
-          <button
+            <button
               onClick={async () => {
                 await logout(); // Call your logout function
                 router.push("/"); // Redirect if needed
               }}
-            className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-orange-600 hover:text-black"
-          >
-    Sign out
-  </button>
+              className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-orange-600 hover:text-black"
+            >
+              Sign out
+            </button>
           </div>
         </div>
       </div>

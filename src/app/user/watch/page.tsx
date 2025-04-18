@@ -106,12 +106,16 @@ export default function HomePage() {
   }, [mutate]);
 
   const handleCardClick = (id: string, title: string) => {
+    alert(id);
+    alert(title);
     if (
       id.startsWith("default") ||
       id.startsWith("trending") ||
       id.startsWith("popular")
     )
       return;
+
+    console.log(id, encodeURIComponent(title));
     router.push(`/user/watch/${id}?title=${encodeURIComponent(title)}`);
   };
 

@@ -359,17 +359,6 @@ export default function SubscriptionPage() {
                       </td>
                     ))}
                   </tr>
-
-                  <tr className="border-b border-gray-700">
-                    <td className="py-4 px-6 text-gray-400">
-                      Screens you can watch on at the same time
-                    </td>
-                    {plans?.map((plan) => (
-                      <td key={plan.planName} className="py-4 px-6 text-white">
-                        {plan.maxStreams}
-                      </td>
-                    ))}
-                  </tr>
                 </tbody>
               </table>
             </div>
