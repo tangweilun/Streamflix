@@ -95,8 +95,12 @@ export default async function middleware(req: NextRequest) {
     const role = getUserRoleFromToken(token);
 
     if (role === "Admin") {
-      console.log("Admin already signed in. Redirecting to /admin/dashboard");
-      return NextResponse.redirect(new URL("/admin/dashboard", req.nextUrl));
+      console.log(
+        "Admin already signed in. Redirecting to /admin/user-management"
+      );
+      return NextResponse.redirect(
+        new URL("/admin/user-management", req.nextUrl)
+      );
     } else {
       console.log("User already signed in. Redirecting to /user/watch");
       return NextResponse.redirect(new URL("/user/watch", req.nextUrl));
