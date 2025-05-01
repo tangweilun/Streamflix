@@ -94,6 +94,7 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="theme-color" content="#000000" />
         <link rel="canonical" href="https://streamsflix.online" />
+        <link rel="manifest" href="/site.webmanifest" />
       </head>
       <body className="flex flex-col min-h-screen overflow-y-hidden">
         <Providers>{children}</Providers>

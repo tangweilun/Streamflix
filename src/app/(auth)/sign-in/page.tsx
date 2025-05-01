@@ -113,7 +113,7 @@ export default function SignInPage() {
     onSuccess: (data) => {
       storeToken(data.token);
       toast.success("Welcome!");
-      router.push("/user/subscription");
+      router.refresh();
     },
     onError: (error: unknown) => {
       if (error instanceof Error) {
