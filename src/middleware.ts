@@ -63,6 +63,19 @@ export default async function middleware(req: NextRequest) {
   const isPublicRoute = publicRoutes.includes(path);
   const isAdminRoute = path.startsWith("/admin");
 
+  // Special case for subscription page after registration
+  const isSubscriptionPage = path === "/user/subscription";
+  const referer = req.headers.get("referer") || "";
+  const isComingFromRegister = referer.includes("/register");
+
+  // If user is coming from registration page to subscription page, allow access
+  if (isSubscriptionPage && isComingFromRegister) {
+    console.log(
+      "User coming from registration to subscription page, allowing access"
+    );
+    return NextResponse.next();
+  }
+
   const token = (await cookies()).get("authToken")?.value;
 
   // Check if token is expired
