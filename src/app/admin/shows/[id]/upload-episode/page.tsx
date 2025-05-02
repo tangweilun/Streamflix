@@ -40,6 +40,7 @@ export default function UploadEpisodePage() {
           method: "POST",
           body: formData,
           headers: { "X-Requested-With": "XMLHttpRequest" },
+          credentials: "include",
         }
       );
 
