@@ -13,7 +13,7 @@ import {
 import { Check, Loader2, RefreshCw } from "lucide-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/skeleton";
-import { getUserId } from "@/lib/action";
+import { getAuthToken, getUserId } from "@/lib/action";
 import { Badge } from "@/components/ui/badge";
 
 interface Plan {
@@ -54,12 +54,16 @@ const fetchSubscriptionPlans = async (): Promise<Plan[]> => {
 
 const getSubscribedPlan = async (): Promise<UserSubscription | null> => {
   try {
+    const token = await getAuthToken();
+
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/subscription/get-subscribed-plan`,
       {
         method: "GET",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token && { Authorization: `Bearer ${token}` }), // attach token
+        },
       }
     );
 
@@ -99,12 +103,16 @@ export default function SubscriptionPage() {
 
   const subscriptionMutation = useMutation({
     mutationFn: async (planId: string) => {
+      const token = await getAuthToken();
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/subscription/subscribe`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token && { Authorization: `Bearer ${token}` }), // attach token
+          },
           body: JSON.stringify({ userId: await getUserId(), planId: planId }),
         }
       );

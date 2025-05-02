@@ -10,7 +10,7 @@ import React from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { getUserId } from "@/lib/action";
+import { getAuthToken, getUserId } from "@/lib/action";
 
 interface Show {
   id: string;
@@ -74,12 +74,16 @@ export default function VideoPage() {
 
   const sendProgressUpdate = useMutation({
     mutationFn: async () => {
+      const token = getAuthToken();
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/watch-history/update-progress`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token && { Authorization: `Bearer ${token}` }), // attach token
+          },
           body: JSON.stringify({
             userId: await getUserId(),
             videoTitle: encodeURIComponent(title),
