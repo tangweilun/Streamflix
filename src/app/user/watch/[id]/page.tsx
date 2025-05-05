@@ -10,7 +10,7 @@ import React from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { getAuthToken, getUserId } from "@/lib/action";
+import { getUserId } from "@/lib/action";
 
 interface Show {
   id: string;
