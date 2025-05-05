@@ -80,10 +80,7 @@ export default function VideoPage() {
         `${process.env.NEXT_PUBLIC_API_URL}/watch-history/update-progress`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token && { Authorization: `Bearer ${token}` }), // attach token
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             userId: await getUserId(),
             videoTitle: encodeURIComponent(title),
