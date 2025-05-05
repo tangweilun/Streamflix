@@ -74,8 +74,6 @@ export default function VideoPage() {
 
   const sendProgressUpdate = useMutation({
     mutationFn: async () => {
-      const token = getAuthToken();
-
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/watch-history/update-progress`,
         {
