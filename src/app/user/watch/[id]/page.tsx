@@ -79,6 +79,7 @@ export default function VideoPage() {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify({
             userId: await getUserId(),
             videoTitle: encodeURIComponent(title),
