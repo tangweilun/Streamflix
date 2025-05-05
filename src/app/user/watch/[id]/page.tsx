@@ -362,6 +362,8 @@ export default function VideoPage() {
 
       (async () => {
         try {
+          const userId = await getUserId();
+
           const response = await fetch(
             `${
               process.env.NEXT_PUBLIC_API_URL
