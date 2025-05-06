@@ -1,6 +1,6 @@
 "use client";
 
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useState } from "react";
 
@@ -355,6 +355,7 @@ export default function CreateVideoWithThumbnail() {
           </>
         )}
       </form>
+      <ToastContainer position="bottom-right" autoClose={3000} />
     </div>
   );
 }
