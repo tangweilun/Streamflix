@@ -150,7 +150,7 @@ export default function RegisterPage() {
                         <FormControl>
                           <Input
                             type={
-                              fieldName.includes("password")
+                              fieldName.toLowerCase().includes("password")
                                 ? "password"
                                 : fieldName === "dateOfBirth"
                                 ? "date"

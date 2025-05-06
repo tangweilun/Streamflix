@@ -62,7 +62,6 @@ function ResetPasswordForm() {
   // Extract token from URL safely
   useEffect(() => {
     const urlToken = searchParams.get("token");
-    alert(urlToken);
     if (urlToken) setToken(urlToken);
   }, [searchParams]);
 

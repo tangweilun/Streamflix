@@ -106,8 +106,6 @@ export default function HomePage() {
   }, [mutate]);
 
   const handleCardClick = (id: string, title: string) => {
-    alert(id);
-    alert(title);
     if (
       id.startsWith("default") ||
       id.startsWith("trending") ||

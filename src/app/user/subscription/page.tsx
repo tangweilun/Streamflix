@@ -129,6 +129,33 @@ export default function SubscriptionPage() {
     },
   });
 
+  const cancelSubscriptionMutation = useMutation({
+    mutationFn: async (planId: string) => {
+      const token = await getAuthToken();
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/subscription/cancel-subscription`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token && { Authorization: `Bearer ${token}` }),
+          },
+          body: JSON.stringify({ userId: await getUserId(), planId: planId }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to cancel subscription.");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      window.location.reload();
+    },
+  });
+
   const [selectedPlanName, setSelectedPlanName] = useState<string | null>(null);
 
   // Get the full plan object to pass to the body of api call
@@ -263,8 +290,16 @@ export default function SubscriptionPage() {
                         <Button
                           variant="outline"
                           className="w-full border-red-700 text-red-500 hover:bg-red-950 hover:text-red-400"
+                          onClick={() =>
+                            cancelSubscriptionMutation.mutate(
+                              subscribedPlan.planId
+                            )
+                          }
+                          disabled={cancelSubscriptionMutation.isPending}
                         >
-                          Cancel Plan
+                          {cancelSubscriptionMutation.isPending
+                            ? "Cancelling..."
+                            : "Cancel Plan"}
                         </Button>
                       </CardFooter>
                     ) : (
