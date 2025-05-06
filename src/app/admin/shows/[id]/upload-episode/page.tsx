@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 
 export default function UploadEpisodePage() {
   const searchParams = useSearchParams();
@@ -109,6 +110,7 @@ export default function UploadEpisodePage() {
           )}
         </button>
       </div>
+      <ToastContainer position="bottom-right" autoClose={3000} />
     </div>
   );
 }
