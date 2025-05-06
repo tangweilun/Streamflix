@@ -81,6 +81,7 @@ export default function VideoPage() {
           headers: { "Content-Type": "application/json" },
           credentials: "include",
           body: JSON.stringify({
+            userId: await getUserId(),
             videoTitle: encodeURIComponent(title),
             currentPosition: currentTimeRef.current,
           }),
