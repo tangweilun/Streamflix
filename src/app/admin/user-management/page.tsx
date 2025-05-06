@@ -22,6 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
+import { useRouter } from "next/navigation";
 
 interface User {
   id: string;
@@ -126,6 +127,8 @@ export default function UserManagement() {
       user.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const router = useRouter();
 
   return (
     <div className="bg-black text-white min-h-screen">
