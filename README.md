@@ -1,9 +1,22 @@
-# Streamflix - Full-Stack Streaming Platform
+![image](https://github.com/user-attachments/assets/7600a32e-32c8-4fbf-881e-b9f6cc3ab7e8)# Streamflix - Full-Stack Streaming Platform
+Live Demo link: https://streamsflix.online/
+Images:
+![image](https://github.com/user-attachments/assets/26030d54-3959-47a3-8c37-5ecbfe8569f4)
+![image](https://github.com/user-attachments/assets/66e0c166-bc08-4183-9de7-b350d286065c)
+![image](https://github.com/user-attachments/assets/12fd7801-9918-4e8b-8bde-2e4f9d4b621a)
+![image](https://github.com/user-attachments/assets/ce25c072-4b28-4511-ad4e-f8d0353c5d8e)
+![image](https://github.com/user-attachments/assets/6d68ae31-383e-47ea-adbf-7b7036d6dedb)
+![image](https://github.com/user-attachments/assets/66191148-fc9f-4efc-ba74-8d3eabcd1fb4)
+![image](https://github.com/user-attachments/assets/c887f936-5908-4360-aeab-c85680948e22)
+![image](https://github.com/user-attachments/assets/39db962e-c756-43ac-be62-645d1c4e6276)
+![image](https://github.com/user-attachments/assets/91d861be-9483-425d-a66b-7b6e4233d94c)
+![image](https://github.com/user-attachments/assets/fd5b1e25-8400-440b-ac64-0053f320b85d)
+![image](https://github.com/user-attachments/assets/0622b5ae-bcf2-475d-83e8-5983ff3c9576)
+
+
 
 Streamflix is a feature-rich video streaming platform designed to deliver a seamless viewing experience for movies and TV shows. This project showcases a modern full-stack architecture, combining a robust .NET backend with a dynamic Next.js frontend.
 
-**Live Frontend Demo (Netlify):** [Link to your Netlify deployment]
-**Backend API:** [Link to your backend API documentation or live endpoint, if applicable]
 
 ## Key Features
 
@@ -119,15 +132,5 @@ To get a local copy up and running:
 
 ## Deployment
 
-- **Frontend:** Deployed on [Netlify](https://www.netlify.com/). The deployment is configured for continuous integration and deployment from the `main` branch.
+- **Frontend:** Deployed on [Netlify]. The deployment is configured for continuous integration and deployment from the `main` branch.
 - **Backend:** Deployed on AWS (EC2, RDS, S3), managed with Terraform and Docker.
-
----
-
-This README aims to be comprehensive. You can adjust the "Live Demo" and repository links as needed. Good luck with your job search!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
